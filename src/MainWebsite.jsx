@@ -75,11 +75,11 @@ const T = {
       qlinks: "Quick Links", services: "Services", contact: "Contact Us",
       newsletter: "Newsletter", nlSub: "Stay updated with our latest offers & insights",
       nlPh: "Your email address", subscribe: "Subscribe",
-      copy: "© 2025 Alkown Group. All rights reserved.",
-      address: "Dubai, United Arab Emirates",
-      phone: "+971 54 490 9522",
-      email: "info@alkown.global",
-      social: "@alkown.global",
+      copy: "© 2026 Alkown Global. All rights reserved.",
+      address: "Istanbul · Dubai · Aleppo",
+      phone: "+90 534 764 1249",
+      email: "info@alkowngroup.com",
+      social: "@alkown.global — Instagram & Facebook",
       license: "Trade License: DED-0000000"
     },
     travel: {
@@ -140,14 +140,19 @@ const T = {
     booking: {
       hero: "Book a Consultation",
       heroSub: "Schedule your free session with our experts",
-      step1: "Personal Info", step2: "Service & Date", step3: "Confirm",
+      step1: "Personal Info", step2: "Select Service", step3: "Upload Files", step4: "Review & Send",
       name: "Full Name", email: "Email Address", phone: "Phone Number",
       whatsapp: "WhatsApp Number",
       service: "Select Service", date: "Preferred Date", time: "Preferred Time",
-      msg: "Tell us about your needs", submit: "Confirm Booking",
-      services: ["Travel & Visas", "Citizenship Programs", "Advertising Agency", "Skills Academy", "Company Formation", "Other"],
+      msg: "Additional Notes (optional)",
+      submit: "Submit Request",
+      uploadLabel: "Upload Files", uploadSub: "Passport, ID, Photos, or any required documents",
+      fileTypes: ["Passport", "National ID", "Photo", "Supporting Document"],
+      reviewTitle: "Review Your Request",
+      bankTitle: "Bank Transfer Details",
+      bankNote: "After submitting, please transfer the amount and send the receipt via WhatsApp.",
       times: ["09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM"],
-      success: "Booking Confirmed!", successSub: "Our team will contact you within 24 hours to confirm your appointment."
+      success: "Request Submitted!", successSub: "We've sent a confirmation and invoice to your email. Our team will review your request within 24 hours."
     },
     dashboard: {
       hero: "Client Dashboard",
@@ -244,11 +249,11 @@ const T = {
       qlinks: "روابط سريعة", services: "خدماتنا", contact: "تواصل معنا",
       newsletter: "النشرة الإخبارية", nlSub: "ابق على اطلاع بأحدث عروضنا ورؤانا",
       nlPh: "بريدك الإلكتروني", subscribe: "اشترك",
-      copy: "© 2025 مجموعة الكون. جميع الحقوق محفوظة.",
-      address: "دبي، الإمارات العربية المتحدة",
-      phone: "+971 54 490 9522",
-      email: "info@alkown.global",
-      social: "@alkown.global",
+      copy: "© 2026 Alkown Global. جميع الحقوق محفوظة.",
+      address: "إسطنبول · دبي · حلب",
+      phone: "+90 534 764 1249",
+      email: "info@alkowngroup.com",
+      social: "@alkown.global — Instagram & Facebook",
       license: "الترخيص التجاري: DED-0000000"
     },
     travel: {
@@ -309,14 +314,19 @@ const T = {
     booking: {
       hero: "احجز استشارة",
       heroSub: "جدوّل جلستك المجانية مع خبرائنا",
-      step1: "المعلومات الشخصية", step2: "الخدمة والموعد", step3: "التأكيد",
+      step1: "المعلومات الشخصية", step2: "اختيار الخدمة", step3: "رفع الملفات", step4: "المراجعة والإرسال",
       name: "الاسم الكامل", email: "البريد الإلكتروني", phone: "رقم الهاتف",
       whatsapp: "رقم الواتساب",
       service: "اختر الخدمة", date: "التاريخ المفضل", time: "الوقت المفضل",
-      msg: "أخبرنا عن احتياجاتك", submit: "تأكيد الحجز",
-      services: ["السفر والتأشيرات", "برامج الجنسية", "وكالة الإعلان", "أكاديمية المهارات", "تأسيس شركات", "أخرى"],
+      msg: "ملاحظات إضافية (اختياري)",
+      submit: "إرسال الطلب",
+      uploadLabel: "رفع الملفات", uploadSub: "جواز السفر، الهوية، الصور، أو أي وثائق مطلوبة",
+      fileTypes: ["جواز السفر", "الهوية الوطنية", "صورة شخصية", "وثيقة داعمة"],
+      reviewTitle: "مراجعة طلبك",
+      bankTitle: "بيانات التحويل البنكي",
+      bankNote: "بعد الإرسال، يرجى تحويل المبلغ وإرسال الإيصال على الواتساب.",
       times: ["09:00 ص", "10:00 ص", "11:00 ص", "12:00 م", "02:00 م", "03:00 م", "04:00 م", "05:00 م"],
-      success: "تم الحجز بنجاح!", successSub: "سيتواصل معك فريقنا خلال 24 ساعة لتأكيد موعدك."
+      success: "تم إرسال طلبك!", successSub: "أرسلنا تأكيداً وفاتورة على بريدك الإلكتروني. سيراجع فريقنا طلبك خلال 24 ساعة."
     },
     dashboard: {
       hero: "لوحة التحكم",
@@ -354,8 +364,8 @@ const C = {
   gold: "#c9a84c", goldLight: "#f0d080", goldDark: "#8a6820",
   goldGlow: "rgba(201,168,76,0.35)",
   cream: "#faf8f4", warmWhite: "#fffdf8", beige: "#f5f0e8",
-  g100: "#f0ece4", g200: "#e0d8cc", g400: "#9a8e7a",
-  g600: "#5a5248", g800: "#2d2820",
+  g100: "#f0ece4", g200: "#e0d8cc", g400: "#7a6e5a",
+  g600: "#3d342a", g800: "#1e1810",
   dark: "#1e1a14", darkMid: "#2a2418",
 };
 
@@ -365,12 +375,24 @@ const gold = (extra = "") =>
 
 // ── GLOBAL STYLES ─────────────────────────────────────────────
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Cairo:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Noto+Naskh Arabic:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{-webkit-font-smoothing:antialiased}
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-track{background:${C.beige}}
 ::-webkit-scrollbar-thumb{background:${C.gold};border-radius:3px}
+h1,h2,h3,h4{font-weight:800;color:#2d2820}
+p{font-weight:500}
+@media(max-width:768px){
+  nav{flex-wrap:wrap;gap:8px!important;padding:12px 16px!important}
+  h1{font-size:clamp(1.6rem,7vw,2.4rem)!important}
+  h2{font-size:clamp(1.3rem,5vw,1.9rem)!important}
+  section{padding:48px 18px!important}
+  .card{cursor:default}
+  .card:hover{transform:none!important;box-shadow:none!important}
+  table{font-size:.82rem}
+}
 @keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
@@ -414,7 +436,7 @@ function Logo({ size = "md", dark = false }) {
       }}>الكون</span>
       <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.1 }}>
         <span style={{ fontSize: s[1] + "rem", fontFamily: "'Cormorant Garamond',serif", color: C.gold, fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase" }}>ALKOWN</span>
-        <span style={{ fontSize: s[2] + "rem", color: dark ? C.g400 : "#9a8060", letterSpacing: ".22em", fontFamily: "Georgia,serif" }}>GROUP</span>
+        <span style={{ fontSize: s[2] + "rem", color: dark ? C.g400 : "#9a8060", letterSpacing: ".22em", fontFamily: "Georgia,serif" }}>GLOBAL</span>
       </div>
     </div>
   );
@@ -848,7 +870,7 @@ function PageHero({ title, subtitle, children }) {
             marginBottom: "24px",
           }}
         >
-          ALKOWN GROUP
+          ALKOWN GLOBAL
         </span>
 
         <h1
@@ -890,6 +912,18 @@ function PageHero({ title, subtitle, children }) {
 // TRAVEL PAGE
 // ═══════════════════════════════════════════════════════════════
 function TravelPage({ t, lang, ff, setPage }) {
+  const [dbServices, setDbServices] = useState([]);
+  useEffect(() => {
+    supabase.from("services").select("id, name, price, price_min, price_max").eq("is_active", true).order("name").then(({ data }) => setDbServices(data || []));
+  }, []);
+
+  function priceLabel(s) {
+    if (s.price_min && s.price_max) return `$${Number(s.price_min).toLocaleString()} – $${Number(s.price_max).toLocaleString()}`;
+    if (s.price_min) return `$${Number(s.price_min).toLocaleString()}+`;
+    if (s.price) return `$${Number(s.price).toLocaleString()}`;
+    return "—";
+  }
+
   return (
     <>
       <PageHero title={t.travel.hero} subtitle={t.travel.heroSub} />
@@ -908,6 +942,29 @@ function TravelPage({ t, lang, ff, setPage }) {
               </div>
             ))}
           </div>
+
+          {/* قائمة الأسعار من قاعدة البيانات */}
+          {dbServices.length > 0 && (
+            <div style={{ marginTop: 72 }}>
+              <div style={{ textAlign: "center", marginBottom: 40 }}>
+                <div style={{ color: C.gold, fontSize: ".72rem", letterSpacing: ".22em", textTransform: "uppercase", marginBottom: 8 }}>
+                  {lang === "ar" ? "أسعار التأشيرات" : "Visa Pricing"}
+                </div>
+                <h2 style={{ fontSize: "clamp(1.5rem,3vw,2rem)", color: C.g800, margin: 0 }}>
+                  {lang === "ar" ? "قائمة خدماتنا وأسعارها" : "Our Services & Pricing"}
+                </h2>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: 14 }}>
+                {dbServices.map(s => (
+                  <div key={s.id} className="card" style={{ padding: "20px 22px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                    <span style={{ color: C.g800, fontWeight: 600, fontSize: ".9rem", lineHeight: 1.5 }}>{s.name}</span>
+                    <span style={{ color: C.gold, fontWeight: 800, fontSize: ".95rem", whiteSpace: "nowrap", flexShrink: 0 }}>{priceLabel(s)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div style={{ textAlign: "center", marginTop: 56 }}>
             <button className="gbtn" style={{ fontFamily: ff }} onClick={() => setPage("booking")}>{t.nav.book}</button>
           </div>
@@ -1250,225 +1307,398 @@ function ContactPage({ t, lang, ff }) {
 // ═══════════════════════════════════════════════════════════════
 function BookingPage({ t, lang, ff }) {
   const [step, setStep] = useState(1);
-  const [booked, setBooked] = useState(false);
-  const [services, setServices] = useState([]);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", whatsapp: "", service: "", date: "", time: "", msg: "" });
+  const [submitted, setSubmitted] = useState(null); // { requestNumber, serviceName, servicePrice }
+  const [dbServices, setDbServices] = useState([]);
+  const [selectedService, setSelectedService] = useState(null);
+  const [uploadedFiles, setUploadedFiles] = useState([]); // [{ file, type, preview }]
+  const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", phone: "", whatsapp: "", date: "", time: "", msg: "" });
   const upd = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
-  const fieldLabels = {
-    name: t.booking.name,
-    email: t.booking.email,
-    phone: t.booking.phone,
-    whatsapp: t.booking.whatsapp,
-    service: t.booking.service,
-    date: t.booking.date,
-    time: t.booking.time,
-    msg: t.booking.msg
-  };
-  const requiredByStep = {
-    1: ["name", "email", "phone", "whatsapp"],
-    2: ["service", "date", "time", "msg"]
-  };
-  const getMissingFields = currentStep =>
-    requiredByStep[currentStep].filter(field => !String(form[field] || "").trim());
-  const isValidEmail = value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-  const validateStep = currentStep => {
-    const missing = getMissingFields(currentStep);
+  const ar = lang === "ar";
 
-    if (missing.length) {
-      alert(
-        lang === "ar"
-          ? `يرجى تعبئة: ${missing.map(field => fieldLabels[field]).join("، ")}`
-          : `Please fill: ${missing.map(field => fieldLabels[field]).join(", ")}`
-      );
+  useEffect(() => {
+    supabase.from("services").select("*").eq("is_active", true).order("name")
+      .then(({ data }) => setDbServices(data || []));
+  }, []);
+
+  function validateStep1() {
+    if (!form.name.trim() || !form.email.trim() || !form.phone.trim()) {
+      alert(ar ? "يرجى تعبئة الاسم والبريد والهاتف" : "Please fill name, email and phone");
       return false;
     }
-
-    if (currentStep === 1 && !isValidEmail(form.email)) {
-      alert(lang === "ar" ? "يرجى إدخال بريد إلكتروني صحيح" : "Please enter a valid email address");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      alert(ar ? "بريد إلكتروني غير صحيح" : "Invalid email address");
       return false;
     }
-
     return true;
-  };
-  const goToStep = nextStep => {
-    if (nextStep > step && !validateStep(step)) return;
-    setStep(nextStep);
-  };
-  const handleBooking = async () => { try {
-    if (!validateStep(1) || !validateStep(2)) return;
-
-    const clientData = await findOrCreateClient({
-      full_name: form.name,
-      phone: form.phone,
-      email: form.email
-    });
-
-    const bookingNotes = [
-      "Source: Website Booking Form",
-      `Service: ${form.service}`,
-      `Date: ${form.date}`,
-      `Time: ${form.time}`,
-      `WhatsApp: ${form.whatsapp}`,
-      "",
-      form.msg
-    ].join("\n");
-
-    const requestData = await createRequestForClient({
-      clientId: clientData.id,
-      status: "New",
-      notes: bookingNotes
-    });
-
-    await sendContactNotification({
-      requestNumber: requestData.request_number,
-      client: clientData,
-      form
-    });
-
-    setBooked(true);
-
-  } catch (error) {
-    console.error(error);
-    alert("Booking failed");
   }
-};
-useEffect(() => {
-  loadServices();
-}, []);
 
-const loadServices = async () => {
-  const { data, error } = await supabase
-    .from("services")
-    .select("*")
-    .eq("is_active", true);
-
-  if (!error) {
-    setServices(data || []);
+  function validateStep2() {
+    if (!selectedService) {
+      alert(ar ? "يرجى اختيار الخدمة" : "Please select a service");
+      return false;
+    }
+    return true;
   }
-};
-  const inputStyle = { width: "100%", padding: "13px 16px", border: `1px solid rgba(201,168,76,.25)`, background: C.beige, color: C.g800, fontSize: ".9rem", borderRadius: 2, fontFamily: ff, transition: "all .25s" };
-  const labelStyle = { display: "block", color: C.g400, fontSize: ".72rem", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 8 };
 
-  if (booked) return (
-    <>
-      <PageHero title={t.booking.hero} subtitle={t.booking.heroSub} />
-      <div style={{ textAlign: "center", padding: "100px 40px", background: "#fff" }}>
-        <div style={{ width: 80, height: 80, borderRadius: "50%", background: `linear-gradient(135deg,${C.gold},${C.goldLight})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2.2rem", margin: "0 auto 24px" }}>✓</div>
-        <h2 style={{ color: C.g800, fontSize: "2.2rem", fontWeight: 300, marginBottom: 12 }}>{t.booking.success}</h2>
-        <p style={{ color: C.g400, fontSize: "1rem", maxWidth: 480, margin: "0 auto" }}>{t.booking.successSub}</p>
-        <div style={{ marginTop: 36, display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-          <button className="gbtn" style={{ fontFamily: ff }} onClick={() => { setBooked(false); setStep(1); setForm({ name: "", email: "", phone: "", whatsapp: "", service: "", date: "", time: "", msg: "" }); }}>
-            {lang === "ar" ? "حجز آخر" : "New Booking"}
-          </button>
+  function addFile(e, fileType) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploadedFiles(prev => [...prev, { file, type: fileType, id: Date.now() }]);
+  }
+
+  function removeFile(id) {
+    setUploadedFiles(prev => prev.filter(f => f.id !== id));
+  }
+
+  function priceLabel(s) {
+    if (!s) return "—";
+    if (s.price_min && s.price_max) return `$${Number(s.price_min).toLocaleString()} – $${Number(s.price_max).toLocaleString()} USD`;
+    if (s.price_min) return `$${Number(s.price_min).toLocaleString()}+ USD`;
+    if (s.price) return `$${Number(s.price).toLocaleString()} USD`;
+    return ar ? "سيتم التحديد" : "TBD";
+  }
+
+  async function handleSubmit() {
+    setSubmitting(true);
+    try {
+      const clientData = await findOrCreateClient({ full_name: form.name, phone: form.phone, email: form.email });
+
+      const notes = [
+        ar ? "المصدر: نموذج الحجز على الموقع" : "Source: Website Booking Form",
+        `${ar ? "الخدمة" : "Service"}: ${selectedService?.name || ""}`,
+        form.date ? `${ar ? "التاريخ" : "Date"}: ${form.date}` : "",
+        form.time ? `${ar ? "الوقت" : "Time"}: ${form.time}` : "",
+        form.whatsapp ? `WhatsApp: ${form.whatsapp}` : "",
+        form.msg ? `\n${form.msg}` : ""
+      ].filter(Boolean).join("\n");
+
+      const requestData = await createRequestForClient({
+        clientId: clientData.id,
+        serviceId: selectedService?.id || null,
+        status: "New",
+        notes
+      });
+
+      // رفع الملفات
+      if (uploadedFiles.length) {
+        setUploading(true);
+        for (const { file, type } of uploadedFiles) {
+          const safeName = file.name.replace(/[^\w.-]+/g, "-");
+          const path = `${requestData.id}/${Date.now()}-${safeName}`;
+          const { error: upErr } = await supabase.storage.from("request-documents").upload(path, file);
+          if (!upErr) {
+            await supabase.from("request_files").insert([{
+              request_id: requestData.id,
+              file_type: type,
+              file_name: file.name,
+              storage_path: path
+            }]);
+          }
+        }
+        setUploading(false);
+      }
+
+      // إرسال الإيميلات
+      await fetch("/.netlify/functions/send-contact-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "new_request",
+          requestNumber: requestData.request_number,
+          client: clientData,
+          form: { ...form, service: selectedService?.name },
+          service: { name: selectedService?.name, price: selectedService?.price || selectedService?.price_min }
+        })
+      });
+
+      setSubmitted({
+        requestNumber: requestData.request_number,
+        serviceName: selectedService?.name,
+        servicePrice: priceLabel(selectedService),
+        clientName: form.name,
+        clientEmail: form.email,
+        whatsapp: form.whatsapp || form.phone
+      });
+    } catch (err) {
+      alert(ar ? `حدث خطأ: ${err.message}` : `Error: ${err.message}`);
+    }
+    setSubmitting(false);
+  }
+
+  const inp = { width: "100%", padding: "13px 16px", border: `1px solid rgba(201,168,76,.25)`, background: C.beige, color: C.g800, fontSize: ".9rem", borderRadius: 2, fontFamily: ff };
+  const lbl = { display: "block", color: C.g400, fontSize: ".72rem", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 8 };
+
+  // ── صفحة النجاح ──────────────────────────────────────────────
+  if (submitted) {
+    const waMsg = encodeURIComponent(`مرحباً، لقد أرسلت طلباً عبر الموقع.\nرقم الطلب: ${submitted.requestNumber}\nالخدمة: ${submitted.serviceName}\nالاسم: ${submitted.clientName}`);
+    const waLink = `https://wa.me/971544909522?text=${waMsg}`;
+
+    return (
+      <>
+        <PageHero title={t.booking.hero} subtitle={t.booking.heroSub} />
+        <div style={{ background: "#fff", padding: "72px clamp(20px,6vw,80px)" }}>
+          <div style={{ maxWidth: 600, margin: "0 auto" }}>
+            <div style={{ textAlign: "center", marginBottom: 36 }}>
+              <div style={{ width: 72, height: 72, borderRadius: "50%", background: `linear-gradient(135deg,${C.gold},${C.goldLight})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem", margin: "0 auto 20px" }}>✓</div>
+              <h2 style={{ color: C.g800, fontSize: "1.8rem", fontWeight: 300, marginBottom: 8 }}>{t.booking.success}</h2>
+              <p style={{ color: C.g400 }}>{t.booking.successSub}</p>
+            </div>
+
+            {/* بطاقة الطلب */}
+            <div style={{ background: C.beige, border: `1px solid rgba(201,168,76,.2)`, borderRadius: 4, padding: "28px 32px", marginBottom: 20 }}>
+              <div style={{ color: C.gold, fontSize: ".7rem", letterSpacing: ".2em", textTransform: "uppercase", marginBottom: 16 }}>{ar ? "تفاصيل الطلب" : "Request Details"}</div>
+              {[
+                [ar ? "رقم الطلب" : "Request Number", submitted.requestNumber],
+                [ar ? "الخدمة" : "Service", submitted.serviceName],
+                [ar ? "السعر" : "Price", submitted.servicePrice],
+                [ar ? "الاسم" : "Name", submitted.clientName],
+                [ar ? "البريد" : "Email", submitted.clientEmail],
+              ].map(([k, v]) => (
+                <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: `1px solid rgba(201,168,76,.12)` }}>
+                  <span style={{ color: C.g400, fontSize: ".8rem" }}>{k}</span>
+                  <strong style={{ color: C.g800, fontSize: ".88rem" }}>{v}</strong>
+                </div>
+              ))}
+            </div>
+
+            {/* بيانات البنك */}
+            <div style={{ background: "#0a0a0a", borderRadius: 4, padding: "24px 28px", marginBottom: 20 }}>
+              <div style={{ color: C.gold, fontSize: ".7rem", letterSpacing: ".2em", textTransform: "uppercase", marginBottom: 16 }}>{t.booking.bankTitle}</div>
+              {[
+                [ar ? "اسم البنك" : "Bank", "مصرف رويا"],
+                [ar ? "اسم الحساب" : "Account Name", "Alkown Group LLC"],
+                ["IBAN", "AE27 1325 4490 9522 0000 001"],
+                [ar ? "المرجع" : "Reference", submitted.requestNumber],
+              ].map(([k, v]) => (
+                <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #1a1a1a", color: "#ccc", fontSize: ".85rem" }}>
+                  <span style={{ color: "#666" }}>{k}</span>
+                  <strong style={{ color: k === (ar ? "المرجع" : "Reference") ? C.gold : "#fff" }}>{v}</strong>
+                </div>
+              ))}
+              <p style={{ color: "#555", fontSize: ".75rem", marginTop: 12 }}>⚠️ {t.booking.bankNote}</p>
+            </div>
+
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+              <a href={waLink} target="_blank" rel="noopener noreferrer" className="gbtn" style={{ fontFamily: ff, textDecoration: "none", display: "inline-block" }}>
+                📲 {ar ? "إرسال الإيصال عبر واتساب" : "Send Receipt via WhatsApp"}
+              </a>
+              <button className="obtn" style={{ fontFamily: ff }} onClick={() => { setSubmitted(null); setStep(1); setForm({ name: "", email: "", phone: "", whatsapp: "", date: "", time: "", msg: "" }); setSelectedService(null); setUploadedFiles([]); }}>
+                {ar ? "طلب جديد" : "New Request"}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </>
-  );
+      </>
+    );
+  }
+
+  const steps = [t.booking.step1, t.booking.step2, t.booking.step3, t.booking.step4];
 
   return (
     <>
       <PageHero title={t.booking.hero} subtitle={t.booking.heroSub} />
       <section style={{ padding: "72px clamp(20px,6vw,80px)", background: "#fff" }}>
-        <div style={{ maxWidth: 680, margin: "0 auto" }}>
+        <div style={{ maxWidth: 700, margin: "0 auto" }}>
 
           {/* Step indicator */}
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginBottom: 52 }}>
-            {[1, 2, 3].map((s, idx) => (
-              <div key={s} style={{ display: "flex", alignItems: "center" }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                  <div style={{
-                    width: 38, height: 38, borderRadius: "50%",
-                    background: s <= step ? `linear-gradient(135deg,${C.gold},${C.goldLight})` : C.g100,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    color: s <= step ? C.g800 : C.g400, fontSize: ".85rem", fontWeight: 800,
-                    transition: "all .35s"
-                  }}>{s < step ? "✓" : s}</div>
-                  <span style={{ fontSize: ".65rem", color: s === step ? C.gold : C.g400, letterSpacing: ".1em", whiteSpace: "nowrap" }}>
-                    {[t.booking.step1, t.booking.step2, t.booking.step3][idx]}
-                  </span>
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-start", marginBottom: 52, gap: 0 }}>
+            {steps.map((label, idx) => {
+              const s = idx + 1;
+              return (
+                <div key={s} style={{ display: "flex", alignItems: "center" }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                    <div style={{
+                      width: 36, height: 36, borderRadius: "50%",
+                      background: s <= step ? `linear-gradient(135deg,${C.gold},${C.goldLight})` : C.g100,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: s <= step ? C.g800 : C.g400, fontSize: ".82rem", fontWeight: 800, transition: "all .3s"
+                    }}>{s < step ? "✓" : s}</div>
+                    <span style={{ fontSize: ".6rem", color: s === step ? C.gold : C.g400, letterSpacing: ".08em", whiteSpace: "nowrap", textAlign: "center", maxWidth: 70 }}>{label}</span>
+                  </div>
+                  {s < 4 && <div style={{ width: "clamp(24px,5vw,56px)", height: 2, background: s < step ? C.gold : C.g200, margin: "0 6px 22px", transition: "all .3s" }} />}
                 </div>
-                {s < 3 && <div style={{ width: "clamp(40px,8vw,72px)", height: 2, background: s < step ? C.gold : C.g200, transition: "all .35s", margin: "0 8px 18px" }} />}
-              </div>
-            ))}
+              );
+            })}
           </div>
 
-          {/* Step 1 */}
+          {/* Step 1 — معلومات شخصية */}
           {step === 1 && (
             <div style={{ animation: "fadeUp .4s ease" }}>
-              {[[t.booking.name, "name", "text"], [t.booking.email, "email", "email"], [t.booking.phone, "phone", "tel"], [t.booking.whatsapp, "whatsapp", "tel"]].map(([lbl, k, tp]) => (
-                <div key={k} style={{ marginBottom: 18 }}>
-                  <label style={labelStyle}>{lbl}</label>
-                  <input type={tp} value={form[k]} onChange={upd(k)} style={inputStyle} />
+              {[[t.booking.name,"name","text"],[t.booking.email,"email","email"],[t.booking.phone,"phone","tel"],[t.booking.whatsapp,"whatsapp","tel"]].map(([label, key, type]) => (
+                <div key={key} style={{ marginBottom: 18 }}>
+                  <label style={lbl}>{label}</label>
+                  <input type={type} value={form[key]} onChange={upd(key)} style={inp} />
                 </div>
               ))}
               <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
-                <button className="gbtn" style={{ fontFamily: ff }} onClick={() => goToStep(2)}>
-                  {lang === "ar" ? "التالي ←" : "Next →"}
+                <button className="gbtn" style={{ fontFamily: ff }} onClick={() => { if (validateStep1()) setStep(2); }}>
+                  {ar ? "التالي ←" : "Next →"}
                 </button>
               </div>
             </div>
           )}
 
-          {/* Step 2 */}
+          {/* Step 2 — اختيار الخدمة */}
           {step === 2 && (
             <div style={{ animation: "fadeUp .4s ease" }}>
-              <div style={{ marginBottom: 18 }}>
-                <label style={labelStyle}>{t.booking.service}</label>
-                <select value={form.service} onChange={upd("service")} style={{ ...inputStyle }}>
-                  <option value="">—</option>
-                  {t.booking.services.map((s, i) => <option key={i} value={s}>{s}</option>)}
-                </select>
+              <div style={{ display: "grid", gap: 12, marginBottom: 24, maxHeight: 420, overflowY: "auto", paddingLeft: 4 }}>
+                {dbServices.map(svc => {
+                  const isSelected = selectedService?.id === svc.id;
+                  return (
+                    <div
+                      key={svc.id}
+                      onClick={() => setSelectedService(svc)}
+                      style={{
+                        padding: "16px 20px", border: `2px solid ${isSelected ? C.gold : "rgba(201,168,76,.2)"}`,
+                        borderRadius: 4, cursor: "pointer", background: isSelected ? `rgba(201,168,76,.06)` : C.beige,
+                        display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12,
+                        transition: "all .2s"
+                      }}
+                    >
+                      <span style={{ color: C.g800, fontWeight: isSelected ? 700 : 500, fontSize: ".9rem" }}>{svc.name}</span>
+                      <span style={{ color: C.gold, fontWeight: 700, fontSize: ".85rem", whiteSpace: "nowrap", flexShrink: 0 }}>{priceLabel(svc)}</span>
+                    </div>
+                  );
+                })}
               </div>
+
+              {selectedService && (
+                <div style={{ background: "#0a0a0a", border: `1px solid rgba(201,168,76,.3)`, borderRadius: 4, padding: "18px 22px", marginBottom: 20 }}>
+                  <div style={{ color: C.gold, fontSize: ".7rem", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 8 }}>{ar ? "الخدمة المختارة" : "Selected Service"}</div>
+                  <div style={{ color: "#fff", fontWeight: 700 }}>{selectedService.name}</div>
+                  <div style={{ color: C.gold, marginTop: 4, fontWeight: 800 }}>{priceLabel(selectedService)}</div>
+                  {selectedService.description && <div style={{ color: "#888", fontSize: ".82rem", marginTop: 6 }}>{selectedService.description}</div>}
+                </div>
+              )}
+
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 18 }}>
                 <div>
-                  <label style={labelStyle}>{t.booking.date}</label>
-                  <input type="date" value={form.date} onChange={upd("date")} style={inputStyle} />
+                  <label style={lbl}>{t.booking.date}</label>
+                  <input type="date" value={form.date} onChange={upd("date")} style={inp} min={new Date().toISOString().split("T")[0]} />
                 </div>
                 <div>
-                  <label style={labelStyle}>{t.booking.time}</label>
-                  <select value={form.time} onChange={upd("time")} style={inputStyle}>
+                  <label style={lbl}>{t.booking.time}</label>
+                  <select value={form.time} onChange={upd("time")} style={inp}>
                     <option value="">—</option>
                     {t.booking.times.map((ti, i) => <option key={i} value={ti}>{ti}</option>)}
                   </select>
                 </div>
               </div>
+
               <div style={{ marginBottom: 22 }}>
-                <label style={labelStyle}>{t.booking.msg}</label>
-                <textarea rows={4} value={form.msg} onChange={upd("msg")} style={{ ...inputStyle, resize: "vertical" }} />
+                <label style={lbl}>{t.booking.msg}</label>
+                <textarea rows={3} value={form.msg} onChange={upd("msg")} style={{ ...inp, resize: "vertical" }} />
               </div>
+
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <button className="obtn" style={{ fontFamily: ff }} onClick={() => setStep(1)}>{lang === "ar" ? "→ السابق" : "← Back"}</button>
-                <button className="gbtn" style={{ fontFamily: ff }} onClick={() => goToStep(3)}>{lang === "ar" ? "التالي ←" : "Next →"}</button>
+                <button className="obtn" style={{ fontFamily: ff }} onClick={() => setStep(1)}>{ar ? "→ السابق" : "← Back"}</button>
+                <button className="gbtn" style={{ fontFamily: ff }} onClick={() => { if (validateStep2()) setStep(3); }}>{ar ? "التالي ←" : "Next →"}</button>
               </div>
             </div>
           )}
 
-          {/* Step 3 */}
+          {/* Step 3 — رفع الملفات */}
           {step === 3 && (
             <div style={{ animation: "fadeUp .4s ease" }}>
-              <div style={{ background: C.beige, border: `1px solid rgba(201,168,76,.2)`, padding: "32px 36px", marginBottom: 24 }}>
-                <h3 style={{ color: C.g800, fontWeight: 700, marginBottom: 20, fontSize: "1rem", letterSpacing: ".08em" }}>
-                  {lang === "ar" ? "مراجعة بيانات الحجز" : "Review Booking Details"}
-                </h3>
-                {Object.entries(form).filter(([, v]) => v).map(([k, v]) => (
-                  <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: `1px solid rgba(201,168,76,.1)` }}>
-                    <span style={{ color: C.g400, fontSize: ".78rem", textTransform: "uppercase", letterSpacing: ".12em" }}>{k}</span>
-                    <span style={{ color: C.g800, fontWeight: 600, fontSize: ".88rem" }}>{v}</span>
-                  </div>
+              <p style={{ color: C.g400, marginBottom: 20, fontSize: ".88rem" }}>{t.booking.uploadSub}</p>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px,1fr))", gap: 12, marginBottom: 24 }}>
+                {t.booking.fileTypes.map((type, i) => (
+                  <label key={i} style={{
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+                    padding: "20px 12px", border: `1px dashed rgba(201,168,76,.35)`,
+                    borderRadius: 4, cursor: "pointer", background: C.beige,
+                    color: C.g600, fontSize: ".8rem", textAlign: "center"
+                  }}>
+                    <span style={{ fontSize: "1.6rem" }}>📎</span>
+                    {type}
+                    <input type="file" style={{ display: "none" }} onChange={e => addFile(e, type)} accept="image/*,.pdf" />
+                  </label>
                 ))}
               </div>
+
+              {uploadedFiles.length > 0 && (
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ color: C.g400, fontSize: ".72rem", letterSpacing: ".15em", textTransform: "uppercase", marginBottom: 10 }}>
+                    {ar ? "الملفات المرفوعة" : "Uploaded Files"} ({uploadedFiles.length})
+                  </div>
+                  <div style={{ display: "grid", gap: 8 }}>
+                    {uploadedFiles.map(({ file, type, id }) => (
+                      <div key={id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: C.beige, border: `1px solid rgba(201,168,76,.2)`, borderRadius: 4 }}>
+                        <div>
+                          <div style={{ fontWeight: 600, fontSize: ".85rem", color: C.g800 }}>{file.name}</div>
+                          <div style={{ color: C.g400, fontSize: ".75rem" }}>{type}</div>
+                        </div>
+                        <button onClick={() => removeFile(id)} style={{ background: "transparent", border: "none", color: "#c0392b", cursor: "pointer", fontSize: "1.1rem" }}>✕</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <p style={{ color: C.g400, fontSize: ".78rem", marginBottom: 24 }}>
+                {ar ? "* رفع الملفات اختياري، يمكنك إرسالها لاحقاً عبر الواتساب." : "* File upload is optional. You can send them later via WhatsApp."}
+              </p>
+
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <button className="obtn" style={{ fontFamily: ff }} onClick={() => setStep(2)}>{lang === "ar" ? "→ السابق" : "← Back"}</button>
-                <button
-  className="gbtn"
-  style={{ fontFamily: ff }}
-  onClick={handleBooking}
->
-  {t.booking.submit}
-</button>
+                <button className="obtn" style={{ fontFamily: ff }} onClick={() => setStep(2)}>{ar ? "→ السابق" : "← Back"}</button>
+                <button className="gbtn" style={{ fontFamily: ff }} onClick={() => setStep(4)}>{ar ? "التالي ←" : "Next →"}</button>
               </div>
             </div>
           )}
+
+          {/* Step 4 — مراجعة وإرسال */}
+          {step === 4 && (
+            <div style={{ animation: "fadeUp .4s ease" }}>
+              <div style={{ background: C.beige, border: `1px solid rgba(201,168,76,.2)`, borderRadius: 4, padding: "24px 28px", marginBottom: 20 }}>
+                <div style={{ color: C.gold, fontSize: ".7rem", letterSpacing: ".2em", textTransform: "uppercase", marginBottom: 16 }}>{t.booking.reviewTitle}</div>
+                {[
+                  [t.booking.name, form.name],
+                  [t.booking.email, form.email],
+                  [t.booking.phone, form.phone],
+                  [t.booking.whatsapp, form.whatsapp],
+                  [ar ? "الخدمة" : "Service", selectedService?.name],
+                  [ar ? "السعر" : "Price", priceLabel(selectedService)],
+                  [t.booking.date, form.date],
+                  [t.booking.time, form.time],
+                  [t.booking.msg, form.msg],
+                  [ar ? "عدد الملفات" : "Files", uploadedFiles.length ? `${uploadedFiles.length} ${ar ? "ملفات" : "files"}` : ar ? "لا توجد ملفات" : "None"],
+                ].filter(([, v]) => v).map(([k, v]) => (
+                  <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: `1px solid rgba(201,168,76,.12)`, gap: 12 }}>
+                    <span style={{ color: C.g400, fontSize: ".78rem" }}>{k}</span>
+                    <span style={{ color: C.g800, fontWeight: 600, fontSize: ".85rem", textAlign: "end" }}>{v}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* بيانات التحويل */}
+              <div style={{ background: "#0a0a0a", borderRadius: 4, padding: "20px 24px", marginBottom: 24 }}>
+                <div style={{ color: C.gold, fontSize: ".7rem", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 12 }}>{t.booking.bankTitle}</div>
+                {[
+                  [ar ? "اسم البنك" : "Bank", "مصرف رويا"],
+                  [ar ? "اسم الحساب" : "Account Name", "Alkown Group LLC"],
+                  ["IBAN", "AE27 1325 4490 9522 0000 001"],
+                ].map(([k, v]) => (
+                  <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: "1px solid #1a1a1a", color: "#aaa", fontSize: ".82rem" }}>
+                    <span style={{ color: "#555" }}>{k}</span>
+                    <span>{v}</span>
+                  </div>
+                ))}
+                <p style={{ color: "#555", fontSize: ".74rem", marginTop: 10 }}>⚠️ {t.booking.bankNote}</p>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <button className="obtn" style={{ fontFamily: ff }} onClick={() => setStep(3)}>{ar ? "→ السابق" : "← Back"}</button>
+                <button className="gbtn" style={{ fontFamily: ff, opacity: submitting ? .7 : 1 }} onClick={handleSubmit} disabled={submitting}>
+                  {submitting ? (ar ? "جارٍ الإرسال..." : "Submitting...") : t.booking.submit}
+                </button>
+              </div>
+            </div>
+          )}
+
         </div>
       </section>
     </>

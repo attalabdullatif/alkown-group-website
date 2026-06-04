@@ -103,3 +103,21 @@ export async function sendContactNotification({ requestNumber, client, form }) {
     console.warn("Email notification failed:", error);
   }
 }
+
+export async function sendStatusNotification({ requestNumber, client, form, status }) {
+  try {
+    await fetch("/.netlify/functions/send-contact-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "status_update",
+        requestNumber,
+        client,
+        form,
+        status,
+      }),
+    });
+  } catch (error) {
+    console.warn("Status email notification failed:", error);
+  }
+}

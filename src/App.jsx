@@ -1,4 +1,7 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { useAuth } from "./context/AuthContext";
+import { signOut } from "./lib/auth";
 
 import MainWebsite from "./MainWebsite";
 
@@ -9,26 +12,40 @@ import Clients from "./pages/Clients";
 import Requests from "./pages/Requests";
 import Invoices from "./pages/Invoices";
 import TrackRequest from "./pages/TrackRequest";
+import VerifyInvoice from "./pages/VerifyInvoice";
 
 function Navigation() {
+  const { user, role } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleSignOut() {
+    await signOut();
+    navigate("/login");
+  }
+
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        gap: "10px",
-        flexWrap: "wrap",
-        padding: "20px",
-      }}
-    >
-      <LinkButton to="/">🏠 Home</LinkButton>
+    <div className="no-print" style={{
+      display: "flex", justifyContent: "center", gap: "10px",
+      flexWrap: "wrap", padding: "20px", alignItems: "center"
+    }}>
       <LinkButton to="/dashboard">Dashboard</LinkButton>
       <LinkButton to="/clients">Clients</LinkButton>
       <LinkButton to="/services">Services</LinkButton>
       <LinkButton to="/requests">Requests</LinkButton>
       <LinkButton to="/invoices">Invoices</LinkButton>
       <LinkButton to="/track-request">Track Request</LinkButton>
-      <LinkButton to="/login">Login</LinkButton>
+      {user && (
+        <button
+          onClick={handleSignOut}
+          style={{
+            background: "#2a1a1a", color: "#ff6b6b", border: "1px solid #4a1a1a",
+            padding: "12px 18px", borderRadius: "10px", fontWeight: "600",
+            cursor: "pointer", fontSize: "14px"
+          }}
+        >
+          تسجيل الخروج ({role})
+        </button>
+      )}
     </div>
   );
 }
@@ -104,11 +121,7 @@ function InvoicesPage() {
 }
 
 function LoginPage() {
-  return (
-    <PageLayout>
-      <Login />
-    </PageLayout>
-  );
+  return <Login />;
 }
 
 export default function App() {
@@ -119,36 +132,39 @@ export default function App() {
         {/* MAIN WEBSITE */}
         <Route path="/" element={<MainWebsite />} />
 
-        {/* CRM */}
-        <Route
-          path="/dashboard"
-          element={<DashboardPage />}
-        />
+        {/* CRM — محمي */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute allowed={["admin", "manager", "staff"]}>
+            <DashboardPage />
+          </ProtectedRoute>
+        } />
 
-        <Route
-          path="/clients"
-          element={<ClientsPage />}
-        />
+        <Route path="/clients" element={
+          <ProtectedRoute allowed={["admin", "manager"]}>
+            <ClientsPage />
+          </ProtectedRoute>
+        } />
 
-        <Route
-          path="/services"
-          element={<ServicesPage />}
-        />
+        <Route path="/services" element={
+          <ProtectedRoute allowed={["admin", "manager"]}>
+            <ServicesPage />
+          </ProtectedRoute>
+        } />
 
-        <Route
-          path="/requests"
-          element={<RequestsPage />}
-        />
+        <Route path="/requests" element={
+          <ProtectedRoute allowed={["admin", "manager", "staff"]}>
+            <RequestsPage />
+          </ProtectedRoute>
+        } />
 
-        <Route
-          path="/invoices"
-          element={<InvoicesPage />}
-        />
+        <Route path="/invoices" element={
+          <ProtectedRoute allowed={["admin", "manager"]}>
+            <InvoicesPage />
+          </ProtectedRoute>
+        } />
 
-        <Route
-          path="/track-request"
-          element={<TrackRequest />}
-        />
+        <Route path="/track-request" element={<TrackRequest />} />
+        <Route path="/verify-invoice" element={<VerifyInvoice />} />
 
         <Route
           path="/login"
