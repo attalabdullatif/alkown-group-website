@@ -169,7 +169,7 @@ export default function Invoices() {
   <div class="header">
     <div>
       <div class="logo">ALKOWN GLOBAL</div>
-      <div class="logo-sub">إسطنبول · دبي · حلب<br>info@alkowngroup.com<br>+90 534 764 1249<br>www.alkownglobal.com</div>
+      <div class="logo-sub" style="font-size:16px;color:#c9a84c;font-weight:700;margin-top:6px">بوابتك نحو العالم</div>
     </div>
     <div>
       <div class="inv-title">فاتورة</div>
@@ -208,14 +208,9 @@ export default function Invoices() {
     </tfoot>
   </table>
 
-  <div class="bank">
-    <div class="bank-title">بيانات التحويل البنكي</div>
-    <div class="bank-grid">
-      <span class="bank-key">اسم البنك:</span><span class="bank-val">مصرف رويا</span>
-      <span class="bank-key">اسم الحساب:</span><span class="bank-val">Alkown Group LLC</span>
-      <span class="bank-key">IBAN:</span><span class="bank-val">AE27 1325 4490 9522 0000 001</span>
-      <span class="bank-key">المرجع (إلزامي):</span><span class="bank-val ref">${inv.invoice_number}</span>
-    </div>
+  <div style="border:1px solid #eee;border-radius:8px;padding:14px 20px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;font-size:14px;">
+    <span style="color:#888">طريقة الدفع</span>
+    <strong>${paymentLabel}</strong>
   </div>
 
   ${inv.notes ? `<div style="border:1px solid #eee;border-radius:8px;padding:14px 16px;margin-bottom:24px;font-size:14px;color:#555"><strong>ملاحظات:</strong> ${inv.notes}</div>` : ""}
@@ -223,6 +218,7 @@ export default function Invoices() {
   <div class="footer">
     <div class="footer-info">
       <div class="footer-logo">ALKOWN GLOBAL</div>
+      <div style="color:#c9a84c;font-size:13px;font-weight:700;margin-bottom:2px">بوابتك نحو العالم</div>
       <div>🌐 www.alkownglobal.com</div>
       <div>✉️ info@alkowngroup.com | 📞 +90 534 764 1249</div>
       <div>📍 إسطنبول · دبي · حلب</div>
