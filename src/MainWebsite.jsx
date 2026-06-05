@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { supabase } from "./lib/supabase";
 import { createRequestForClient, findOrCreateClient, sendContactNotification } from "./lib/crm";
+import VisaCenterPage from "./pages/visa/VisaCenterPage";
+import VisaResultPage from "./pages/visa/VisaResultPage";
+import VisaApplicationPage from "./pages/visa/VisaApplicationPage";
+import VisaAdminPage from "./pages/visa/VisaAdminPage";
 
 /* ═══════════════════════════════════════════════════════════════
    ALKOWN GROUP — Complete Bilingual Luxury Corporate Website
@@ -508,6 +512,7 @@ export default function AlkownGroup() {
   const [page, setPage] = useState("home");
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false); // eslint-disable-line no-unused-vars
+  const [visaParams, setVisaParams] = useState(null);
   const t = T[lang];
 
   useEffect(() => {
@@ -525,6 +530,7 @@ export default function AlkownGroup() {
 
   const navItems = [
     { k: "home", l: t.nav.home }, { k: "travel", l: t.nav.travel },
+    { k: "visa-center", l: lang === "ar" ? "مركز التأشيرات" : "Visa Center" },
     { k: "citizenship", l: t.nav.citizenship }, { k: "advertising", l: t.nav.advertising },
     { k: "academy", l: t.nav.academy }, { k: "about", l: t.nav.about },
     { k: "contact", l: t.nav.contact }
@@ -597,6 +603,10 @@ export default function AlkownGroup() {
         {page === "booking" && <BookingPage t={t} lang={lang} ff={ff} />}
         {page === "dashboard" && <DashboardPage t={t} lang={lang} ff={ff} />}
         {page === "student" && <StudentPage t={t} lang={lang} ff={ff} />}
+        {page === "visa-center" && <VisaCenterPage lang={lang} ff={ff} setPage={setPage} setVisaParams={setVisaParams} />}
+        {page === "visa-result" && <VisaResultPage params={visaParams} lang={lang} ff={ff} setPage={setPage} setVisaParams={setVisaParams} />}
+        {page === "visa-apply" && <VisaApplicationPage lang={lang} ff={ff} setPage={setPage} initialParams={visaParams} />}
+        {page === "visa-admin" && <VisaAdminPage ff={ff} />}
       </div>
 
       <Footer t={t} lang={lang} ff={ff} setPage={setPage} />
