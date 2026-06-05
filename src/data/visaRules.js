@@ -353,6 +353,209 @@ export const VISA_RULES = {
     updatedAt: "2025-01-01",
   },
 
+  // ── EGYPT → destinations ─────────────────────────────────────
+  "EG_AE": {
+    from: "EG", to: "AE",
+    type: VISA_TYPES.E_VISA,
+    stay: "30–90 days",
+    processing: "3–5 business days",
+    fee: { amount: 100, currency: "AED", note: "Single entry" },
+    feeAr: { amount: 100, currency: "درهم", note: "دخول واحد" },
+    documents: [...DOCS.standard],
+    notes: { en: "Egyptian nationals can apply for UAE e-visa online. Processing is fast.", ar: "المواطنون المصريون يمكنهم التقديم على تأشيرة الإمارات الإلكترونية. المعالجة سريعة." },
+    faqs: [],
+    popular: true,
+    updatedAt: "2025-01-01",
+  },
+
+  "EG_DE": {
+    from: "EG", to: "DE",
+    type: VISA_TYPES.EMBASSY,
+    stay: "Up to 90 days",
+    processing: "15–30 business days",
+    fee: { amount: 80, currency: "EUR", note: "Non-refundable" },
+    feeAr: { amount: 80, currency: "يورو", note: "غير قابل للاسترداد" },
+    documents: [...DOCS.standard, ...DOCS.schengen_extra],
+    notes: { en: "Egyptian nationals require a Schengen visa for Germany.", ar: "المواطنون المصريون يحتاجون تأشيرة شنغن لألمانيا." },
+    faqs: [],
+    popular: false,
+    updatedAt: "2025-01-01",
+  },
+
+  // ── JORDAN → destinations ─────────────────────────────────────
+  "JO_DE": {
+    from: "JO", to: "DE",
+    type: VISA_TYPES.EMBASSY,
+    stay: "Up to 90 days",
+    processing: "10–20 business days",
+    fee: { amount: 80, currency: "EUR", note: "Non-refundable" },
+    feeAr: { amount: 80, currency: "يورو", note: "غير قابل للاسترداد" },
+    documents: [...DOCS.standard, ...DOCS.schengen_extra],
+    notes: { en: "Jordanians require a Schengen visa for Germany. Jordan has a visa facilitation agreement with the EU.", ar: "الأردنيون يحتاجون تأشيرة شنغن لألمانيا. الأردن لديها اتفاقية تيسير التأشيرة مع الاتحاد الأوروبي." },
+    faqs: [],
+    popular: false,
+    updatedAt: "2025-01-01",
+  },
+
+  "JO_US": {
+    from: "JO", to: "US",
+    type: VISA_TYPES.EMBASSY,
+    stay: "Up to 6 months",
+    processing: "30–90 days",
+    fee: { amount: 185, currency: "USD", note: "Non-immigrant fee" },
+    feeAr: { amount: 185, currency: "دولار", note: "رسوم غير مهاجر" },
+    documents: [...DOCS.standard, ...DOCS.us_extra],
+    notes: { en: "Jordanian nationals require a US B1/B2 visa. Apply at the US Embassy in Amman.", ar: "المواطنون الأردنيون يحتاجون تأشيرة أمريكية B1/B2. التقديم في السفارة الأمريكية في عمان." },
+    faqs: [],
+    popular: false,
+    updatedAt: "2025-01-01",
+  },
+
+  // ── SAUDI ARABIA → destinations ───────────────────────────────
+  "SA_JP": {
+    from: "SA", to: "JP",
+    type: VISA_TYPES.NONE,
+    stay: "90 days",
+    processing: "Visa-free",
+    fee: { amount: 0, currency: "JPY", note: "Free" },
+    feeAr: { amount: 0, currency: "ين", note: "مجاناً" },
+    documents: [{ en: "Valid Saudi passport", ar: "جواز سفر سعودي ساري" }, { en: "Return ticket", ar: "تذكرة العودة" }],
+    notes: { en: "Saudi passport holders enjoy visa-free access to Japan for 90 days.", ar: "حاملو الجواز السعودي يتمتعون بدخول مجاني لليابان لمدة 90 يوماً." },
+    faqs: [],
+    popular: false,
+    updatedAt: "2025-01-01",
+  },
+
+  "SA_US": {
+    from: "SA", to: "US",
+    type: VISA_TYPES.EMBASSY,
+    stay: "Up to 6 months",
+    processing: "30–60 days",
+    fee: { amount: 185, currency: "USD", note: "Non-immigrant fee" },
+    feeAr: { amount: 185, currency: "دولار", note: "رسوم غير مهاجر" },
+    documents: [...DOCS.standard, ...DOCS.us_extra],
+    notes: { en: "Saudi nationals require a US visa. Apply at the US Embassy in Riyadh or Jeddah.", ar: "المواطنون السعوديون يحتاجون تأشيرة أمريكية. التقديم في سفارة الرياض أو قنصلية جدة." },
+    faqs: [],
+    popular: false,
+    updatedAt: "2025-01-01",
+  },
+
+  // ── PAKISTAN → destinations ────────────────────────────────────
+  "PK_AE": {
+    from: "PK", to: "AE",
+    type: VISA_TYPES.E_VISA,
+    stay: "30–90 days",
+    processing: "3–7 business days",
+    fee: { amount: 100, currency: "AED", note: "Single entry" },
+    feeAr: { amount: 100, currency: "درهم", note: "دخول واحد" },
+    documents: [...DOCS.standard],
+    notes: { en: "Pakistani nationals can apply for UAE e-visa. Ensure passport is valid for at least 6 months.", ar: "المواطنون الباكستانيون يمكنهم التقديم للتأشيرة الإلكترونية للإمارات." },
+    faqs: [],
+    popular: true,
+    updatedAt: "2025-01-01",
+  },
+
+  "PK_TR": {
+    from: "PK", to: "TR",
+    type: VISA_TYPES.E_VISA,
+    stay: "30 days",
+    processing: "1–3 business days",
+    fee: { amount: 25, currency: "USD", note: "E-visa fee" },
+    feeAr: { amount: 25, currency: "دولار", note: "رسوم التأشيرة الإلكترونية" },
+    documents: [{ en: "Valid passport", ar: "جواز سفر ساري" }, { en: "Credit card for payment", ar: "بطاقة ائتمان للدفع" }],
+    notes: { en: "Pakistani nationals can apply for Turkish e-visa online at evisa.gov.tr.", ar: "المواطنون الباكستانيون يمكنهم التقديم للتأشيرة الإلكترونية التركية على evisa.gov.tr." },
+    faqs: [],
+    popular: false,
+    updatedAt: "2025-01-01",
+  },
+
+  // ── INDIA → destinations ────────────────────────────────────────
+  "IN_AE": {
+    from: "IN", to: "AE",
+    type: VISA_TYPES.E_VISA,
+    stay: "30–90 days",
+    processing: "3–5 business days",
+    fee: { amount: 100, currency: "AED", note: "Single entry" },
+    feeAr: { amount: 100, currency: "درهم", note: "دخول واحد" },
+    documents: [...DOCS.standard],
+    notes: { en: "Indian nationals can apply for UAE e-visa online. One of the most common visa routes.", ar: "المواطنون الهنود يمكنهم التقديم للتأشيرة الإلكترونية للإمارات. أحد أكثر مسارات التأشيرة شيوعاً." },
+    faqs: [],
+    popular: true,
+    updatedAt: "2025-01-01",
+  },
+
+  "IN_TR": {
+    from: "IN", to: "TR",
+    type: VISA_TYPES.E_VISA,
+    stay: "30 days",
+    processing: "1–3 business days",
+    fee: { amount: 25, currency: "USD", note: "E-visa fee" },
+    feeAr: { amount: 25, currency: "دولار", note: "رسوم إلكترونية" },
+    documents: [{ en: "Valid passport", ar: "جواز سفر ساري" }],
+    notes: { en: "Indian nationals can get Turkish e-visa online.", ar: "المواطنون الهنود يمكنهم الحصول على التأشيرة التركية الإلكترونية." },
+    faqs: [],
+    popular: false,
+    updatedAt: "2025-01-01",
+  },
+
+  // ── MOROCCO → destinations ─────────────────────────────────────
+  "MA_AE": {
+    from: "MA", to: "AE",
+    type: VISA_TYPES.NONE,
+    stay: "30 days",
+    processing: "Visa-free",
+    fee: { amount: 0, currency: "AED", note: "Free" },
+    feeAr: { amount: 0, currency: "درهم", note: "مجاناً" },
+    documents: [{ en: "Valid Moroccan passport", ar: "جواز سفر مغربي ساري" }],
+    notes: { en: "Moroccan citizens can visit UAE visa-free for 30 days.", ar: "المواطنون المغاربة يزورون الإمارات بدون تأشيرة لمدة 30 يوماً." },
+    faqs: [],
+    popular: false,
+    updatedAt: "2025-01-01",
+  },
+
+  "MA_FR": {
+    from: "MA", to: "FR",
+    type: VISA_TYPES.EMBASSY,
+    stay: "Up to 90 days",
+    processing: "15–30 business days",
+    fee: { amount: 80, currency: "EUR", note: "Non-refundable" },
+    feeAr: { amount: 80, currency: "يورو", note: "غير قابل للاسترداد" },
+    documents: [...DOCS.standard, ...DOCS.schengen_extra],
+    notes: { en: "Moroccan nationals require a Schengen visa for France. France is the main destination for Moroccans.", ar: "المواطنون المغاربة يحتاجون تأشيرة شنغن لفرنسا." },
+    faqs: [],
+    popular: true,
+    updatedAt: "2025-01-01",
+  },
+
+  // ── KUWAIT → destinations ──────────────────────────────────────
+  "KW_JP": {
+    from: "KW", to: "JP",
+    type: VISA_TYPES.NONE,
+    stay: "90 days",
+    processing: "Visa-free",
+    fee: { amount: 0, currency: "JPY", note: "Free" },
+    feeAr: { amount: 0, currency: "ين", note: "مجاناً" },
+    documents: [{ en: "Valid Kuwaiti passport", ar: "جواز سفر كويتي ساري" }],
+    notes: { en: "Kuwaiti passport holders enjoy visa-free access to Japan.", ar: "حاملو الجواز الكويتي يتمتعون بدخول مجاني لليابان." },
+    faqs: [],
+    popular: false,
+    updatedAt: "2025-01-01",
+  },
+
+  "KW_DE": {
+    from: "KW", to: "DE",
+    type: VISA_TYPES.NONE,
+    stay: "90 days per 180 days",
+    processing: "Visa-free",
+    fee: { amount: 0, currency: "EUR", note: "Free" },
+    feeAr: { amount: 0, currency: "يورو", note: "مجاناً" },
+    documents: [{ en: "Valid Kuwaiti passport", ar: "جواز سفر كويتي ساري" }],
+    notes: { en: "Kuwaiti passport holders can visit all Schengen countries including Germany without a visa.", ar: "حاملو الجواز الكويتي يزورون دول شنغن بما فيها ألمانيا بدون تأشيرة." },
+    faqs: [],
+    popular: false,
+    updatedAt: "2025-01-01",
+  },
+
   // ── Residence-based overrides (NATIONALITY_RESIDENCE_DESTINATION) ──
   // Syrian living in UAE → Germany
   "SY_AE_DE": {
@@ -400,6 +603,64 @@ export const VISA_RULES = {
     faqs: [
       { q: { en: "How fast is processing for UAE residents?", ar: "ما سرعة المعالجة لمقيمي الإمارات؟" }, a: { en: "Usually 5-7 working days when applying from UAE.", ar: "عادةً 5-7 أيام عمل عند التقديم من الإمارات." } },
     ],
+    popular: true,
+    updatedAt: "2025-01-01",
+  },
+
+  // Syrian living in UAE → UK
+  "SY_AE_GB": {
+    from: "SY", residence: "AE", to: "GB",
+    type: VISA_TYPES.EMBASSY,
+    stay: "Up to 6 months",
+    processing: "15–20 business days",
+    fee: { amount: 115, currency: "GBP", note: "Standard visitor visa" },
+    feeAr: { amount: 115, currency: "جنيه استرليني", note: "تأشيرة زائر عادية" },
+    documents: [...DOCS.standard, ...DOCS.uae_extra, { en: "UK visa online form (UKVI)", ar: "نموذج التأشيرة الإلكتروني UKVI" }, { en: "Biometrics at VAC", ar: "البصمة في مركز التأشيرات" }],
+    notes: {
+      en: "Syrians resident in UAE apply for UK visa online at UKVI. UAE residency is viewed positively. Biometrics at the UK Visa Application Centre in Dubai or Abu Dhabi.",
+      ar: "السوريون المقيمون في الإمارات يتقدمون للتأشيرة البريطانية إلكترونياً عبر UKVI. الإقامة الإماراتية تُنظر إليها بإيجابية."
+    },
+    faqs: [
+      { q: { en: "Where to submit biometrics from UAE?", ar: "أين أقدم البصمة من الإمارات؟" }, a: { en: "UK Visa Application Centres in Dubai (DIFC) or Abu Dhabi.", ar: "مراكز تقديم التأشيرة البريطانية في دبي (مركز DIFC) أو أبوظبي." } },
+    ],
+    popular: true,
+    updatedAt: "2025-01-01",
+  },
+
+  // Syrian living in UAE → USA
+  "SY_AE_US": {
+    from: "SY", residence: "AE", to: "US",
+    type: VISA_TYPES.EMBASSY,
+    stay: "Determined at port of entry",
+    processing: "60–180+ days",
+    fee: { amount: 185, currency: "USD", note: "Non-immigrant visa fee" },
+    feeAr: { amount: 185, currency: "دولار", note: "رسوم تأشيرة غير مهاجر" },
+    documents: [...DOCS.standard, ...DOCS.us_extra, ...DOCS.uae_extra],
+    notes: {
+      en: "Syrians in UAE can apply at the US Embassy in Abu Dhabi or Consulate in Dubai. UAE residency and financial stability help the case, but processing for Syrians remains lengthy due to administrative processing.",
+      ar: "السوريون في الإمارات يتقدمون في السفارة الأمريكية بأبوظبي أو قنصلية دبي. الإقامة الإماراتية والاستقرار المالي يساعدان، لكن المعالجة تظل طويلة."
+    },
+    faqs: [
+      { q: { en: "Will UAE residency help my US visa?", ar: "هل ستساعد إقامة الإمارات في تأشيرة أمريكا؟" }, a: { en: "Yes, UAE residency demonstrates stability and ties, which can positively impact the interview, but administrative processing is still likely.", ar: "نعم، الإقامة الإماراتية تثبت الاستقرار والروابط وتؤثر إيجاباً على المقابلة، لكن المعالجة الإدارية لا تزال محتملة." } },
+    ],
+    popular: true,
+    updatedAt: "2025-01-01",
+  },
+
+  // Egyptian living in UAE → Germany
+  "EG_AE_DE": {
+    from: "EG", residence: "AE", to: "DE",
+    type: VISA_TYPES.EMBASSY,
+    stay: "Up to 90 days",
+    processing: "10–20 business days",
+    fee: { amount: 80, currency: "EUR", note: "Non-refundable" },
+    feeAr: { amount: 80, currency: "يورو", note: "غير قابل للاسترداد" },
+    documents: [...DOCS.standard, ...DOCS.schengen_extra, ...DOCS.uae_extra],
+    notes: {
+      en: "Egyptians resident in UAE apply at the German Embassy Abu Dhabi or Consulate Dubai. UAE residency significantly improves approval chances.",
+      ar: "المصريون المقيمون في الإمارات يتقدمون في السفارة الألمانية أبوظبي أو القنصلية في دبي. الإقامة الإماراتية تحسن فرص الموافقة بشكل ملحوظ."
+    },
+    faqs: [],
     popular: true,
     updatedAt: "2025-01-01",
   },

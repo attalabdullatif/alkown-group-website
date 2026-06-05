@@ -5,6 +5,7 @@ import VisaCenterPage from "./pages/visa/VisaCenterPage";
 import VisaResultPage from "./pages/visa/VisaResultPage";
 import VisaApplicationPage from "./pages/visa/VisaApplicationPage";
 import VisaAdminPage from "./pages/visa/VisaAdminPage";
+import VisaTrackPage from "./pages/visa/VisaTrackPage";
 
 /* ═══════════════════════════════════════════════════════════════
    ALKOWN GROUP — Complete Bilingual Luxury Corporate Website
@@ -607,6 +608,7 @@ export default function AlkownGroup() {
         {page === "visa-result" && <VisaResultPage params={visaParams} lang={lang} ff={ff} setPage={setPage} setVisaParams={setVisaParams} />}
         {page === "visa-apply" && <VisaApplicationPage lang={lang} ff={ff} setPage={setPage} initialParams={visaParams} />}
         {page === "visa-admin" && <VisaAdminPage ff={ff} />}
+        {page === "visa-track" && <VisaTrackPage lang={lang} ff={ff} setPage={setPage} />}
       </div>
 
       <Footer t={t} lang={lang} ff={ff} setPage={setPage} />

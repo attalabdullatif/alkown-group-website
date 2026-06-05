@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom";
+import VisaRoutePage from "./pages/visa/VisaRoutePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext";
 import { signOut } from "./lib/auth";
@@ -168,6 +169,7 @@ export default function App() {
         <Route path="/track-request" element={<TrackRequest />} />
         <Route path="/verify-invoice" element={<VerifyInvoice />} />
         <Route path="/portal" element={<ClientPortal />} />
+        <Route path="/visa/:slug" element={<VisaRoutePage />} />
 
         <Route
           path="/login"

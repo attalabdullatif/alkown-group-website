@@ -338,19 +338,33 @@ export default function VisaCenterPage({ lang, ff, setPage, setVisaParams }) {
               ? "فريقنا من الخبراء يتولى طلبك كاملاً من البداية للنهاية."
               : "Our expert team handles your entire application from start to finish."}
           </p>
-          <button
-            onClick={() => setPage("visa-apply")}
-            style={{
-              padding: "14px 36px", background: C.dark, color: C.gold,
-              border: "none", borderRadius: 6, cursor: "pointer",
-              fontFamily: ff, fontSize: ".9rem", fontWeight: 700,
-              letterSpacing: ".08em", transition: "all .3s",
-            }}
-            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,.3)"; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
-          >
-            {ar ? "قدّم طلبك الآن" : "Start Your Application"}
-          </button>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+            <button
+              onClick={() => setPage("visa-apply")}
+              style={{
+                padding: "14px 36px", background: C.dark, color: C.gold,
+                border: "none", borderRadius: 6, cursor: "pointer",
+                fontFamily: ff, fontSize: ".9rem", fontWeight: 700,
+                letterSpacing: ".08em", transition: "all .3s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,.3)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
+            >
+              {ar ? "قدّم طلبك الآن" : "Start Your Application"}
+            </button>
+            <button
+              onClick={() => setPage("visa-track")}
+              style={{
+                padding: "14px 28px", background: "transparent", color: C.dark,
+                border: `2px solid ${C.dark}`, borderRadius: 6, cursor: "pointer",
+                fontFamily: ff, fontSize: ".9rem", fontWeight: 700, transition: "all .3s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = "rgba(30,24,16,.08)"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
+            >
+              {ar ? "🔍 تتبع طلبي" : "🔍 Track My Application"}
+            </button>
+          </div>
         </div>
       </section>
     </div>
