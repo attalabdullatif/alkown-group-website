@@ -1200,24 +1200,59 @@ function ContactPage({ t, lang, ff }) {
         <div style={{ maxWidth: 1140, margin: "0 auto" }}>
 
           {/* خريطة العالم مع الدبابيس */}
-          <div style={{ position: "relative", marginBottom: 64, borderRadius: 4, overflow: "hidden", border: `1px solid rgba(201,168,76,.2)` }}>
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/World_map_-_low_resolution.svg/1200px-World_map_-_low_resolution.svg.png"
-              alt="World Map"
-              style={{ width: "100%", height: 320, objectFit: "cover", objectPosition: "center", filter: "sepia(20%) saturate(80%)", display: "block" }}
-            />
-            {/* Pins */}
-            {[
-              { label: lang === "ar" ? "إسطنبول" : "Istanbul", x: "55%", y: "31%" },
-              { label: lang === "ar" ? "دبي" : "Dubai", x: "64%", y: "42%" },
-              { label: lang === "ar" ? "حلب" : "Aleppo", x: "60%", y: "35%" },
-            ].map((pin, i) => (
-              <div key={i} style={{ position: "absolute", left: pin.x, top: pin.y, transform: "translate(-50%,-100%)", textAlign: "center", zIndex: 2 }}>
-                <div style={{ fontSize: "1.6rem", lineHeight: 1, filter: "drop-shadow(0 2px 4px rgba(0,0,0,.4))" }}>📍</div>
-                <div style={{ background: "rgba(0,0,0,.75)", color: "#fff", fontSize: 11, padding: "3px 8px", borderRadius: 4, whiteSpace: "nowrap", marginTop: 2, backdropFilter: "blur(4px)" }}>{pin.label}</div>
-              </div>
-            ))}
-            <div style={{ position: "absolute", bottom: 12, right: 16, background: "rgba(0,0,0,.6)", color: C.gold, fontSize: 12, padding: "4px 12px", borderRadius: 4, fontWeight: 700, letterSpacing: 2 }}>ALKOWN GLOBAL</div>
+          <div style={{ position: "relative", marginBottom: 64, borderRadius: 4, overflow: "hidden", border: `1px solid rgba(201,168,76,.2)`, background: "#f0ece4" }}>
+            <svg viewBox="0 0 1000 500" style={{ width: "100%", height: 320, display: "block" }} xmlns="http://www.w3.org/2000/svg">
+              {/* Ocean */}
+              <rect width="1000" height="500" fill="#d6e8f5"/>
+              {/* North America */}
+              <path d="M60,80 L160,70 L200,90 L210,130 L180,160 L160,200 L140,240 L120,260 L100,280 L80,300 L70,320 L90,340 L110,350 L100,370 L80,380 L60,360 L40,340 L30,300 L20,260 L30,220 L40,180 L50,140 L60,100 Z" fill="#c8b89a" stroke="#b8a880" strokeWidth="1"/>
+              {/* South America */}
+              <path d="M160,310 L200,300 L230,310 L240,340 L250,370 L240,410 L220,440 L200,460 L180,450 L160,420 L150,390 L140,360 L150,330 Z" fill="#c8b89a" stroke="#b8a880" strokeWidth="1"/>
+              {/* Europe */}
+              <path d="M440,60 L500,55 L530,65 L540,85 L520,100 L500,110 L480,120 L460,115 L445,100 L440,80 Z" fill="#c8b89a" stroke="#b8a880" strokeWidth="1"/>
+              {/* Africa */}
+              <path d="M450,130 L510,120 L540,130 L560,160 L570,200 L565,240 L550,280 L530,320 L510,350 L490,360 L470,350 L450,310 L440,270 L435,230 L440,190 L445,160 Z" fill="#c8b89a" stroke="#b8a880" strokeWidth="1"/>
+              {/* Asia */}
+              <path d="M530,55 L650,45 L750,50 L820,60 L860,80 L870,110 L840,140 L800,160 L760,170 L720,165 L680,170 L660,190 L640,200 L610,195 L580,180 L560,160 L540,140 L530,110 L525,80 Z" fill="#c8b89a" stroke="#b8a880" strokeWidth="1"/>
+              {/* Middle East */}
+              <path d="M540,140 L580,130 L610,140 L620,170 L610,195 L580,200 L560,195 L545,175 Z" fill="#c8b89a" stroke="#b8a880" strokeWidth="1"/>
+              {/* Australia */}
+              <path d="M760,280 L830,270 L870,280 L890,310 L880,350 L850,370 L810,370 L780,355 L760,330 L755,300 Z" fill="#c8b89a" stroke="#b8a880" strokeWidth="1"/>
+              {/* Greenland */}
+              <path d="M220,30 L280,20 L310,35 L300,60 L270,70 L240,65 L220,50 Z" fill="#d4ccc0" stroke="#b8a880" strokeWidth="1"/>
+
+              {/* --- PINS --- */}
+              {/* Istanbul: ~29°E, 41°N → x≈555, y≈135 */}
+              <g transform="translate(555,135)">
+                <circle cx="0" cy="0" r="10" fill={C.gold} opacity="0.25"/>
+                <circle cx="0" cy="0" r="5" fill={C.gold}/>
+                <line x1="0" y1="0" x2="0" y2="18" stroke={C.gold} strokeWidth="2"/>
+                <rect x="-28" y="20" width="56" height="18" rx="3" fill="rgba(20,15,5,0.82)"/>
+                <text x="0" y="33" textAnchor="middle" fill="#fff" fontSize="10" fontFamily="Cairo,sans-serif">{lang==="ar"?"إسطنبول":"Istanbul"}</text>
+              </g>
+
+              {/* Aleppo: ~37°E, 36°N → x≈570, y≈155 */}
+              <g transform="translate(575,158)">
+                <circle cx="0" cy="0" r="10" fill={C.gold} opacity="0.25"/>
+                <circle cx="0" cy="0" r="5" fill={C.gold}/>
+                <line x1="0" y1="0" x2="0" y2="18" stroke={C.gold} strokeWidth="2"/>
+                <rect x="-22" y="20" width="44" height="18" rx="3" fill="rgba(20,15,5,0.82)"/>
+                <text x="0" y="33" textAnchor="middle" fill="#fff" fontSize="10" fontFamily="Cairo,sans-serif">{lang==="ar"?"حلب":"Aleppo"}</text>
+              </g>
+
+              {/* Dubai: ~55°E, 25°N → x≈607, y≈178 */}
+              <g transform="translate(610,182)">
+                <circle cx="0" cy="0" r="10" fill={C.gold} opacity="0.25"/>
+                <circle cx="0" cy="0" r="5" fill={C.gold}/>
+                <line x1="0" y1="0" x2="0" y2="18" stroke={C.gold} strokeWidth="2"/>
+                <rect x="-20" y="20" width="40" height="18" rx="3" fill="rgba(20,15,5,0.82)"/>
+                <text x="0" y="33" textAnchor="middle" fill="#fff" fontSize="10" fontFamily="Cairo,sans-serif">{lang==="ar"?"دبي":"Dubai"}</text>
+              </g>
+
+              {/* Branding */}
+              <rect x="820" y="460" width="160" height="24" rx="3" fill="rgba(20,15,5,0.6)"/>
+              <text x="900" y="476" textAnchor="middle" fill="#C9A84C" fontSize="11" fontFamily="Cairo,sans-serif" letterSpacing="2">ALKOWN GLOBAL</text>
+            </svg>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(30px,6vw,72px)", alignItems: "start" }}>
