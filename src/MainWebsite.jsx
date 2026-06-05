@@ -1195,9 +1195,6 @@ function ContactPage({ t, lang, ff }) {
         }
       });
 
-      setSent(true);
-
-      // إشعار واتساب للأدمن
       const waMsg = encodeURIComponent(
         `📩 *رسالة تواصل جديدة — الكون العالمية*\n\n` +
         `👤 الاسم: ${form.name}\n` +
@@ -1207,7 +1204,7 @@ function ContactPage({ t, lang, ff }) {
         `🎯 الخدمة: ${form.service || "—"}\n` +
         `📝 الرسالة: ${form.msg}`
       );
-      window.open(`https://wa.me/971544909522?text=${waMsg}`, "_blank");
+      setSent(`https://wa.me/971544909522?text=${waMsg}`);
 
     } catch (error) {
       console.error("Contact Form Error:", error);
@@ -1299,14 +1296,12 @@ function ContactPage({ t, lang, ff }) {
               { num: "+971 54 490 9522", wa: "https://wa.me/971544909522" },
               { num: "+963 980 631 952", wa: "https://wa.me/963980631952" },
             ].map(({ num, wa }, i) => (
-              <a key={i} href={wa} target="_blank" rel="noreferrer" style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 0", borderBottom: `1px solid rgba(201,168,76,.1)`, textDecoration: "none", transition: "opacity .2s" }}
-                onMouseEnter={e => e.currentTarget.style.opacity = ".75"}
+              <a key={i} href={wa} target="_blank" rel="noreferrer"
+                style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 0", borderBottom: `1px solid rgba(201,168,76,.1)`, textDecoration: "none" }}
+                onMouseEnter={e => e.currentTarget.style.opacity = ".7"}
                 onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
-                <div style={{ width: 40, height: 40, background: "rgba(37,211,102,.1)", border: "1px solid rgba(37,211,102,.3)", borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.004 2C6.479 2 2 6.479 2 12.004c0 1.771.467 3.437 1.28 4.888L2 22l5.236-1.276A9.954 9.954 0 0012.004 22C17.529 22 22 17.521 22 12.004 22 6.479 17.529 2 12.004 2zm0 18c-1.663 0-3.234-.463-4.574-1.267l-.327-.195-3.107.757.782-3.024-.213-.341A7.944 7.944 0 014 12.004C4 7.582 7.582 4 12.004 4 16.418 4 20 7.582 20 12.004 20 16.418 16.418 20 12.004 20z"/></svg>
-                </div>
-                <span style={{ color: C.g600, fontSize: ".9rem", flex: 1 }}>{num}</span>
-                <span style={{ color: "#25d366", fontSize: ".8rem", fontWeight: 700 }}>WhatsApp ↗</span>
+                <div style={{ width: 40, height: 40, background: `rgba(201,168,76,.1)`, border: `1px solid rgba(201,168,76,.25)`, borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: ".95rem", flexShrink: 0 }}>📞</div>
+                <span style={{ color: C.g600, fontSize: ".9rem" }}>{num}</span>
               </a>
             ))}
 
@@ -1333,12 +1328,16 @@ function ContactPage({ t, lang, ff }) {
 
           {/* Form */}
           {sent ? (
-            <div style={{ textAlign: "center", padding: "72px 0" }}>
-              <div style={{ fontSize: "4rem", marginBottom: 18, color: C.gold }}>✓</div>
-              <h3 style={{ color: C.g800, fontSize: "1.6rem", fontWeight: 300, marginBottom: 10 }}>
+            <div style={{ textAlign: "center", padding: "60px 0" }}>
+              <div style={{ fontSize: "3.5rem", marginBottom: 16, color: C.gold }}>✓</div>
+              <h3 style={{ color: C.g800, fontSize: "1.5rem", fontWeight: 300, marginBottom: 10 }}>
                 {lang === "ar" ? "تم إرسال رسالتك!" : "Message Sent!"}
               </h3>
-              <p style={{ color: C.g400 }}>{lang === "ar" ? "سنتواصل معك في أقرب وقت" : "We'll get back to you soon"}</p>
+              <p style={{ color: C.g400, marginBottom: 24 }}>{lang === "ar" ? "سنتواصل معك في أقرب وقت" : "We'll get back to you soon"}</p>
+              <a href={sent} target="_blank" rel="noreferrer"
+                style={{ display: "inline-block", padding: "13px 28px", background: "#25d366", color: "#fff", borderRadius: 6, fontFamily: ff, fontWeight: 700, textDecoration: "none", fontSize: ".9rem" }}>
+                💬 {lang === "ar" ? "أرسل رسالتك عبر واتساب" : "Send via WhatsApp"}
+              </a>
             </div>
           ) : (
             <div>
@@ -1964,11 +1963,11 @@ function Footer({ t, lang, ff, setPage }) {
               { num: "+971 54 490 9522", wa: "https://wa.me/971544909522" },
               { num: "+963 980 631 952", wa: "https://wa.me/963980631952" },
             ].map(({ num, wa }, i) => (
-              <a key={i} href={wa} target="_blank" rel="noreferrer" style={{ display: "flex", gap: 8, marginBottom: 10, alignItems: "center", textDecoration: "none", opacity: 1, transition: "opacity .2s" }}
+              <a key={i} href={wa} target="_blank" rel="noreferrer"
+                style={{ display: "flex", gap: 8, marginBottom: 10, alignItems: "center", textDecoration: "none", transition: "opacity .2s" }}
                 onMouseEnter={e => e.currentTarget.style.opacity = ".7"}
                 onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
-                <span style={{ fontSize: ".84rem", color: "#6a6054", flex: 1 }}>📞 {num}</span>
-                <span style={{ fontSize: ".72rem", color: "#25d366", border: "1px solid #25d36644", padding: "2px 8px", borderRadius: 10 }}>WhatsApp ↗</span>
+                <span style={{ fontSize: ".84rem", color: "#6a6054" }}>📞 {num}</span>
               </a>
             ))}
             <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>

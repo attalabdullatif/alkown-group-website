@@ -65,32 +65,34 @@ export default function VisaApplicationPage({ lang, ff, setPage, initialParams }
   };
 
   const ADMIN_WA = "971544909522";
+  const [waLink, setWaLink] = useState("");
+
+  const buildWaLink = (id, f) => {
+    const msg = encodeURIComponent(
+      `🛂 *طلب تأشيرة جديد — الكون العالمية*\n\n` +
+      `📋 رقم الطلب: ${id}\n` +
+      `👤 الاسم: ${f.fullName}\n` +
+      `📧 البريد: ${f.email}\n` +
+      `📞 الهاتف: ${f.phone}${f.whatsapp ? "\n💬 واتساب: " + f.whatsapp : ""}\n` +
+      `🌍 الجنسية: ${f.nationality}\n` +
+      `🏠 الإقامة: ${f.residence || "—"}\n` +
+      `✈️ الوجهة: ${f.destination}\n` +
+      `📅 تاريخ السفر: ${f.travelDate || "—"}\n` +
+      `🎯 الغرض: ${f.tripPurpose}\n` +
+      `📝 ملاحظات: ${f.notes || "—"}`
+    );
+    return `https://wa.me/${ADMIN_WA}?text=${msg}`;
+  };
 
   const handleSubmit = async () => {
     if (!form.agreeTerms) return;
     setSubmitting(true);
     const res = await submitVisaApplication(form);
     setSubmitting(false);
-
     const id = res.applicationId || "AK-VISA-" + Date.now();
     setAppId(id);
+    setWaLink(buildWaLink(id, form));
     setSubmitted(true);
-
-    // إشعار واتساب للأدمن تلقائياً
-    const msg = encodeURIComponent(
-      `🛂 *طلب تأشيرة جديد — الكون العالمية*\n\n` +
-      `📋 رقم الطلب: ${id}\n` +
-      `👤 الاسم: ${form.fullName}\n` +
-      `📧 البريد: ${form.email}\n` +
-      `📞 الهاتف: ${form.phone}${form.whatsapp ? "\n💬 واتساب: " + form.whatsapp : ""}\n` +
-      `🌍 الجنسية: ${form.nationality}\n` +
-      `🏠 الإقامة: ${form.residence || "—"}\n` +
-      `✈️ الوجهة: ${form.destination}\n` +
-      `📅 تاريخ السفر: ${form.travelDate || "—"}\n` +
-      `🎯 الغرض: ${form.tripPurpose}\n` +
-      `📝 ملاحظات: ${form.notes || "—"}`
-    );
-    window.open(`https://wa.me/${ADMIN_WA}?text=${msg}`, "_blank");
   };
 
   if (submitted) return (
@@ -110,7 +112,16 @@ export default function VisaApplicationPage({ lang, ff, setPage, initialParams }
             ? "سيتواصل معك فريقنا خلال 24 ساعة لمتابعة طلبك وإعلامك بالخطوات التالية."
             : "Our team will contact you within 24 hours to follow up and guide you through the next steps."}
         </p>
-        <button onClick={() => setPage("visa-center")} style={{ padding: "12px 28px", background: C.gold, color: C.dark, border: "none", borderRadius: 6, cursor: "pointer", fontFamily: ff, fontWeight: 700 }}>
+        <a
+          href={waLink}
+          target="_blank"
+          rel="noreferrer"
+          style={{ display: "inline-block", padding: "13px 28px", background: "#25d366", color: "#fff", borderRadius: 6, fontFamily: ff, fontWeight: 700, textDecoration: "none", marginBottom: 12, fontSize: ".9rem" }}
+        >
+          💬 {ar ? "أرسل تفاصيل طلبك عبر واتساب" : "Send Details via WhatsApp"}
+        </a>
+        <br />
+        <button onClick={() => setPage("visa-center")} style={{ padding: "10px 24px", background: "transparent", color: C.g400, border: `1px solid rgba(201,168,76,.3)`, borderRadius: 6, cursor: "pointer", fontFamily: ff, fontSize: ".85rem", marginTop: 8 }}>
           {ar ? "العودة إلى مركز التأشيرات" : "Back to Visa Center"}
         </button>
       </div>

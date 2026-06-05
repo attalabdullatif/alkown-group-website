@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom";
 import VisaRoutePage from "./pages/visa/VisaRoutePage";
+import VisaAdminPage from "./pages/visa/VisaAdminPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext";
 import { signOut } from "./lib/auth";
@@ -35,6 +36,7 @@ function Navigation() {
       <LinkButton to="/services">Services</LinkButton>
       <LinkButton to="/requests">Requests</LinkButton>
       <LinkButton to="/invoices">Invoices</LinkButton>
+      <LinkButton to="/visa-admin">🛂 Visa Admin</LinkButton>
       <LinkButton to="/track-request">Track Request</LinkButton>
       <LinkButton to="/portal">بوابة العملاء</LinkButton>
       {user && (
@@ -170,6 +172,11 @@ export default function App() {
         <Route path="/verify-invoice" element={<VerifyInvoice />} />
         <Route path="/portal" element={<ClientPortal />} />
         <Route path="/visa/:slug" element={<VisaRoutePage />} />
+        <Route path="/visa-admin" element={
+          <ProtectedRoute allowed={["admin", "manager"]}>
+            <VisaAdminPage ff="'Cormorant Garamond',Georgia,serif" />
+          </ProtectedRoute>
+        } />
 
         <Route
           path="/login"
