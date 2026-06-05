@@ -80,7 +80,7 @@ const T = {
       phone: "+90 534 764 1249 | +971 54 490 9522 | +963 980 631 952",
       email: "info@alkownglobal.com",
       social: "@alkown.global — Instagram & Facebook",
-      license: "Trade License: DED-0000000"
+      license: ""
     },
     travel: {
       hero: "Travel & Visas",
@@ -254,7 +254,7 @@ const T = {
       phone: "+90 534 764 1249 | +971 54 490 9522 | +963 980 631 952",
       email: "info@alkownglobal.com",
       social: "@alkown.global — Instagram & Facebook",
-      license: "الترخيص التجاري: DED-0000000"
+      license: ""
     },
     travel: {
       hero: "السفر والتأشيرات",
@@ -1301,8 +1301,8 @@ function ContactPage({ t, lang, ff }) {
                 <label style={{ display: "block", color: C.g400, fontSize: ".72rem", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 8 }}>{t.booking.service}</label>
                 <select value={form.service} onChange={upd("service")}
                   style={{ width: "100%", padding: "13px 16px", border: `1px solid rgba(201,168,76,.25)`, background: C.beige, color: C.g800, fontSize: ".9rem", borderRadius: 2, transition: "all .25s", fontFamily: ff }}>
-                  <option value="">{t.booking.service}</option>
-                  {t.booking.services.map(service => (
+                  <option value="">{lang === "ar" ? "اختر الخدمة" : "Select Service"}</option>
+                  {["السفر والتأشيرات", "برامج الجنسية", "وكالة الإعلان", "أكاديمية المهارات", "تأسيس شركات", "أخرى"].map(service => (
                     <option key={service} value={service}>{service}</option>
                   ))}
                 </select>
@@ -1950,7 +1950,7 @@ function Footer({ t, lang, ff, setPage }) {
             <span style={{ fontSize: ".68rem", color: C.gold, letterSpacing: ".24em" }}>ALKOWN.GLOBAL</span>
             <div style={{ width: 18, height: 1, background: `rgba(201,168,76,.35)` }} />
           </div>
-          <div style={{ fontSize: ".72rem", color: "#4a4438" }}>{ft.license}</div>
+          {ft.license && <div style={{ fontSize: ".72rem", color: "#4a4438" }}>{ft.license}</div>}
         </div>
       </div>
     </footer>

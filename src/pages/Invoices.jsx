@@ -168,9 +168,16 @@ export default function Invoices() {
 <div class="page">
   <div class="header">
     <div>
-      <div class="logo">ALKOWN GLOBAL</div>
-      <img src="/logo.png" alt="Alkown Global" style="height:48px;margin-top:8px;display:block;object-fit:contain" onerror="this.style.display='none'" />
-      <div class="logo-sub" style="font-size:16px;color:#c9a84c;font-weight:700;margin-top:6px">بوابتك نحو العالم</div>
+      <img src="/logo.png" alt="Alkown Global" style="height:64px;display:block;object-fit:contain;margin-bottom:6px" onerror="this.style.display='none'" />
+      <div style="font-size:13px;color:#c9a84c;font-weight:700;letter-spacing:1px">بوابتك نحو العالم</div>
+      <div class="logo-sub" style="margin-top:8px;line-height:1.9;font-size:12px;color:#888">
+        🌐 www.alkownglobal.com<br>
+        ✉️ info@alkownglobal.com<br>
+        📞 +90 534 764 1249<br>
+        📞 +971 54 490 9522<br>
+        📞 +963 980 631 952<br>
+        📍 إسطنبول · دبي · حلب
+      </div>
     </div>
     <div>
       <div class="inv-title">فاتورة</div>
@@ -218,15 +225,10 @@ export default function Invoices() {
 
   <div class="footer">
     <div class="footer-info">
-      <div class="footer-logo">ALKOWN GLOBAL</div>
-      <div style="color:#c9a84c;font-size:13px;font-weight:700;margin-bottom:2px">بوابتك نحو العالم</div>
-      <div>🌐 www.alkownglobal.com</div>
-      <div>✉️ info@alkownglobal.com | 📞 +90 534 764 1249</div>
-      <div>📍 إسطنبول · دبي · حلب</div>
-      <div style="margin-top:8px;font-size:11px;color:#aaa">هذه الفاتورة وثيقة رسمية صادرة عن Alkown Global</div>
+      <div style="font-size:11px;color:#aaa">هذه الفاتورة وثيقة رسمية صادرة عن Alkown Global · www.alkownglobal.com</div>
     </div>
     <div style="text-align:center">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(verifyUrl)}" width="100" height="100" alt="QR" />
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(verifyUrl)}" width="90" height="90" alt="QR" />
       <div class="qr-label">امسح للتحقق</div>
     </div>
   </div>
