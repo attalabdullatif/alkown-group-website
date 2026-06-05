@@ -59,7 +59,7 @@ function CountrySelect({ value, onChange, placeholder, placeholderAr, lang, ff }
 
       {open && (
         <div style={{
-          position: "absolute", top: "calc(100% + 8px)", left: 0, right: 0, zIndex: 100,
+          position: "absolute", top: "calc(100% + 8px)", left: 0, right: 0, zIndex: 9999,
           background: C.dark, border: `1px solid rgba(201,168,76,.3)`, borderRadius: 8,
           boxShadow: "0 20px 60px rgba(0,0,0,.5)", maxHeight: 280, display: "flex", flexDirection: "column",
         }}>
@@ -133,7 +133,7 @@ export default function VisaCenterPage({ lang, ff, setPage, setVisaParams }) {
       <section style={{
         minHeight: "92vh", background: `linear-gradient(145deg, ${C.dark} 0%, #2a1f10 50%, #1a1206 100%)`,
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-        padding: "80px clamp(20px,6vw,80px) 60px", position: "relative", overflow: "hidden",
+        padding: "80px clamp(20px,6vw,80px) 60px", position: "relative",
       }}>
         {/* Background decoration */}
         <div style={{
@@ -221,7 +221,7 @@ export default function VisaCenterPage({ lang, ff, setPage, setVisaParams }) {
         </div>
 
         {/* Stats */}
-        <div style={{ position: "relative", zIndex: 1, display: "flex", gap: "clamp(24px,6vw,80px)", marginTop: 52, flexWrap: "wrap", justifyContent: "center" }}>
+        <div style={{ position: "relative", zIndex: 0, display: "flex", gap: "clamp(24px,6vw,80px)", marginTop: 52, flexWrap: "wrap", justifyContent: "center" }}>
           {[
             { n: "195+", l: ar ? "دولة" : "Countries" },
             { n: "10K+", l: ar ? "مسار تأشيرة" : "Visa Routes" },

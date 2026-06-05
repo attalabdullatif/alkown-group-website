@@ -93,25 +93,30 @@ export const VISA_RULES = {
 
   "SY_TR": {
     from: "SY", to: "TR",
-    type: VISA_TYPES.ON_ARRIVAL,
-    stay: "90 days",
-    processing: "On arrival",
-    fee: { amount: 0, currency: "USD", note: "Free" },
-    feeAr: { amount: 0, currency: "دولار", note: "مجاناً" },
+    type: VISA_TYPES.EMBASSY,
+    stay: "30–90 days",
+    processing: "5–15 business days",
+    fee: { amount: 0, currency: "USD", note: "Free (no visa fee, but appointment required)" },
+    feeAr: { amount: 0, currency: "دولار", note: "مجاناً (بدون رسوم، لكن يلزم موعد)" },
     documents: [
-      { en: "Valid passport", ar: "جواز سفر ساري" },
-      { en: "Recent photo", ar: "صورة شخصية حديثة" },
-      { en: "Return ticket", ar: "تذكرة العودة" },
+      { en: "Valid passport (min. 6 months validity)", ar: "جواز سفر ساري (صلاحية 6 أشهر على الأقل)" },
+      { en: "Recent passport-size photo", ar: "صورة شخصية حديثة" },
+      { en: "Completed visa application form", ar: "استمارة طلب التأشيرة مكتملة" },
+      { en: "Proof of accommodation in Turkey", ar: "إثبات مكان الإقامة في تركيا" },
+      { en: "Return or onward ticket", ar: "تذكرة العودة أو المرور" },
+      { en: "Bank statement or proof of funds", ar: "كشف حساب بنكي أو إثبات الأموال" },
     ],
     notes: {
-      en: "Syrians can enter Turkey visa-free for up to 90 days per 180-day period.",
-      ar: "السوريون يستطيعون دخول تركيا بدون تأشيرة لمدة 90 يوماً خلال 180 يوماً."
+      en: "Syrian passport holders are required to obtain a visa from the Turkish embassy or consulate before traveling. Visas are typically free of charge. Apply at the Turkish Embassy in Damascus, or from the Turkish Consulate in your country of residence. Processing usually takes 5–15 working days.",
+      ar: "حاملو الجواز السوري ملزمون بالحصول على تأشيرة من السفارة أو القنصلية التركية قبل السفر. التأشيرة مجانية في الغالب. يمكن التقديم في السفارة التركية في دمشق، أو من القنصلية التركية في بلد إقامتك. المعالجة تستغرق عادةً 5–15 يوم عمل."
     },
     faqs: [
-      { q: { en: "Can Syrians work in Turkey?", ar: "هل يمكن للسوريين العمل في تركيا؟" }, a: { en: "A work permit is required to work legally in Turkey.", ar: "تصريح العمل مطلوب للعمل بشكل قانوني في تركيا." } },
+      { q: { en: "Is the Turkish visa free for Syrians?", ar: "هل تأشيرة تركيا مجانية للسوريين؟" }, a: { en: "Yes, the visa fee is waived for Syrian nationals, but you still must apply at the embassy.", ar: "نعم، رسوم التأشيرة معفاة للمواطنين السوريين، لكن يجب التقديم في السفارة." } },
+      { q: { en: "Can I apply from UAE?", ar: "هل أستطيع التقديم من الإمارات؟" }, a: { en: "Yes, you can apply at the Turkish Consulate in Dubai or Embassy in Abu Dhabi if you are a UAE resident.", ar: "نعم، يمكنك التقديم في القنصلية التركية في دبي أو السفارة في أبوظبي إذا كنت مقيماً في الإمارات." } },
+      { q: { en: "Can Syrians work in Turkey?", ar: "هل يمكن للسوريين العمل في تركيا؟" }, a: { en: "A separate work permit is required to work legally in Turkey.", ar: "تصريح العمل مطلوب بشكل منفصل للعمل بشكل قانوني في تركيا." } },
     ],
     popular: true,
-    updatedAt: "2025-01-01",
+    updatedAt: "2025-06-06",
   },
 
   "SY_DE": {

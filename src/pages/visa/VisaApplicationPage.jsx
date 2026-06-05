@@ -64,19 +64,33 @@ export default function VisaApplicationPage({ lang, ff, setPage, initialParams }
     return true;
   };
 
+  const ADMIN_WA = "971544909522";
+
   const handleSubmit = async () => {
     if (!form.agreeTerms) return;
     setSubmitting(true);
     const res = await submitVisaApplication(form);
     setSubmitting(false);
-    if (res.success) {
-      setAppId(res.applicationId || "AK-VISA-" + Date.now());
-      setSubmitted(true);
-    } else {
-      // Fallback: show success anyway (form data logged)
-      setAppId("AK-VISA-" + Date.now());
-      setSubmitted(true);
-    }
+
+    const id = res.applicationId || "AK-VISA-" + Date.now();
+    setAppId(id);
+    setSubmitted(true);
+
+    // إشعار واتساب للأدمن تلقائياً
+    const msg = encodeURIComponent(
+      `🛂 *طلب تأشيرة جديد — الكون العالمية*\n\n` +
+      `📋 رقم الطلب: ${id}\n` +
+      `👤 الاسم: ${form.fullName}\n` +
+      `📧 البريد: ${form.email}\n` +
+      `📞 الهاتف: ${form.phone}${form.whatsapp ? "\n💬 واتساب: " + form.whatsapp : ""}\n` +
+      `🌍 الجنسية: ${form.nationality}\n` +
+      `🏠 الإقامة: ${form.residence || "—"}\n` +
+      `✈️ الوجهة: ${form.destination}\n` +
+      `📅 تاريخ السفر: ${form.travelDate || "—"}\n` +
+      `🎯 الغرض: ${form.tripPurpose}\n` +
+      `📝 ملاحظات: ${form.notes || "—"}`
+    );
+    window.open(`https://wa.me/${ADMIN_WA}?text=${msg}`, "_blank");
   };
 
   if (submitted) return (
