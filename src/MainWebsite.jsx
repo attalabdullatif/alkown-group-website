@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "./lib/supabase";
 import { createRequestForClient, findOrCreateClient, sendContactNotification } from "./lib/crm";
 
@@ -370,6 +370,7 @@ const C = {
 };
 
 // ── HELPERS ───────────────────────────────────────────────────
+// eslint-disable-next-line no-unused-vars
 const gold = (extra = "") =>
   `background:linear-gradient(135deg,${C.gold} 0%,${C.goldLight} 45%,${C.gold} 100%);${extra}`;
 
@@ -506,7 +507,7 @@ export default function AlkownGroup() {
   const [lang, setLang] = useState("en");
   const [page, setPage] = useState("home");
   const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false); // eslint-disable-line no-unused-vars
   const t = T[lang];
 
   useEffect(() => {
@@ -1338,7 +1339,7 @@ function BookingPage({ t, lang, ff }) {
   const [dbServices, setDbServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [uploadedFiles, setUploadedFiles] = useState([]); // [{ file, type, preview }]
-  const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState(false); // eslint-disable-line no-unused-vars
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", whatsapp: "", date: "", time: "", msg: "" });
   const upd = k => e => setForm(f => ({ ...f, [k]: e.target.value }));

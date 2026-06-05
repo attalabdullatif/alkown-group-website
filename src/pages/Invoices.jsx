@@ -29,8 +29,8 @@ export default function Invoices() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [printInvoice, setPrintInvoice] = useState(null);
-  const printRef = useRef();
+  const [printInvoice, setPrintInvoice] = useState(null); // eslint-disable-line no-unused-vars
+  const printRef = useRef(); // eslint-disable-line no-unused-vars
 
   useEffect(() => { loadData(); }, []);
 

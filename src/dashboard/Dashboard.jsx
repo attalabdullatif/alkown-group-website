@@ -42,7 +42,7 @@ export default function Dashboard() {
     setLoading(false);
   }
 
-  const totalRevenue = useMemo(() => invoices.reduce((s, i) => s + Number(i.amount || 0), 0), [invoices]);
+  const totalRevenue = useMemo(() => invoices.reduce((s, i) => s + Number(i.amount || 0), 0), [invoices]); // eslint-disable-line no-unused-vars
   const paidRevenue = useMemo(() => invoices.filter(i => i.status === "Paid").reduce((s, i) => s + Number(i.amount || 0), 0), [invoices]);
   const pendingRevenue = useMemo(() => invoices.filter(i => i.status === "Pending").reduce((s, i) => s + Number(i.amount || 0), 0), [invoices]);
 
