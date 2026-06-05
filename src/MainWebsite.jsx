@@ -77,8 +77,8 @@ const T = {
       nlPh: "Your email address", subscribe: "Subscribe",
       copy: "© 2026 Alkown Global. All rights reserved.",
       address: "Istanbul · Dubai · Aleppo",
-      phone: "+90 534 764 1249",
-      email: "info@alkowngroup.com",
+      phone: "+90 534 764 1249 | +971 54 490 9522 | +963 980 631 952",
+      email: "info@alkownglobal.com",
       social: "@alkown.global — Instagram & Facebook",
       license: "Trade License: DED-0000000"
     },
@@ -251,8 +251,8 @@ const T = {
       nlPh: "بريدك الإلكتروني", subscribe: "اشترك",
       copy: "© 2026 Alkown Global. جميع الحقوق محفوظة.",
       address: "إسطنبول · دبي · حلب",
-      phone: "+90 534 764 1249",
-      email: "info@alkowngroup.com",
+      phone: "+90 534 764 1249 | +971 54 490 9522 | +963 980 631 952",
+      email: "info@alkownglobal.com",
       social: "@alkown.global — Instagram & Facebook",
       license: "الترخيص التجاري: DED-0000000"
     },
@@ -1091,19 +1091,6 @@ function AcademyPage({ t, lang, ff, setPage }) {
 // ABOUT PAGE
 // ═══════════════════════════════════════════════════════════════
 function AboutPage({ t, lang, ff, setPage }) {
-  const team = lang === "ar"
-    ? [
-        { name: "م. خالد المنصوري", role: "المدير التنفيذي", icon: "👔" },
-        { name: "أ. فاطمة الهاشمي", role: "رئيسة العمليات", icon: "💼" },
-        { name: "م. سارة أحمد", role: "مديرة الإعلان", icon: "◈" },
-        { name: "أ. عمر الراشد", role: "مدير الأكاديمية", icon: "🎓" }
-      ]
-    : [
-        { name: "Khalid Al Mansouri", role: "Chief Executive Officer", icon: "👔" },
-        { name: "Fatima Al Hashemi", role: "Chief Operations Officer", icon: "💼" },
-        { name: "Sara Ahmed", role: "Advertising Director", icon: "◈" },
-        { name: "Omar Al Rashid", role: "Academy Director", icon: "🎓" }
-      ];
 
   return (
     <>
@@ -1123,23 +1110,6 @@ function AboutPage({ t, lang, ff, setPage }) {
               <div key={i} style={{ textAlign: "center", padding: "40px 24px", background: i % 2 === 0 ? C.beige : "#fff", borderTop: `3px solid rgba(201,168,76,.35)` }}>
                 <div className="shimmer" style={{ fontSize: "2.8rem", fontWeight: 800, fontFamily: "Georgia,serif", display: "block" }}>{v}</div>
                 <div style={{ fontSize: ".74rem", color: C.g400, letterSpacing: ".17em", textTransform: "uppercase", marginTop: 8 }}>{l}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Team */}
-          <div style={{ textAlign: "center", marginBottom: 40 }}>
-            <Label text={lang === "ar" ? "فريقنا" : "Our Team"} />
-            <h2 style={{ fontSize: "2rem", fontWeight: 300, color: C.g800, marginTop: 10 }}>{lang === "ar" ? "القيادة التنفيذية" : "Executive Leadership"}</h2>
-            <Divider />
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 18, marginBottom: 52 }}>
-            {team.map((m, i) => (
-              <div key={i} className="card" style={{ padding: "40px 28px", textAlign: "center" }}>
-                <div style={{ width: 72, height: 72, borderRadius: "50%", background: `linear-gradient(135deg,${C.gold},${C.goldLight})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem", margin: "0 auto 16px" }}>{m.icon}</div>
-                <h3 style={{ color: C.g800, fontWeight: 700, fontSize: "1rem", marginBottom: 6 }}>{m.name}</h3>
-                <div className="gl" style={{ margin: "0 auto 6px" }} />
-                <div style={{ color: C.g400, fontSize: ".78rem", letterSpacing: ".1em" }}>{m.role}</div>
               </div>
             ))}
           </div>
@@ -1224,9 +1194,32 @@ function ContactPage({ t, lang, ff }) {
 
   return (
     <>
-      <PageHero title={t.nav.contact} subtitle="alkown.global · +971 54 490 9522" />
+      <PageHero title={t.nav.contact} subtitle="www.alkownglobal.com" />
       <section style={{ padding: "80px clamp(20px,6vw,80px)", background: "#fff" }}>
-        <div style={{ maxWidth: 1140, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(30px,6vw,72px)", alignItems: "start" }}>
+        <div style={{ maxWidth: 1140, margin: "0 auto" }}>
+
+          {/* خريطة العالم مع الدبابيس */}
+          <div style={{ position: "relative", marginBottom: 64, borderRadius: 4, overflow: "hidden", border: `1px solid rgba(201,168,76,.2)` }}>
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/World_map_-_low_resolution.svg/1200px-World_map_-_low_resolution.svg.png"
+              alt="World Map"
+              style={{ width: "100%", height: 320, objectFit: "cover", objectPosition: "center", filter: "sepia(20%) saturate(80%)", display: "block" }}
+            />
+            {/* Pins */}
+            {[
+              { label: lang === "ar" ? "إسطنبول" : "Istanbul", x: "55%", y: "31%" },
+              { label: lang === "ar" ? "دبي" : "Dubai", x: "64%", y: "42%" },
+              { label: lang === "ar" ? "حلب" : "Aleppo", x: "60%", y: "35%" },
+            ].map((pin, i) => (
+              <div key={i} style={{ position: "absolute", left: pin.x, top: pin.y, transform: "translate(-50%,-100%)", textAlign: "center", zIndex: 2 }}>
+                <div style={{ fontSize: "1.6rem", lineHeight: 1, filter: "drop-shadow(0 2px 4px rgba(0,0,0,.4))" }}>📍</div>
+                <div style={{ background: "rgba(0,0,0,.75)", color: "#fff", fontSize: 11, padding: "3px 8px", borderRadius: 4, whiteSpace: "nowrap", marginTop: 2, backdropFilter: "blur(4px)" }}>{pin.label}</div>
+              </div>
+            ))}
+            <div style={{ position: "absolute", bottom: 12, right: 16, background: "rgba(0,0,0,.6)", color: C.gold, fontSize: 12, padding: "4px 12px", borderRadius: 4, fontWeight: 700, letterSpacing: 2 }}>ALKOWN GLOBAL</div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(30px,6vw,72px)", alignItems: "start" }}>
           {/* Info */}
           <div>
             <Label text={t.nav.contact} />
@@ -1234,16 +1227,27 @@ function ContactPage({ t, lang, ff }) {
             <Divider />
             <p style={{ color: C.g600, lineHeight: 2, fontSize: ".95rem", margin: "16px 0 36px" }}>{t.about.p.split(".")[0]}.</p>
 
+            {/* معلومات التواصل التفاعلية */}
             {[
-              ["📍", t.footer.address],
-              ["📞", t.footer.phone],
-              ["✉️", t.footer.email],
-              ["📸", t.footer.social],
-              ["📋", t.footer.license]
-            ].map(([ic, val], i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 0", borderBottom: `1px solid rgba(201,168,76,.1)` }}>
-                <div style={{ width: 42, height: 42, background: `rgba(201,168,76,.1)`, border: `1px solid rgba(201,168,76,.25)`, borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1rem", flexShrink: 0 }}>{ic}</div>
-                <span style={{ color: C.g600, fontSize: ".9rem" }}>{val}</span>
+              { ic: "📍", val: t.footer.address, href: null },
+              { ic: "📞", val: "+90 534 764 1249", href: "tel:+905347641249" },
+              { ic: "📞", val: "+971 54 490 9522", href: "tel:+971544909522" },
+              { ic: "📞", val: "+963 980 631 952", href: "tel:+963980631952" },
+              { ic: "✉️", val: "info@alkownglobal.com", href: "mailto:info@alkownglobal.com" },
+              { ic: "🌐", val: "www.alkownglobal.com", href: "https://www.alkownglobal.com" },
+              { ic: "📸", val: "@alkown.global", href: "https://instagram.com/alkown.global" },
+            ].map(({ ic, val, href }, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 0", borderBottom: `1px solid rgba(201,168,76,.1)` }}>
+                <div style={{ width: 40, height: 40, background: `rgba(201,168,76,.1)`, border: `1px solid rgba(201,168,76,.25)`, borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: ".95rem", flexShrink: 0 }}>{ic}</div>
+                {href ? (
+                  <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noreferrer"
+                    style={{ color: C.gold, fontSize: ".9rem", textDecoration: "none", fontWeight: 600, transition: "opacity .2s" }}
+                    onMouseEnter={e => e.target.style.opacity = ".7"}
+                    onMouseLeave={e => e.target.style.opacity = "1"}
+                  >{val}</a>
+                ) : (
+                  <span style={{ color: C.g600, fontSize: ".9rem" }}>{val}</span>
+                )}
               </div>
             ))}
           </div>
@@ -1296,6 +1300,7 @@ function ContactPage({ t, lang, ff }) {
 </button>
             </div>
           )}
+          </div>
         </div>
       </section>
     </>
@@ -1709,122 +1714,14 @@ function BookingPage({ t, lang, ff }) {
 // CLIENT DASHBOARD
 // ═══════════════════════════════════════════════════════════════
 function DashboardPage({ t, lang, ff }) {
-  const [tab, setTab] = useState("apps");
-  const dt = t.dashboard;
-
+  // تم نقل بوابة العملاء إلى /portal
+  useEffect(() => {
+    window.location.href = "/portal";
+  }, []);
   return (
-    <>
-      <PageHero title={dt.hero} subtitle="alkown.global" />
-      <section style={{ padding: "56px clamp(16px,5vw,64px)", background: C.beige, minHeight: "60vh" }}>
-        <div style={{ maxWidth: 1300, margin: "0 auto" }}>
-
-          {/* Profile bar */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#fff", border: `1px solid rgba(201,168,76,.18)`, padding: "20px 28px", marginBottom: 28, flexWrap: "wrap", gap: 14 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <div style={{ width: 52, height: 52, borderRadius: "50%", background: `linear-gradient(135deg,${C.gold},${C.goldLight})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.3rem", fontWeight: 800, color: C.g800 }}>A</div>
-              <div>
-                <div style={{ color: C.g400, fontSize: ".72rem", letterSpacing: ".14em", textTransform: "uppercase" }}>{dt.welcome}</div>
-                <div style={{ color: C.g800, fontWeight: 700, fontSize: "1rem" }}>Ahmed Al Mansouri</div>
-                <div style={{ color: C.gold, fontSize: ".72rem" }}>{dt.client}</div>
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button className="obtn" style={{ fontFamily: ff, padding: "8px 18px", fontSize: ".72rem" }}>{dt.upload}</button>
-              <button className="gbtn" style={{ fontFamily: ff, padding: "8px 18px", fontSize: ".72rem" }}>{dt.newApp}</button>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div style={{ borderBottom: `2px solid rgba(201,168,76,.14)`, marginBottom: 30 }}>
-            {Object.entries(dt.tabs).map(([k, v]) => (
-              <button key={k} className={`tab-btn ${tab === k ? "tab-active" : ""}`} style={{ fontFamily: ff, color: tab === k ? C.gold : C.g400 }} onClick={() => setTab(k)}>{v}</button>
-            ))}
-          </div>
-
-          {/* Applications */}
-          {tab === "apps" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              {dt.apps.map((app, i) => (
-                <div key={i} style={{ background: "#fff", border: `1px solid rgba(201,168,76,.16)`, padding: "26px 30px" }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 20, alignItems: "start" }}>
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10, flexWrap: "wrap" }}>
-                        <span style={{ fontSize: ".7rem", color: C.g400, letterSpacing: ".16em", fontFamily: "monospace" }}>{app.id}</span>
-                        <span style={{ padding: "3px 13px", borderRadius: 20, fontSize: ".7rem", fontWeight: 700, letterSpacing: ".1em", background: `${dt.statusColors[app.status]}18`, color: dt.statusColors[app.status] }}>
-                          {dt.statuses[app.status]}
-                        </span>
-                      </div>
-                      <h3 style={{ color: C.g800, fontWeight: 700, fontSize: "1rem", marginBottom: 6 }}>{app.service}</h3>
-                      <div style={{ fontSize: ".76rem", color: C.g400, marginBottom: 14 }}>
-                        {lang === "ar" ? "المسؤول:" : "Officer:"} <strong style={{ color: C.g600 }}>{app.officer}</strong>
-                        &nbsp;·&nbsp; {app.date}
-                      </div>
-                      {/* Progress bar */}
-                      <div style={{ width: "100%", height: 5, background: C.g100, borderRadius: 3, overflow: "hidden" }}>
-                        <div style={{ width: `${app.progress}%`, height: "100%", background: `linear-gradient(90deg,${C.gold},${C.goldLight})`, borderRadius: 3, transition: "width 1.2s ease" }} />
-                      </div>
-                      <div style={{ fontSize: ".72rem", color: C.g400, marginTop: 6 }}>
-                        {app.progress}% {lang === "ar" ? "مكتمل" : "complete"}
-                      </div>
-                    </div>
-                    <button className="obtn" style={{ fontFamily: ff, padding: "8px 18px", fontSize: ".72rem", whiteSpace: "nowrap" }}>
-                      {lang === "ar" ? "تفاصيل" : "Details"}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Documents */}
-          {tab === "docs" && (
-            <div style={{ textAlign: "center", padding: "72px 0" }}>
-              <div style={{ fontSize: "3.5rem", marginBottom: 16 }}>📁</div>
-              <p style={{ color: C.g400, marginBottom: 24 }}>{lang === "ar" ? "لا توجد مستندات بعد" : "No documents uploaded yet"}</p>
-              <button className="gbtn" style={{ fontFamily: ff }}>{dt.upload}</button>
-            </div>
-          )}
-
-          {/* Invoices */}
-          {tab === "invoices" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {dt.invoices.map((inv, i) => (
-                <div key={i} style={{ background: "#fff", border: `1px solid rgba(201,168,76,.15)`, padding: "22px 28px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-                  <div>
-                    <div style={{ fontSize: ".7rem", color: C.g400, letterSpacing: ".15em", fontFamily: "monospace", marginBottom: 4 }}>{inv.id}</div>
-                    <div style={{ color: C.g800, fontWeight: 700, fontSize: ".95rem" }}>{inv.service}</div>
-                    <div style={{ color: C.g400, fontSize: ".78rem", marginTop: 3 }}>{inv.date}</div>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                    <div style={{ fontSize: "1.1rem", fontWeight: 800, color: C.g800 }}>{inv.amount}</div>
-                    <span style={{ padding: "4px 14px", background: "rgba(39,174,96,.12)", color: "#27ae60", borderRadius: 20, fontSize: ".72rem", fontWeight: 700 }}>
-                      {lang === "ar" ? "مدفوع" : "PAID"}
-                    </span>
-                    <button className="obtn" style={{ fontFamily: ff, padding: "7px 16px", fontSize: ".7rem" }}>
-                      {lang === "ar" ? "تحميل" : "Download"}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Support */}
-          {tab === "support" && (
-            <div style={{ maxWidth: 580, margin: "0 auto" }}>
-              <div style={{ background: "#fff", border: `1px solid rgba(201,168,76,.15)`, padding: "36px" }}>
-                <h3 style={{ color: C.g800, fontWeight: 700, marginBottom: 18, fontSize: "1rem" }}>
-                  {lang === "ar" ? "تواصل مع فريق الدعم" : "Contact Support Team"}
-                </h3>
-                <textarea rows={5} placeholder={lang === "ar" ? "اكتب رسالتك هنا..." : "Write your message here..."}
-                  style={{ width: "100%", padding: "13px 16px", border: `1px solid rgba(201,168,76,.25)`, background: C.beige, borderRadius: 2, fontSize: ".9rem", color: C.g800, resize: "vertical", fontFamily: ff, transition: "all .25s" }} />
-                <button className="gbtn" style={{ marginTop: 16, fontFamily: ff }}>{lang === "ar" ? "إرسال" : "Send Message"}</button>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-    </>
+    <div style={{ textAlign: "center", padding: "80px 20px", color: "#666" }}>
+      جارٍ التوجيه لبوابة العملاء...
+    </div>
   );
 }
 
@@ -1979,10 +1876,25 @@ function Footer({ t, lang, ff, setPage }) {
           {/* Contact */}
           <div>
             <h4 style={{ color: C.gold, fontSize: ".72rem", letterSpacing: ".22em", textTransform: "uppercase", marginBottom: 20 }}>{ft.contact}</h4>
-            {[["📍", ft.address], ["📞", ft.phone], ["✉️", ft.email], ["📸", ft.social]].map(([ic, v], i) => (
+            {[
+              { ic: "📍", v: ft.address, href: null },
+              { ic: "📞", v: "+90 534 764 1249", href: "tel:+905347641249" },
+              { ic: "📞", v: "+971 54 490 9522", href: "tel:+971544909522" },
+              { ic: "📞", v: "+963 980 631 952", href: "tel:+963980631952" },
+              { ic: "✉️", v: "info@alkownglobal.com", href: "mailto:info@alkownglobal.com" },
+              { ic: "📸", v: ft.social, href: "https://instagram.com/alkown.global" },
+            ].map(({ ic, v, href }, i) => (
               <div key={i} style={{ display: "flex", gap: 10, marginBottom: 13, alignItems: "flex-start" }}>
                 <span style={{ fontSize: ".9rem", marginTop: 1 }}>{ic}</span>
-                <span style={{ fontSize: ".84rem", color: "#6a6054", lineHeight: 1.55 }}>{v}</span>
+                {href ? (
+                  <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noreferrer"
+                    style={{ fontSize: ".84rem", color: C.gold, lineHeight: 1.55, textDecoration: "none", transition: "opacity .2s" }}
+                    onMouseEnter={e => e.target.style.opacity = ".7"}
+                    onMouseLeave={e => e.target.style.opacity = "1"}
+                  >{v}</a>
+                ) : (
+                  <span style={{ fontSize: ".84rem", color: "#6a6054", lineHeight: 1.55 }}>{v}</span>
+                )}
               </div>
             ))}
           </div>

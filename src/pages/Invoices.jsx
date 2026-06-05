@@ -169,6 +169,7 @@ export default function Invoices() {
   <div class="header">
     <div>
       <div class="logo">ALKOWN GLOBAL</div>
+      <img src="/logo.png" alt="Alkown Global" style="height:48px;margin-top:8px;display:block;object-fit:contain" onerror="this.style.display='none'" />
       <div class="logo-sub" style="font-size:16px;color:#c9a84c;font-weight:700;margin-top:6px">بوابتك نحو العالم</div>
     </div>
     <div>
@@ -220,7 +221,7 @@ export default function Invoices() {
       <div class="footer-logo">ALKOWN GLOBAL</div>
       <div style="color:#c9a84c;font-size:13px;font-weight:700;margin-bottom:2px">بوابتك نحو العالم</div>
       <div>🌐 www.alkownglobal.com</div>
-      <div>✉️ info@alkowngroup.com | 📞 +90 534 764 1249</div>
+      <div>✉️ info@alkownglobal.com | 📞 +90 534 764 1249</div>
       <div>📍 إسطنبول · دبي · حلب</div>
       <div style="margin-top:8px;font-size:11px;color:#aaa">هذه الفاتورة وثيقة رسمية صادرة عن Alkown Global</div>
     </div>

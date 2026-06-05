@@ -13,6 +13,7 @@ import Requests from "./pages/Requests";
 import Invoices from "./pages/Invoices";
 import TrackRequest from "./pages/TrackRequest";
 import VerifyInvoice from "./pages/VerifyInvoice";
+import ClientPortal from "./pages/ClientPortal";
 
 function Navigation() {
   const { user, role } = useAuth();
@@ -34,6 +35,7 @@ function Navigation() {
       <LinkButton to="/requests">Requests</LinkButton>
       <LinkButton to="/invoices">Invoices</LinkButton>
       <LinkButton to="/track-request">Track Request</LinkButton>
+      <LinkButton to="/portal">بوابة العملاء</LinkButton>
       {user && (
         <button
           onClick={handleSignOut}
@@ -165,6 +167,7 @@ export default function App() {
 
         <Route path="/track-request" element={<TrackRequest />} />
         <Route path="/verify-invoice" element={<VerifyInvoice />} />
+        <Route path="/portal" element={<ClientPortal />} />
 
         <Route
           path="/login"

@@ -9,7 +9,7 @@ exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return { statusCode: 405, headers, body: JSON.stringify({ error: "Method not allowed" }) };
 
   const apiKey = process.env.RESEND_API_KEY;
-  const adminEmail = process.env.CONTACT_NOTIFY_TO || "info@alkowngroup.com";
+  const adminEmail = process.env.CONTACT_NOTIFY_TO || "info@alkownglobal.com";
   const from = process.env.CONTACT_NOTIFY_FROM || "Alkown Group <onboarding@resend.dev>";
 
   if (!apiKey) {
@@ -120,7 +120,7 @@ function baseLayout(content) {
   </style></head><body><div class="wrap">
     <div class="logo">ALKOWN GROUP</div>
     ${content}
-    <div class="footer">alkowngroup.com · info@alkowngroup.com<br>© 2026 Alkown Group. All rights reserved.</div>
+    <div class="footer">alkowngroup.com · info@alkownglobal.com<br>© 2026 Alkown Group. All rights reserved.</div>
   </div></body></html>`;
 }
 
