@@ -366,12 +366,18 @@ const T = {
 
 // ── THEME ─────────────────────────────────────────────────────
 const C = {
-  gold: "#c9a84c", goldLight: "#f0d080", goldDark: "#8a6820",
-  goldGlow: "rgba(201,168,76,0.35)",
-  cream: "#faf8f4", warmWhite: "#fffdf8", beige: "#f5f0e8",
-  g100: "#f0ece4", g200: "#e0d8cc", g400: "#7a6e5a",
-  g600: "#3d342a", g800: "#1e1810",
-  dark: "#1e1a14", darkMid: "#2a2418",
+  // ذهبي أقوى وأكثر إشراقاً
+  gold: "#c8922a", goldLight: "#f5c842", goldDark: "#8a6010",
+  goldMid: "#d4a843",
+  goldGlow: "rgba(200,146,42,0.40)",
+  // خلفيات دافئة راقية
+  cream: "#faf7f2", warmWhite: "#fffcf7", beige: "#f4ede0",
+  g100: "#ede5d8", g200: "#ddd0bc", g400: "#7a6b50",
+  g600: "#3d3020", g800: "#1e1508",
+  // داكن فاخر
+  dark: "#16100a", darkMid: "#211608",
+  // ألوان مساعدة
+  success: "#2d9c5a", error: "#c0392b", info: "#2980b9",
 };
 
 // ── HELPERS ───────────────────────────────────────────────────
@@ -381,68 +387,183 @@ const gold = (extra = "") =>
 
 // ── GLOBAL STYLES ─────────────────────────────────────────────
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Noto+Naskh Arabic:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Noto+Naskh+Arabic:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body{-webkit-font-smoothing:antialiased}
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:${C.beige}}
-::-webkit-scrollbar-thumb{background:${C.gold};border-radius:3px}
-h1,h2,h3,h4{font-weight:800;color:#2d2820}
-p{font-weight:500}
+body{-webkit-font-smoothing:antialiased;background:${C.warmWhite}}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:${C.g100}}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,${C.gold},${C.goldLight});border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:${C.gold}}
+h1,h2,h3,h4{font-weight:700;color:${C.g800};line-height:1.25}
+p{font-weight:400;line-height:1.8}
+a{transition:color .2s}
+::selection{background:${C.goldGlow};color:${C.g800}}
+
+/* ── تحسين الموبايل ── */
 @media(max-width:768px){
   nav{flex-wrap:wrap;gap:8px!important;padding:12px 16px!important}
-  h1{font-size:clamp(1.6rem,7vw,2.4rem)!important}
-  h2{font-size:clamp(1.3rem,5vw,1.9rem)!important}
-  section{padding:48px 18px!important}
-  .card{cursor:default}
+  h1{font-size:clamp(1.7rem,7vw,2.6rem)!important}
+  h2{font-size:clamp(1.3rem,5vw,2rem)!important}
+  section{padding:52px 20px!important}
   .card:hover{transform:none!important;box-shadow:none!important}
   table{font-size:.82rem}
+  .hide-mobile{display:none!important}
 }
-@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:480px){
+  .grid-2{grid-template-columns:1fr!important}
+  .grid-3{grid-template-columns:1fr!important}
+  .grid-4{grid-template-columns:1fr 1fr!important}
+}
+
+/* ── Animations ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
 @keyframes shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.4)}50%{box-shadow:0 0 0 14px rgba(201,168,76,0)}}
-@keyframes spinSlow{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-@keyframes slideRight{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 ${C.goldGlow}}70%{box-shadow:0 0 0 16px rgba(200,146,42,0)}}
 @keyframes draw{from{stroke-dashoffset:1000}to{stroke-dashoffset:0}}
-.fu{animation:fadeUp .65s cubic-bezier(.22,1,.36,1) both}
-.fu2{animation:fadeUp .65s .15s cubic-bezier(.22,1,.36,1) both}
-.fu3{animation:fadeUp .65s .3s cubic-bezier(.22,1,.36,1) both}
-.fu4{animation:fadeUp .65s .45s cubic-bezier(.22,1,.36,1) both}
-.shimmer{background:linear-gradient(90deg,${C.gold} 0%,${C.goldLight} 30%,${C.gold} 60%,${C.goldLight} 90%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s linear infinite}
-.gbtn{background:linear-gradient(135deg,${C.gold},${C.goldLight},${C.gold});color:${C.g800};border:none;padding:14px 34px;font-size:.82rem;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;border-radius:2px;font-weight:700;transition:all .3s;position:relative;overflow:hidden}
-.gbtn:hover{transform:translateY(-2px);box-shadow:0 10px 36px ${C.goldGlow};animation:pulse 1.8s infinite}
-.obtn{background:transparent;color:${C.gold};border:1.5px solid rgba(201,168,76,.45);padding:12px 30px;font-size:.82rem;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;border-radius:2px;font-weight:600;transition:all .3s}
-.obtn:hover{border-color:${C.gold};background:rgba(201,168,76,.07);transform:translateY(-2px)}
-.dbtn{background:${C.g800};color:${C.goldLight};border:none;padding:14px 34px;font-size:.82rem;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;border-radius:2px;font-weight:700;transition:all .3s}
-.dbtn:hover{background:#1e1a14;transform:translateY(-2px);box-shadow:0 10px 36px rgba(0,0,0,.25)}
-.card{background:#fff;border:1px solid rgba(201,168,76,.14);transition:all .4s cubic-bezier(.25,.46,.45,.94);cursor:pointer;position:relative;overflow:hidden}
-.card:hover{transform:translateY(-7px);box-shadow:0 24px 64px rgba(100,80,30,.13)!important;border-color:rgba(201,168,76,.3)}
-.card:hover .gl{width:56px!important}
-.gl{width:28px;height:2px;background:linear-gradient(90deg,${C.gold},${C.goldLight});transition:width .4s ease;margin-bottom:16px}
-input,textarea,select{outline:none;font-family:inherit}
-input:focus,textarea:focus,select:focus{border-color:${C.gold}!important;box-shadow:0 0 0 3px rgba(201,168,76,.12)!important}
-.tab-btn{background:transparent;border:none;cursor:pointer;padding:12px 22px;font-size:.82rem;letter-spacing:.1em;transition:all .3s;border-bottom:2px solid transparent;margin-bottom:-2px}
-.tab-active{color:${C.gold};border-bottom-color:${C.gold}!important;font-weight:700}
+@keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+
+.fu{animation:fadeUp .7s cubic-bezier(.22,1,.36,1) both}
+.fu2{animation:fadeUp .7s .12s cubic-bezier(.22,1,.36,1) both}
+.fu3{animation:fadeUp .7s .24s cubic-bezier(.22,1,.36,1) both}
+.fu4{animation:fadeUp .7s .36s cubic-bezier(.22,1,.36,1) both}
+
+/* ── Shimmer text ── */
+.shimmer{
+  background:linear-gradient(90deg,${C.goldDark} 0%,${C.goldLight} 30%,${C.gold} 55%,${C.goldLight} 80%,${C.goldDark} 100%);
+  background-size:250% auto;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:shimmer 5s linear infinite
+}
+
+/* ── أزرار رئيسية ── */
+.gbtn{
+  background:linear-gradient(135deg,${C.goldDark} 0%,${C.gold} 35%,${C.goldLight} 65%,${C.gold} 100%);
+  background-size:200% 200%;
+  color:${C.dark};
+  border:none;
+  padding:14px 36px;
+  font-size:.83rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  cursor:pointer;
+  border-radius:3px;
+  font-weight:800;
+  transition:all .35s cubic-bezier(.25,.46,.45,.94);
+  box-shadow:0 4px 18px rgba(200,146,42,.25);
+  position:relative;
+  overflow:hidden
+}
+.gbtn::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);
+  opacity:0;
+  transition:opacity .3s
+}
+.gbtn:hover{
+  transform:translateY(-3px);
+  box-shadow:0 14px 40px ${C.goldGlow};
+  background-position:right center
+}
+.gbtn:hover::after{opacity:1}
+.gbtn:active{transform:translateY(-1px)}
+
+/* ── أزرار ثانوية ── */
+.obtn{
+  background:transparent;
+  color:${C.gold};
+  border:1.5px solid rgba(200,146,42,.5);
+  padding:12px 30px;
+  font-size:.82rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  cursor:pointer;
+  border-radius:3px;
+  font-weight:600;
+  transition:all .3s
+}
+.obtn:hover{border-color:${C.gold};background:rgba(200,146,42,.08);transform:translateY(-2px);box-shadow:0 6px 20px rgba(200,146,42,.15)}
+
+/* ── أزرار داكنة ── */
+.dbtn{
+  background:${C.g800};
+  color:${C.goldLight};
+  border:none;
+  padding:14px 34px;
+  font-size:.82rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  cursor:pointer;
+  border-radius:3px;
+  font-weight:700;
+  transition:all .3s;
+  box-shadow:0 4px 16px rgba(0,0,0,.2)
+}
+.dbtn:hover{background:${C.dark};transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,.3)}
+
+/* ── بطاقات ── */
+.card{
+  background:#fff;
+  border:1px solid rgba(200,146,42,.12);
+  transition:all .4s cubic-bezier(.25,.46,.45,.94);
+  cursor:pointer;
+  position:relative;
+  overflow:hidden
+}
+.card::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:2px;
+  background:linear-gradient(90deg,transparent,${C.gold},transparent);
+  opacity:0;
+  transition:opacity .4s
+}
+.card:hover{transform:translateY(-8px);box-shadow:0 28px 72px rgba(120,90,20,.14)!important;border-color:rgba(200,146,42,.28)}
+.card:hover::before{opacity:1}
+.card:hover .gl{width:60px!important}
+
+/* ── خط ذهبي ── */
+.gl{width:28px;height:2px;background:linear-gradient(90deg,${C.gold},${C.goldLight});transition:width .45s ease;margin-bottom:16px;border-radius:2px}
+
+/* ── مدخلات ── */
+input,textarea,select{outline:none;font-family:inherit;transition:all .25s}
+input:focus,textarea:focus,select:focus{
+  border-color:${C.gold}!important;
+  box-shadow:0 0 0 4px rgba(200,146,42,.1)!important
+}
+input::placeholder,textarea::placeholder{color:${C.g400};opacity:.7}
+
+/* ── تبويبات ── */
+.tab-btn{background:transparent;border:none;cursor:pointer;padding:12px 22px;font-size:.83rem;letter-spacing:.08em;transition:all .3s;border-bottom:2px solid transparent;margin-bottom:-2px;color:${C.g400}}
+.tab-active{color:${C.gold}!important;border-bottom-color:${C.gold}!important;font-weight:700}
 .tab-btn:hover{color:${C.gold}}
+
+/* ── شريط تمييز ── */
+.gold-bar{height:3px;background:linear-gradient(90deg,${C.goldDark},${C.gold},${C.goldLight},${C.gold},${C.goldDark});background-size:200% auto;animation:shimmer 4s linear infinite}
 `;
 
 // ── LOGO ──────────────────────────────────────────────────────
-function Logo({ size = "md", dark = false }) {
+function Logo({ size = "md" }) {
   const s = { sm: [1.5, .58, .5], md: [1.9, .66, .58], lg: [3.2, .95, .82] }[size];
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", userSelect: "none" }}>
       <span style={{
-        fontSize: s[0] + "rem", fontFamily: "'Noto Naskh Arabic',serif", fontWeight: 700, lineHeight: 1,
-        background: "linear-gradient(135deg,#c9a84c 0%,#f0d080 40%,#c9a84c 72%,#a07830 100%)",
-        WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-        filter: "drop-shadow(0 2px 10px rgba(180,140,50,.45))"
+        fontSize: s[0] + "rem", fontFamily: "'Noto Naskh Arabic',serif", fontWeight: 800, lineHeight: 1,
+        background: `linear-gradient(135deg,${C.goldDark} 0%,${C.goldLight} 38%,${C.gold} 65%,${C.goldDark} 100%)`,
+        WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+        filter: "drop-shadow(0 2px 12px rgba(200,146,42,.5))"
       }}>الكون</span>
-      <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.1 }}>
-        <span style={{ fontSize: s[1] + "rem", fontFamily: "'Cormorant Garamond',serif", color: C.gold, fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase" }}>ALKOWN</span>
-        <span style={{ fontSize: s[2] + "rem", color: dark ? C.g400 : "#9a8060", letterSpacing: ".22em", fontFamily: "Georgia,serif" }}>GLOBAL</span>
+      <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.15, gap: 1 }}>
+        <span style={{ fontSize: s[1] + "rem", fontFamily: "'Cormorant Garamond',serif", color: C.gold, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase" }}>ALKOWN</span>
+        <span style={{ fontSize: s[2] + "rem", color: C.g400, letterSpacing: ".24em", fontFamily: "Georgia,serif", textTransform: "uppercase" }}>GLOBAL</span>
       </div>
     </div>
   );
@@ -451,10 +572,13 @@ function Logo({ size = "md", dark = false }) {
 // ── GOLD DIVIDER ──────────────────────────────────────────────
 function Divider() {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "14px auto", width: "fit-content" }}>
-      <div style={{ width: 36, height: 1, background: `linear-gradient(90deg,transparent,${C.gold})` }} />
-      <div style={{ width: 7, height: 7, background: C.gold, transform: "rotate(45deg)", flexShrink: 0 }} />
-      <div style={{ width: 36, height: 1, background: `linear-gradient(90deg,${C.gold},transparent)` }} />
+    <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "16px auto", width: "fit-content" }}>
+      <div style={{ width: 44, height: 1, background: `linear-gradient(90deg,transparent,${C.gold})` }} />
+      <div style={{ position: "relative", width: 8, height: 8 }}>
+        <div style={{ width: 8, height: 8, background: C.gold, transform: "rotate(45deg)" }} />
+        <div style={{ position: "absolute", inset: -3, border: `1px solid rgba(200,146,42,.3)`, transform: "rotate(45deg)" }} />
+      </div>
+      <div style={{ width: 44, height: 1, background: `linear-gradient(90deg,${C.gold},transparent)` }} />
     </div>
   );
 }
@@ -462,10 +586,10 @@ function Divider() {
 // ── SECTION LABEL ─────────────────────────────────────────────
 function Label({ text }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 6 }}>
-      <div style={{ width: 22, height: 1, background: C.gold }} />
-      <span style={{ fontSize: ".7rem", letterSpacing: ".26em", color: C.gold, textTransform: "uppercase", fontFamily: "Georgia,serif", fontWeight: 600 }}>{text}</span>
-      <div style={{ width: 22, height: 1, background: C.gold }} />
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 8 }}>
+      <div style={{ width: 28, height: 1.5, background: `linear-gradient(90deg,transparent,${C.gold})`, borderRadius: 2 }} />
+      <span style={{ fontSize: ".68rem", letterSpacing: ".28em", color: C.gold, textTransform: "uppercase", fontFamily: "'Cairo',sans-serif", fontWeight: 700 }}>{text}</span>
+      <div style={{ width: 28, height: 1.5, background: `linear-gradient(90deg,${C.gold},transparent)`, borderRadius: 2 }} />
     </div>
   );
 }
@@ -509,7 +633,7 @@ function HeroBG() {
 // MAIN APP
 // ═══════════════════════════════════════════════════════════════
 export default function AlkownGroup() {
-  const [lang, setLang] = useState("en");
+  const [lang, setLang] = useState("ar");
   const [page, setPage] = useState("home");
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false); // eslint-disable-line no-unused-vars
@@ -541,23 +665,32 @@ export default function AlkownGroup() {
     <div style={{ fontFamily: ff, direction: t.dir, background: C.warmWhite, minHeight: "100vh", overflowX: "hidden", color: C.g800 }}>
       <style>{CSS}</style>
 
+      {/* ── شريط ذهبي علوي ── */}
+      <div className="gold-bar" style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000, height: 3 }} />
+
       {/* ── NAVBAR ── */}
       <nav style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 999,
-        background: scrolled ? "rgba(255,253,248,.97)" : "transparent",
-        backdropFilter: scrolled ? "blur(24px)" : "none",
-        borderBottom: scrolled ? `1px solid rgba(201,168,76,.15)` : "none",
-        transition: "all .4s", padding: "0 clamp(16px,4vw,48px)"
+        position: "fixed", top: 3, left: 0, right: 0, zIndex: 999,
+        background: scrolled ? "rgba(255,252,245,.97)" : "transparent",
+        backdropFilter: scrolled ? "blur(28px) saturate(180%)" : "none",
+        borderBottom: scrolled ? `1px solid rgba(200,146,42,.18)` : "none",
+        boxShadow: scrolled ? "0 4px 32px rgba(120,80,10,.08)" : "none",
+        transition: "all .45s cubic-bezier(.25,.46,.45,.94)", padding: "0 clamp(16px,4vw,48px)"
       }}>
-        <div style={{ maxWidth: 1440, margin: "0 auto", height: 76, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-          <div onClick={() => setPage("home")}><Logo size="sm" /></div>
+        <div style={{ maxWidth: 1440, margin: "0 auto", height: 74, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+          <div onClick={() => setPage("home")} style={{ transition: "opacity .2s" }}
+            onMouseEnter={e => e.currentTarget.style.opacity = ".85"}
+            onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
+            <Logo size="sm" />
+          </div>
 
           {/* Desktop links */}
           <div style={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center" }}>
             {navItems.map(n => (
               <button key={n.k} onClick={() => setPage(n.k)} style={{
-                background: "transparent", border: "none", cursor: "pointer", fontFamily: ff,
-                fontSize: ".8rem", letterSpacing: ".07em", padding: "7px 11px", borderRadius: 3,
+                background: page === n.k ? "rgba(200,146,42,.08)" : "transparent",
+                border: "none", cursor: "pointer", fontFamily: ff,
+                fontSize: ".82rem", letterSpacing: ".06em", padding: "7px 13px", borderRadius: 20,
                 color: page === n.k ? C.gold : C.g600,
                 fontWeight: page === n.k ? 700 : 400,
                 transition: "color .25s"
@@ -593,7 +726,7 @@ export default function AlkownGroup() {
       </nav>
 
       {/* ── PAGES ── */}
-      <div style={{ paddingTop: 76 }}>
+      <div style={{ paddingTop: 80 }}>
         {page === "home" && <HomePage t={t} lang={lang} ff={ff} setPage={setPage} />}
         {page === "travel" && <TravelPage t={t} lang={lang} ff={ff} setPage={setPage} />}
         {page === "citizenship" && <CitizenshipPage t={t} lang={lang} ff={ff} setPage={setPage} />}
