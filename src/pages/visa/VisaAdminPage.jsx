@@ -15,7 +15,7 @@ const C = {
   beige: "#f5f0e8", warmWhite: "#fffdf8",
 };
 
-const ff = "'Tajawal','Cairo',sans-serif";
+const ff = "'Cairo','Noto Naskh Arabic',sans-serif";
 
 const VISA_TYPES_AR = {
   visa_free: "بدون تأشيرة",
