@@ -78,7 +78,7 @@ export default function TrackRequest() {
     <div style={{
       minHeight: "100vh", background: "#0a0a0a",
       display: "flex", alignItems: "center", justifyContent: "center",
-      padding: "40px 16px", fontFamily: "'Cairo', 'Segoe UI', sans-serif",
+      padding: "40px 16px", fontFamily: "'Tajawal','Cairo',sans-serif",
       direction: lang === "ar" ? "rtl" : "ltr"
     }}>
       <div style={{ width: "100%", maxWidth: 580 }}>

@@ -387,7 +387,7 @@ const gold = (extra = "") =>
 
 // ── GLOBAL STYLES ─────────────────────────────────────────────
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Noto+Naskh+Arabic:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Poppins:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{-webkit-font-smoothing:antialiased;background:${C.warmWhite}}
@@ -395,8 +395,9 @@ body{-webkit-font-smoothing:antialiased;background:${C.warmWhite}}
 ::-webkit-scrollbar-track{background:${C.g100}}
 ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,${C.gold},${C.goldLight});border-radius:4px}
 ::-webkit-scrollbar-thumb:hover{background:${C.gold}}
-h1,h2,h3,h4{font-weight:700;color:${C.g800};line-height:1.25}
-p{font-weight:400;line-height:1.8}
+h1,h2,h3,h4{font-weight:800;color:${C.g800};line-height:1.25}
+p{font-weight:400;line-height:1.9}
+strong,b{font-weight:700}
 a{transition:color .2s}
 ::selection{background:${C.goldGlow};color:${C.g800}}
 
@@ -556,14 +557,14 @@ function Logo({ size = "md" }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", userSelect: "none" }}>
       <span style={{
-        fontSize: s[0] + "rem", fontFamily: "'Noto Naskh Arabic',serif", fontWeight: 800, lineHeight: 1,
+        fontSize: s[0] + "rem", fontFamily: "'Tajawal',sans-serif", fontWeight: 900, lineHeight: 1,
         background: `linear-gradient(135deg,${C.goldDark} 0%,${C.goldLight} 38%,${C.gold} 65%,${C.goldDark} 100%)`,
         WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
         filter: "drop-shadow(0 2px 12px rgba(200,146,42,.5))"
       }}>الكون</span>
       <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.15, gap: 1 }}>
-        <span style={{ fontSize: s[1] + "rem", fontFamily: "'Cormorant Garamond',serif", color: C.gold, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase" }}>ALKOWN</span>
-        <span style={{ fontSize: s[2] + "rem", color: C.g400, letterSpacing: ".24em", fontFamily: "Georgia,serif", textTransform: "uppercase" }}>GLOBAL</span>
+        <span style={{ fontSize: s[1] + "rem", fontFamily: "'Poppins',sans-serif", color: C.gold, fontWeight: 800, letterSpacing: ".18em", textTransform: "uppercase" }}>ALKOWN</span>
+        <span style={{ fontSize: s[2] + "rem", color: C.g400, letterSpacing: ".26em", fontFamily: "'Poppins',sans-serif", fontWeight: 500, textTransform: "uppercase" }}>GLOBAL</span>
       </div>
     </div>
   );
@@ -588,7 +589,7 @@ function Label({ text }) {
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 8 }}>
       <div style={{ width: 28, height: 1.5, background: `linear-gradient(90deg,transparent,${C.gold})`, borderRadius: 2 }} />
-      <span style={{ fontSize: ".68rem", letterSpacing: ".28em", color: C.gold, textTransform: "uppercase", fontFamily: "'Cairo',sans-serif", fontWeight: 700 }}>{text}</span>
+      <span style={{ fontSize: ".68rem", letterSpacing: ".28em", color: C.gold, textTransform: "uppercase", fontFamily: "'Poppins','Tajawal',sans-serif", fontWeight: 700 }}>{text}</span>
       <div style={{ width: 28, height: 1.5, background: `linear-gradient(90deg,${C.gold},transparent)`, borderRadius: 2 }} />
     </div>
   );
@@ -651,7 +652,7 @@ export default function AlkownGroup() {
     setMobileOpen(false);
   }, [page]);
 
-  const ff = lang === "ar" ? "'Cairo','Noto Naskh Arabic',serif" : "'Cormorant Garamond',Georgia,serif";
+  const ff = lang === "ar" ? "'Tajawal','Cairo',sans-serif" : "'Poppins','Segoe UI',sans-serif";
 
   const navItems = [
     { k: "home", l: t.nav.home }, { k: "travel", l: t.nav.travel },

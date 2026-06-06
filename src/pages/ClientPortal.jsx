@@ -26,9 +26,9 @@ const STATUS_STEPS = ["New", "In Progress", "Pending Documents", "Approved", "Co
 
 // ── Styles ────────────────────────────────────────────────────
 const S = {
-  page: { minHeight: "100vh", background: BG, fontFamily: "'Cairo','Segoe UI',sans-serif", direction: "rtl", color: "#fff" },
+  page: { minHeight: "100vh", background: BG, fontFamily: "'Tajawal','Tajawal',sans-serif", direction: "rtl", color: "#fff" },
   card: { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16 },
-  input: { width: "100%", padding: "12px 16px", background: "#1a1a1a", border: `1px solid ${BORDER}`, borderRadius: 10, color: "#fff", fontSize: 15, outline: "none", boxSizing: "border-box", fontFamily: "'Cairo',sans-serif" },
+  input: { width: "100%", padding: "12px 16px", background: "#1a1a1a", border: `1px solid ${BORDER}`, borderRadius: 10, color: "#fff", fontSize: 15, outline: "none", boxSizing: "border-box", fontFamily: "'Tajawal',sans-serif" },
   btn: { background: GOLD, color: "#000", border: "none", borderRadius: 10, padding: "13px 24px", fontWeight: 700, cursor: "pointer", fontSize: 15, width: "100%" },
   ghost: { background: "transparent", color: GOLD, border: `1px solid ${GOLD}33`, borderRadius: 10, padding: "10px 20px", cursor: "pointer", fontSize: 13, fontWeight: 600 },
   tab: (active) => ({
