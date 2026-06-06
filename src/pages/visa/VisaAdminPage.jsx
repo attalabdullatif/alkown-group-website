@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../../lib/supabase";
 import { COUNTRIES } from "../../data/countries";
+import { VISA_RULES } from "../../data/visaRules";
 
 const C = {
   gold: "#c9a84c", goldLight: "#f0d080",
@@ -214,6 +215,32 @@ export default function VisaAdminPage() {
     setRules(r => r.filter(x => x.id !== id));
   };
 
+  const [importing, setImporting] = useState(false);
+  const importDefaultRules = async () => {
+    if (!window.confirm("سيتم استيراد جميع القواعد الافتراضية إلى قاعدة البيانات. هل تريد المتابعة؟")) return;
+    setImporting(true);
+    const rows = Object.values(VISA_RULES).map(r => ({
+      from_country: r.from,
+      residence: r.residence || null,
+      to_country: r.to,
+      visa_type: r.type,
+      stay_duration: r.stay || "",
+      processing_time: r.processing || "",
+      fee_amount: r.fee?.amount || 0,
+      fee_currency: r.fee?.currency || "USD",
+      fee_note_ar: r.feeAr?.note || r.fee?.note || "",
+      notes_ar: r.notes?.ar || r.notes?.en || "",
+      documents_ar: (r.documents || []).map(d => d.ar || d.en || ""),
+      is_popular: r.popular || false,
+      is_active: true,
+    }));
+    const { error } = await supabase.from("visa_rules_db").insert(rows);
+    setImporting(false);
+    if (error) return alert("خطأ: " + error.message);
+    alert(`✅ تم استيراد ${rows.length} قاعدة بنجاح`);
+    loadRules();
+  };
+
   const filteredApps = applications.filter(a =>
     !appSearch || a.full_name?.toLowerCase().includes(appSearch.toLowerCase()) ||
     a.email?.includes(appSearch) || a.phone?.includes(appSearch)
@@ -388,11 +415,26 @@ export default function VisaAdminPage() {
         {tab === "rules" && (
           <div>
             {!showRuleForm && (
-              <button
-                onClick={() => { setEditingRule(null); setShowRuleForm(true); }}
-                style={{ padding: "11px 24px", background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: "none", borderRadius: 8, cursor: "pointer", color: C.dark, fontFamily: ff, fontWeight: 700, fontSize: ".9rem", marginBottom: 20 }}>
-                ➕ إضافة قاعدة تأشيرة جديدة
-              </button>
+              <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap", alignItems: "center" }}>
+                <button
+                  onClick={() => { setEditingRule(null); setShowRuleForm(true); }}
+                  style={{ padding: "11px 24px", background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: "none", borderRadius: 8, cursor: "pointer", color: C.dark, fontFamily: ff, fontWeight: 700, fontSize: ".9rem" }}>
+                  ➕ إضافة قاعدة جديدة
+                </button>
+                {rules.length === 0 && (
+                  <button
+                    onClick={importDefaultRules}
+                    disabled={importing}
+                    style={{ padding: "11px 24px", background: "#fff", border: `1px solid rgba(201,168,76,.4)`, borderRadius: 8, cursor: importing ? "not-allowed" : "pointer", color: C.gold, fontFamily: ff, fontWeight: 700, fontSize: ".9rem", opacity: importing ? .7 : 1 }}>
+                    {importing ? "جاري الاستيراد..." : "📥 استيراد القواعد الافتراضية"}
+                  </button>
+                )}
+                {rules.length > 0 && (
+                  <span style={{ color: C.g400, fontSize: ".82rem" }}>
+                    {rules.length} قاعدة في قاعدة البيانات
+                  </span>
+                )}
+              </div>
             )}
 
             {showRuleForm && (
