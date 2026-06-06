@@ -22,10 +22,10 @@ const ff = "'Cormorant Garamond',Georgia,serif";
 function resolveSlug(slug) {
   const parts = slug?.split("-to-");
   if (!parts || parts.length < 2) return null;
-  const fromSlug = parts[0];
-  const toSlug = parts.slice(1).join("-to-");
-  const fromC = COUNTRIES.find(c => toSlug(c.name) === fromSlug);
-  const toC = COUNTRIES.find(c => toSlug(c.name) === toSlug);
+  const fromPart = parts[0];
+  const toPart = parts.slice(1).join("-to-");
+  const fromC = COUNTRIES.find(c => toSlug(c.name) === fromPart);
+  const toC = COUNTRIES.find(c => toSlug(c.name) === toPart);
   return fromC && toC ? { from: fromC, to: toC } : null;
 }
 
