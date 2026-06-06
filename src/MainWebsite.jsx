@@ -6,6 +6,9 @@ import VisaResultPage from "./pages/visa/VisaResultPage";
 import VisaApplicationPage from "./pages/visa/VisaApplicationPage";
 import VisaAdminPage from "./pages/visa/VisaAdminPage";
 import VisaTrackPage from "./pages/visa/VisaTrackPage";
+import KnowledgeCenter from "./pages/KnowledgeCenter";
+import CompanyFormation from "./pages/CompanyFormation";
+import { setSEOMeta, setStructuredData, ORGANIZATION_SCHEMA, PAGE_SEO } from "./services/seoService";
 
 /* ═══════════════════════════════════════════════════════════════
    ALKOWN GROUP — Complete Bilingual Luxury Corporate Website
@@ -19,16 +22,21 @@ const T = {
     lang: "EN",
     switchLabel: "عربي",
     nav: {
-      home: "Home", travel: "Travel & Visas", citizenship: "Citizenship",
-      advertising: "Advertising", academy: "Academy", about: "About",
-      contact: "Contact", book: "Book Consultation", dashboard: "Dashboard",
-      student: "Student Portal"
+      home: "Home", travel: "Travel & Tourism",
+      "visa-center": "Visa Center",
+      residency: "Residency Programs",
+      "company-formation": "Company Formation",
+      knowledge: "Knowledge Center",
+      about: "About Us", contact: "Contact",
+      book: "Book Consultation", dashboard: "Dashboard",
+      student: "Student Portal", citizenship: "Citizenship",
+      advertising: "Advertising", academy: "Academy",
     },
     hero: {
       badge: "Premium Global Services",
-      h1: "Your Gateway\nto the World",
-      sub: "Travel & Visas  ·  Citizenship Programs  ·  Advertising Agency  ·  Skills Academy",
-      cta1: "Book Free Consultation", cta2: "Explore Services"
+      h1: "Global Travel, Visas\n& Residency Solutions",
+      sub: "Visa Services  ·  Residency Programs  ·  Company Formation  ·  Travel & Tourism",
+      cta1: "Check Visa Requirements", cta2: "Apply Now"
     },
     about: {
       label: "Who We Are",
@@ -193,16 +201,23 @@ const T = {
     lang: "AR",
     switchLabel: "EN",
     nav: {
-      home: "الرئيسية", travel: "السفر والتأشيرات", citizenship: "برامج الجنسية",
-      advertising: "وكالة الإعلان", academy: "أكاديمية المهارات", about: "من نحن",
-      contact: "اتصل بنا", book: "احجز استشارة", dashboard: "لوحة التحكم",
-      student: "بوابة الطالب"
+      home: "الرئيسية",
+      "visa-center": "مركز التأشيرات",
+      residency: "برامج الإقامة",
+      "company-formation": "تأسيس الشركات",
+      travel: "السفر والسياحة",
+      knowledge: "مركز المعرفة",
+      about: "من نحن", contact: "تواصل معنا",
+      book: "احجز استشارة", dashboard: "لوحة التحكم",
+      student: "بوابة الطالب",
+      citizenship: "برامج الجنسية",
+      advertising: "وكالة الإعلان", academy: "أكاديمية المهارات",
     },
     hero: {
       badge: "خدمات عالمية متميزة",
-      h1: "بوابتك\nنحو العالم",
-      sub: "السفر والتأشيرات  ·  برامج الجنسية  ·  وكالة الإعلان  ·  أكاديمية المهارات",
-      cta1: "احجز استشارة مجانية", cta2: "استكشف خدماتنا"
+      h1: "تأشيرات · إقامة\nوحلول سفر عالمية",
+      sub: "مركز التأشيرات  ·  برامج الإقامة  ·  تأسيس الشركات  ·  السفر والسياحة",
+      cta1: "تحقق من تأشيرتك", cta2: "قدّم طلبك الآن"
     },
     about: {
       label: "من نحن",
@@ -653,12 +668,25 @@ export default function AlkownGroup() {
 
   const ff = lang === "ar" ? "'Cairo','Noto Naskh Arabic',serif" : "'Cormorant Garamond',Georgia,serif";
 
+  // SEO — update on page change
+  useEffect(() => {
+    const seoKey = page === "home" ? "home" : PAGE_SEO[page] ? page : null;
+    if (seoKey) {
+      const cfg = PAGE_SEO[seoKey]?.[lang] || {};
+      setSEOMeta({ ...cfg, lang, canonical: page === "home" ? "/" : `/${page}` });
+    }
+    if (page === "home") setStructuredData(ORGANIZATION_SCHEMA);
+  }, [page, lang]);
+
   const navItems = [
-    { k: "home", l: t.nav.home }, { k: "travel", l: t.nav.travel },
-    { k: "visa-center", l: lang === "ar" ? "مركز التأشيرات" : "Visa Center" },
-    { k: "citizenship", l: t.nav.citizenship }, { k: "advertising", l: t.nav.advertising },
-    { k: "academy", l: t.nav.academy }, { k: "about", l: t.nav.about },
-    { k: "contact", l: t.nav.contact }
+    { k: "home",             l: t.nav.home },
+    { k: "visa-center",      l: t.nav["visa-center"] },
+    { k: "residency",        l: t.nav.residency },
+    { k: "company-formation",l: t.nav["company-formation"] },
+    { k: "travel",           l: t.nav.travel },
+    { k: "knowledge",        l: t.nav.knowledge },
+    { k: "about",            l: t.nav.about },
+    { k: "contact",          l: t.nav.contact },
   ];
 
   return (
@@ -742,6 +770,9 @@ export default function AlkownGroup() {
         {page === "visa-apply" && <VisaApplicationPage lang={lang} ff={ff} setPage={setPage} initialParams={visaParams} />}
         {page === "visa-admin" && <VisaAdminPage ff={ff} />}
         {page === "visa-track" && <VisaTrackPage lang={lang} ff={ff} setPage={setPage} />}
+        {page === "knowledge" && <KnowledgeCenter lang={lang} ff={ff} setPage={setPage} />}
+        {page === "company-formation" && <CompanyFormation lang={lang} ff={ff} setPage={setPage} />}
+        {page === "residency" && <CitizenshipPage t={t} lang={lang} ff={ff} setPage={setPage} />}
       </div>
 
       <Footer t={t} lang={lang} ff={ff} setPage={setPage} />
@@ -801,8 +832,18 @@ function HomePage({ t, lang, ff, setPage }) {
           <p className="fu3" style={{ fontSize: "clamp(.8rem,1.8vw,.92rem)", color: C.g400, letterSpacing: ".18em", marginBottom: 44 }}>{t.hero.sub}</p>
 
           <div className="fu4" style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
-            <button className="gbtn" style={{ fontFamily: ff }} onClick={() => setPage("booking")}>{t.hero.cta1}</button>
-            <button className="obtn" style={{ fontFamily: ff }} onClick={() => document.getElementById("divisions-sec")?.scrollIntoView({ behavior: "smooth" })}>{t.hero.cta2}</button>
+            <button className="gbtn" style={{ fontFamily: ff }} onClick={() => setPage("visa-center")}>{t.hero.cta1}</button>
+            <button className="obtn" style={{ fontFamily: ff }} onClick={() => setPage("visa-apply")}>{t.hero.cta2}</button>
+          </div>
+          {/* Trust badges */}
+          <div className="fu4" style={{ display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap", marginTop: 36 }}>
+            {[
+              lang === "ar" ? "✅ خدمة موثوقة منذ 2014" : "✅ Trusted since 2014",
+              lang === "ar" ? "🌍 195+ دولة" : "🌍 195+ Countries",
+              lang === "ar" ? "⚡ نتائج خلال دقائق" : "⚡ Results in minutes",
+            ].map((b, i) => (
+              <span key={i} style={{ color: C.g400, fontSize: ".78rem", letterSpacing: ".06em" }}>{b}</span>
+            ))}
           </div>
         </div>
 
@@ -832,34 +873,61 @@ function HomePage({ t, lang, ff, setPage }) {
         </div>
       </section>
 
+      {/* ── MINI VISA CHECKER ── */}
+      <section style={{ padding: "0 clamp(20px,6vw,80px)", background: C.warmWhite }}>
+        <div style={{ maxWidth: 900, margin: "0 auto", background: `linear-gradient(135deg, ${C.dark}, ${C.darkMid})`, borderRadius: 16, padding: "36px 40px", border: `1px solid rgba(201,168,76,.2)`, boxShadow: "0 20px 60px rgba(0,0,0,.15)", transform: "translateY(-32px)" }}>
+          <div style={{ textAlign: "center", marginBottom: 20 }}>
+            <span style={{ color: C.gold, fontSize: ".72rem", letterSpacing: ".2em", textTransform: "uppercase", fontWeight: 700 }}>🔍 {lang === "ar" ? "تحقق من تأشيرتك فوراً" : "Instant Visa Check"}</span>
+          </div>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ color: "rgba(255,255,255,.5)", fontSize: ".88rem", flex: 1, minWidth: 200, textAlign: "center", padding: "14px", background: "rgba(255,255,255,.06)", borderRadius: 8, border: "1px solid rgba(201,168,76,.2)", cursor: "pointer" }}
+              onClick={() => setPage("visa-center")}>
+              {lang === "ar" ? "🌍 اختر جنسيتك..." : "🌍 Select nationality..."}
+            </div>
+            <div style={{ color: "rgba(255,255,255,.3)", fontSize: "1.2rem" }}>→</div>
+            <div style={{ color: "rgba(255,255,255,.5)", fontSize: ".88rem", flex: 1, minWidth: 200, textAlign: "center", padding: "14px", background: "rgba(255,255,255,.06)", borderRadius: 8, border: "1px solid rgba(201,168,76,.2)", cursor: "pointer" }}
+              onClick={() => setPage("visa-center")}>
+              {lang === "ar" ? "✈️ اختر وجهتك..." : "✈️ Select destination..."}
+            </div>
+            <button onClick={() => setPage("visa-center")} style={{
+              padding: "14px 28px", background: `linear-gradient(135deg, ${C.goldDark}, ${C.gold})`,
+              border: "none", borderRadius: 8, cursor: "pointer", color: C.dark, fontFamily: ff, fontWeight: 800, fontSize: ".88rem", whiteSpace: "nowrap",
+            }}>
+              {lang === "ar" ? "فحص التأشيرة ←" : "Check Visa →"}
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* ── DIVISIONS ── */}
-      <section id="divisions-sec" style={{ padding: "96px clamp(20px,6vw,80px)", background: "#fff" }}>
+      <section id="divisions-sec" style={{ padding: "64px clamp(20px,6vw,80px) 96px", background: "#fff" }}>
         <div style={{ maxWidth: 1340, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 60 }}>
-            <Label text={t.divisions.label} />
-            <h2 style={{ fontSize: "clamp(1.8rem,4vw,3rem)", fontWeight: 300, color: C.g800, marginTop: 10 }}>{t.divisions.h2}</h2>
+          <div style={{ textAlign: "center", marginBottom: 52 }}>
+            <Label text={lang === "ar" ? "خدماتنا الرئيسية" : "Our Core Services"} />
+            <h2 style={{ fontSize: "clamp(1.8rem,4vw,2.8rem)", fontWeight: 700, color: C.g800, marginTop: 10 }}>
+              {lang === "ar" ? "كل ما تحتاجه في مكان واحد" : "Everything You Need in One Place"}
+            </h2>
             <Divider />
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(276px,1fr))", gap: 22 }}>
-            {t.divisions.cards.map((card, i) => {
-              const pages = ["travel", "citizenship", "advertising", "academy"];
-              return (
-                <div key={i} className="card" onClick={() => setPage(pages[i])} style={{ padding: "46px 38px" }}>
-                  {/* corner */}
-                  <div style={{ position: "absolute", top: 0, [lang === "ar" ? "left" : "right"]: 0, width: 52, height: 52, borderTop: `1px solid rgba(201,168,76,.35)`, [lang === "ar" ? "borderLeft" : "borderRight"]: `1px solid rgba(201,168,76,.35)` }} />
-                  <div style={{ fontSize: "2.4rem", marginBottom: 18 }}>{card.icon}</div>
-                  <div style={{ fontSize: ".68rem", letterSpacing: ".2em", color: C.gold, textTransform: "uppercase", marginBottom: 6 }}>{card.sub}</div>
-                  <h3 style={{ fontSize: "1.25rem", fontWeight: 700, color: C.g800, marginBottom: 10 }}>{card.title}</h3>
-                  <div className="gl" />
-                  <p style={{ color: C.g600, fontSize: ".87rem", lineHeight: 1.85, marginBottom: 26 }}>{card.desc}</p>
-                  <div style={{ display: "flex", alignItems: "center", gap: 7, color: C.gold, fontSize: ".76rem", letterSpacing: ".16em", textTransform: "uppercase", fontWeight: 700 }}>
-                    {lang === "ar" ? <span style={{ fontSize: "1rem" }}>←</span> : null}
-                    <span>{card.cta}</span>
-                    {lang === "ar" ? null : <span style={{ fontSize: "1rem" }}>→</span>}
-                  </div>
+            {[
+              { icon: "🛂", titleAr: "خدمات التأشيرة", titleEn: "Visa Services", subAr: "مركز التأشيرات", subEn: "Visa Center", descAr: "فحص فوري لمتطلبات التأشيرة · تقديم الطلبات · تتبع الحالة · دعم 195+ دولة", descEn: "Instant visa check · Application filing · Status tracking · 195+ countries", page: "visa-center" },
+              { icon: "🏠", titleAr: "برامج الإقامة", titleEn: "Residency Programs", subAr: "الإقامة والجنسية", subEn: "Residency & Citizenship", descAr: "جنسية ثانية · إقامة بالاستثمار · الفيزا الذهبية · برامج أوروبية", descEn: "Second passport · Residency by investment · Golden Visa · European programs", page: "residency" },
+              { icon: "🏢", titleAr: "تأسيس الشركات", titleEn: "Company Formation", subAr: "الإمارات وتركيا والعالم", subEn: "UAE, Turkey & Globally", descAr: "تسجيل شركات · ترخيص كامل · حساب بنكي · فيزا المستثمر · خدمة PRO", descEn: "Company registration · Full licensing · Bank account · Investor visa · PRO services", page: "company-formation" },
+              { icon: "✈️", titleAr: "السفر والسياحة", titleEn: "Travel & Tourism", subAr: "رحلات VIP", subEn: "VIP Travel Services", descAr: "حجز تذاكر وفنادق · رحلات منظمة فاخرة · خدمات مطار VIP · تأمين سفر", descEn: "Flights & hotels · Luxury tours · VIP airport services · Travel insurance", page: "travel" },
+            ].map((svc, i) => (
+              <div key={i} className="card" onClick={() => setPage(svc.page)} style={{ padding: "40px 34px" }}>
+                <div style={{ position: "absolute", top: 0, [lang === "ar" ? "left" : "right"]: 0, width: 52, height: 52, borderTop: `1px solid rgba(201,168,76,.35)`, [lang === "ar" ? "borderLeft" : "borderRight"]: `1px solid rgba(201,168,76,.35)` }} />
+                <div style={{ fontSize: "2.4rem", marginBottom: 18 }}>{svc.icon}</div>
+                <div style={{ fontSize: ".68rem", letterSpacing: ".2em", color: C.gold, textTransform: "uppercase", marginBottom: 6 }}>{lang === "ar" ? svc.subAr : svc.subEn}</div>
+                <h3 style={{ fontSize: "1.2rem", fontWeight: 700, color: C.g800, marginBottom: 10 }}>{lang === "ar" ? svc.titleAr : svc.titleEn}</h3>
+                <div className="gl" />
+                <p style={{ color: C.g600, fontSize: ".87rem", lineHeight: 1.85, marginBottom: 26 }}>{lang === "ar" ? svc.descAr : svc.descEn}</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 7, color: C.gold, fontSize: ".78rem", fontWeight: 700 }}>
+                  <span>{lang === "ar" ? "اكتشف المزيد ←" : "Explore →"}</span>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       </section>
