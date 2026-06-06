@@ -80,7 +80,7 @@ export default function VisaResultPage({ params, lang, ff, setPage, setVisaParam
     <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", background: C.warmWhite, padding: "40px 24px" }}>
       <div style={{ textAlign: "center", maxWidth: 500 }}>
         <div style={{ fontSize: "3.5rem", marginBottom: 20 }}>🔍</div>
-        <h2 style={{ fontWeight: 300, color: C.g800, marginBottom: 12, fontFamily: ff }}>
+        <h2 style={{ fontWeight: 800, color: C.g800, marginBottom: 12, fontFamily: ff }}>
           {ar ? "لا توجد بيانات لهذا المسار" : "No Data Found for This Route"}
         </h2>
         <p style={{ color: C.g400, lineHeight: 1.7, marginBottom: 28, fontFamily: ff }}>
@@ -148,7 +148,7 @@ export default function VisaResultPage({ params, lang, ff, setPage, setVisaParam
                 {resC && <div style={{ color: C.gold, fontSize: ".8rem" }}>{ar ? `مقيم في ${resC.nameAr}` : `Residing in ${resC.name}`}</div>}
               </div>
             </div>
-            <div style={{ color: C.gold, fontSize: "2rem", fontWeight: 300 }}>→</div>
+            <div style={{ color: C.gold, fontSize: "2rem", fontWeight: 800 }}>→</div>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <span style={{ fontSize: "3rem" }}>{toC?.flag}</span>
               <div>

@@ -823,7 +823,7 @@ function HomePage({ t, lang, ff, setPage }) {
           <div className="fu2"><Divider /></div>
 
           <h1 className="fu3" style={{
-            fontSize: "clamp(2.6rem,6.5vw,5.4rem)", fontWeight: 300, color: C.g800,
+            fontSize: "clamp(2.6rem,6.5vw,5.4rem)", fontWeight: 800, color: C.g800,
             lineHeight: 1.12, margin: "18px 0 14px", letterSpacing: lang === "ar" ? ".02em" : "-.025em",
             whiteSpace: "pre-line"
           }}>{t.hero.h1}</h1>
@@ -856,7 +856,7 @@ function HomePage({ t, lang, ff, setPage }) {
         <div style={{ maxWidth: 1220, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 60 }}>
             <Label text={t.about.label} />
-            <h2 style={{ fontSize: "clamp(1.8rem,4vw,3rem)", fontWeight: 300, color: C.g800, marginTop: 10, whiteSpace: "pre-line", lineHeight: 1.25 }}>{t.about.h2}</h2>
+            <h2 style={{ fontSize: "clamp(1.8rem,4vw,3rem)", fontWeight: 800, color: C.g800, marginTop: 10, whiteSpace: "pre-line", lineHeight: 1.25 }}>{t.about.h2}</h2>
             <Divider />
             <p style={{ maxWidth: 680, margin: "16px auto 0", color: C.g600, lineHeight: 2, fontSize: "1rem" }}>{t.about.p}</p>
           </div>
@@ -941,7 +941,7 @@ function HomePage({ t, lang, ff, setPage }) {
         <div style={{ maxWidth: 1260, margin: "0 auto", position: "relative" }}>
           <div style={{ textAlign: "center", marginBottom: 60 }}>
             <Label text={t.why.label} />
-            <h2 style={{ fontSize: "clamp(1.8rem,4vw,3rem)", fontWeight: 300, color: C.beige, marginTop: 10 }}>{t.why.h2}</h2>
+            <h2 style={{ fontSize: "clamp(1.8rem,4vw,3rem)", fontWeight: 800, color: C.beige, marginTop: 10 }}>{t.why.h2}</h2>
             <Divider />
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 3 }}>
@@ -960,7 +960,7 @@ function HomePage({ t, lang, ff, setPage }) {
       <section style={{ padding: "96px clamp(20px,6vw,80px)", background: C.warmWhite }}>
         <div style={{ maxWidth: 860, margin: "0 auto", textAlign: "center" }}>
           <Label text={t.testimonials.label} />
-          <h2 style={{ fontSize: "clamp(1.8rem,4vw,3rem)", fontWeight: 300, color: C.g800, marginTop: 10 }}>{t.testimonials.h2}</h2>
+          <h2 style={{ fontSize: "clamp(1.8rem,4vw,3rem)", fontWeight: 800, color: C.g800, marginTop: 10 }}>{t.testimonials.h2}</h2>
           <Divider />
 
           <div style={{ marginTop: 48, position: "relative" }} key={tIdx}>
@@ -1090,7 +1090,7 @@ function PageHero({ title, subtitle, children }) {
           className="fu"
           style={{
             fontSize: "clamp(2.4rem,5vw,4.8rem)",
-            fontWeight: 300,
+            fontWeight: 800,
             color: C.beige,
             lineHeight: 1.15,
             marginBottom: "18px",
@@ -1312,7 +1312,7 @@ function AboutPage({ t, lang, ff, setPage }) {
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
             <Label text={t.about.label} />
-            <h2 style={{ fontSize: "clamp(1.8rem,4vw,3rem)", fontWeight: 300, color: C.g800, marginTop: 10, whiteSpace: "pre-line", lineHeight: 1.25 }}>{t.about.h2}</h2>
+            <h2 style={{ fontSize: "clamp(1.8rem,4vw,3rem)", fontWeight: 800, color: C.g800, marginTop: 10, whiteSpace: "pre-line", lineHeight: 1.25 }}>{t.about.h2}</h2>
             <Divider />
             <p style={{ maxWidth: 700, margin: "18px auto 0", color: C.g600, lineHeight: 2, fontSize: "1rem" }}>{t.about.p}</p>
           </div>
@@ -1480,7 +1480,7 @@ function ContactPage({ t, lang, ff }) {
           {/* Info */}
           <div>
             <Label text={t.nav.contact} />
-            <h2 style={{ fontSize: "clamp(1.6rem,3.5vw,2.4rem)", fontWeight: 300, color: C.g800, marginTop: 10, marginBottom: 8 }}>{t.about.h2.split("\n")[0]}</h2>
+            <h2 style={{ fontSize: "clamp(1.6rem,3.5vw,2.4rem)", fontWeight: 800, color: C.g800, marginTop: 10, marginBottom: 8 }}>{t.about.h2.split("\n")[0]}</h2>
             <Divider />
             <p style={{ color: C.g600, lineHeight: 2, fontSize: ".95rem", margin: "16px 0 36px" }}>{t.about.p.split(".")[0]}.</p>
 
@@ -1530,7 +1530,7 @@ function ContactPage({ t, lang, ff }) {
           {sent ? (
             <div style={{ textAlign: "center", padding: "60px 0" }}>
               <div style={{ fontSize: "3.5rem", marginBottom: 16, color: C.gold }}>✓</div>
-              <h3 style={{ color: C.g800, fontSize: "1.5rem", fontWeight: 300, marginBottom: 10 }}>
+              <h3 style={{ color: C.g800, fontSize: "1.5rem", fontWeight: 800, marginBottom: 10 }}>
                 {lang === "ar" ? "تم إرسال رسالتك!" : "Message Sent!"}
               </h3>
               <p style={{ color: C.g400, marginBottom: 24 }}>{lang === "ar" ? "سنتواصل معك في أقرب وقت" : "We'll get back to you soon"}</p>
@@ -1726,7 +1726,7 @@ function BookingPage({ t, lang, ff }) {
           <div style={{ maxWidth: 600, margin: "0 auto" }}>
             <div style={{ textAlign: "center", marginBottom: 36 }}>
               <div style={{ width: 72, height: 72, borderRadius: "50%", background: `linear-gradient(135deg,${C.gold},${C.goldLight})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem", margin: "0 auto 20px" }}>✓</div>
-              <h2 style={{ color: C.g800, fontSize: "1.8rem", fontWeight: 300, marginBottom: 8 }}>{t.booking.success}</h2>
+              <h2 style={{ color: C.g800, fontSize: "1.8rem", fontWeight: 800, marginBottom: 8 }}>{t.booking.success}</h2>
               <p style={{ color: C.g400 }}>{t.booking.successSub}</p>
             </div>
 

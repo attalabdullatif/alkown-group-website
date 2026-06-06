@@ -164,7 +164,7 @@ export default function VisaCenterPage({ lang, ff, setPage, setVisaParams }) {
 
           {/* Headline */}
           <h1 style={{
-            fontSize: "clamp(2.2rem,6vw,4.5rem)", fontWeight: 300, color: "#fff",
+            fontSize: "clamp(2.2rem,6vw,4.5rem)", fontWeight: 800, color: "#fff",
             lineHeight: 1.1, marginBottom: 20, letterSpacing: "-.02em",
           }}>
             {ar ? "اعرف تأشيرتك\n" : "Know Your Visa\n"}
@@ -229,7 +229,7 @@ export default function VisaCenterPage({ lang, ff, setPage, setVisaParams }) {
             { n: "98%", l: ar ? "دقة البيانات" : "Data Accuracy" },
           ].map((s, i) => (
             <div key={i} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "clamp(1.6rem,4vw,2.4rem)", fontWeight: 300, color: C.gold }}>{s.n}</div>
+              <div style={{ fontSize: "clamp(1.6rem,4vw,2.4rem)", fontWeight: 800, color: C.gold }}>{s.n}</div>
               <div style={{ fontSize: ".75rem", color: "rgba(255,255,255,.4)", letterSpacing: ".12em", textTransform: "uppercase" }}>{s.l}</div>
             </div>
           ))}
@@ -245,7 +245,7 @@ export default function VisaCenterPage({ lang, ff, setPage, setVisaParams }) {
                 {ar ? "المسارات الشائعة" : "Popular Routes"}
               </span>
             </div>
-            <h2 style={{ fontSize: "clamp(1.6rem,3vw,2.4rem)", fontWeight: 300, color: C.g800, marginBottom: 12 }}>
+            <h2 style={{ fontSize: "clamp(1.6rem,3vw,2.4rem)", fontWeight: 800, color: C.g800, marginBottom: 12 }}>
               {ar ? "مسارات يبحث عنها عملاؤنا" : "Routes Our Clients Search Most"}
             </h2>
           </div>
@@ -299,7 +299,7 @@ export default function VisaCenterPage({ lang, ff, setPage, setVisaParams }) {
       {/* ── WHY ALKOWN ────────────────────────────────────────── */}
       <section style={{ padding: "80px clamp(20px,6vw,80px)", background: C.dark }}>
         <div style={{ maxWidth: 1140, margin: "0 auto", textAlign: "center" }}>
-          <h2 style={{ fontSize: "clamp(1.6rem,3vw,2.4rem)", fontWeight: 300, color: "#fff", marginBottom: 52 }}>
+          <h2 style={{ fontSize: "clamp(1.6rem,3vw,2.4rem)", fontWeight: 800, color: "#fff", marginBottom: 52 }}>
             {ar ? "لماذا مركز التأشيرات من الكون؟" : "Why ALKOWN Visa Center?"}
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: 24 }}>

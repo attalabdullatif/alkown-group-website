@@ -64,7 +64,7 @@ export default function VisaRoutePage() {
     <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: ff }}>
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: "3rem", marginBottom: 16 }}>🔍</div>
-        <h2 style={{ fontWeight: 300, color: C.g800, marginBottom: 16 }}>Page Not Found</h2>
+        <h2 style={{ fontWeight: 800, color: C.g800, marginBottom: 16 }}>Page Not Found</h2>
         <button onClick={() => navigate("/")} style={{ padding: "10px 24px", background: C.gold, color: C.dark, border: "none", borderRadius: 6, cursor: "pointer", fontFamily: ff }}>
           Back to Visa Center
         </button>
@@ -109,7 +109,7 @@ export default function VisaRoutePage() {
             <div style={{ color: C.gold, fontSize: "2rem" }}>→</div>
             <span style={{ fontSize: "4rem" }}>{resolved.to.flag}</span>
             <div style={{ flex: 1 }}>
-              <h1 style={{ color: "#fff", fontWeight: 300, fontSize: "clamp(1.4rem,3vw,2.4rem)", marginBottom: 6 }}>
+              <h1 style={{ color: "#fff", fontWeight: 800, fontSize: "clamp(1.4rem,3vw,2.4rem)", marginBottom: 6 }}>
                 {resolved.from.name} to {resolved.to.name} Visa
               </h1>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>

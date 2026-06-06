@@ -81,7 +81,7 @@ export default function VisaTrackPage({ lang, ff, setPage }) {
       <div style={{ background: `linear-gradient(135deg, ${C.dark}, ${C.darkMid})`, padding: "56px clamp(20px,6vw,80px)" }}>
         <div style={{ maxWidth: 640, margin: "0 auto", textAlign: "center" }}>
           <div style={{ fontSize: "2.5rem", marginBottom: 16 }}>🛂</div>
-          <h1 style={{ color: "#fff", fontWeight: 300, fontSize: "clamp(1.6rem,3vw,2.4rem)", marginBottom: 10 }}>
+          <h1 style={{ color: "#fff", fontWeight: 800, fontSize: "clamp(1.6rem,3vw,2.4rem)", marginBottom: 10 }}>
             {ar ? "تتبع طلب التأشيرة" : "Track Your Visa Application"}
           </h1>
           <p style={{ color: "rgba(255,255,255,.5)", fontSize: ".9rem" }}>

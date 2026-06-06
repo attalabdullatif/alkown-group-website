@@ -99,7 +99,7 @@ export default function VisaApplicationPage({ lang, ff, setPage, initialParams }
     <div style={{ minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center", background: C.warmWhite, padding: 40, fontFamily: ff }}>
       <div style={{ textAlign: "center", maxWidth: 520 }}>
         <div style={{ width: 80, height: 80, borderRadius: "50%", background: "rgba(39,174,96,.1)", border: "2px solid #27ae60", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2.5rem", margin: "0 auto 24px" }}>✓</div>
-        <h2 style={{ fontWeight: 300, color: C.g800, marginBottom: 12, fontSize: "1.8rem" }}>
+        <h2 style={{ fontWeight: 800, color: C.g800, marginBottom: 12, fontSize: "1.8rem" }}>
           {ar ? "تم استلام طلبك!" : "Application Received!"}
         </h2>
         <div style={{ background: "rgba(201,168,76,.08)", border: `1px solid rgba(201,168,76,.2)`, borderRadius: 8, padding: "12px 20px", marginBottom: 20 }}>
@@ -138,7 +138,7 @@ export default function VisaApplicationPage({ lang, ff, setPage, initialParams }
               ← {ar ? "مركز التأشيرات" : "Visa Center"}
             </button>
           </div>
-          <h1 style={{ color: "#fff", fontWeight: 300, fontSize: "clamp(1.6rem,3vw,2.4rem)", marginBottom: 8 }}>
+          <h1 style={{ color: "#fff", fontWeight: 800, fontSize: "clamp(1.6rem,3vw,2.4rem)", marginBottom: 8 }}>
             {ar ? "طلب تأشيرة" : "Visa Application"}
           </h1>
           <p style={{ color: "rgba(255,255,255,.5)", fontSize: ".9rem" }}>
