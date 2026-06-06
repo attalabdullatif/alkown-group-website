@@ -209,6 +209,13 @@ export default function VisaAdminPage() {
     if (selectedApp?.id === id) setSelectedApp(a => ({ ...a, status }));
   };
 
+  const deleteApp = async (id) => {
+    if (!window.confirm("هل تريد حذف هذا الطلب نهائياً؟ لا يمكن التراجع عن هذا الإجراء.")) return;
+    await supabase.from("visa_applications").delete().eq("id", id);
+    setApplications(apps => apps.filter(a => a.id !== id));
+    if (selectedApp?.id === id) setSelectedApp(null);
+  };
+
   const deleteRule = async (id) => {
     if (!window.confirm("هل تريد حذف هذه القاعدة؟")) return;
     await supabase.from("visa_rules_db").delete().eq("id", id);
@@ -354,10 +361,18 @@ export default function VisaAdminPage() {
                               </span>
                             </td>
                             <td style={{ padding: "12px 14px" }} onClick={e => e.stopPropagation()}>
-                              <select value={app.status || "new"} onChange={e => updateAppStatus(app.id, e.target.value)}
-                                style={{ padding: "5px 8px", border: `1px solid rgba(201,168,76,.25)`, borderRadius: 4, background: "#fff", color: C.g800, fontSize: ".78rem", cursor: "pointer", fontFamily: ff }}>
-                                {Object.entries(STATUS_AR).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                              </select>
+                              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                                <select value={app.status || "new"} onChange={e => updateAppStatus(app.id, e.target.value)}
+                                  style={{ padding: "5px 8px", border: `1px solid rgba(201,168,76,.25)`, borderRadius: 4, background: "#fff", color: C.g800, fontSize: ".78rem", cursor: "pointer", fontFamily: ff }}>
+                                  {Object.entries(STATUS_AR).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                                </select>
+                                <button
+                                  onClick={() => deleteApp(app.id)}
+                                  title="حذف الطلب"
+                                  style={{ padding: "5px 8px", background: "rgba(192,57,43,.1)", border: "1px solid rgba(192,57,43,.25)", borderRadius: 4, cursor: "pointer", color: "#c0392b", fontSize: ".85rem", lineHeight: 1 }}>
+                                  🗑
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -406,6 +421,11 @@ export default function VisaAdminPage() {
                     ✉️ إيميل
                   </a>
                 </div>
+                <button
+                  onClick={() => deleteApp(selectedApp.id)}
+                  style={{ width: "100%", marginTop: 10, padding: "10px", background: "rgba(192,57,43,.08)", border: "1px solid rgba(192,57,43,.2)", borderRadius: 8, cursor: "pointer", color: "#c0392b", fontFamily: ff, fontWeight: 600, fontSize: ".82rem" }}>
+                  🗑 حذف هذا الطلب
+                </button>
               </div>
             )}
           </div>
