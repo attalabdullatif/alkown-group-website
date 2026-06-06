@@ -497,27 +497,215 @@ export default function VisaAdminPage() {
         )}
 
         {/* ═══ تبويب الدول ═══ */}
-        {tab === "countries" && (
-          <div>
-            <div style={{ background: "rgba(201,168,76,.06)", border: `1px solid rgba(201,168,76,.2)`, borderRadius: 8, padding: "14px 18px", marginBottom: 20 }}>
-              <p style={{ color: C.g600, fontSize: ".85rem" }}>
-                💡 قائمة الدول محفوظة في ملف <code style={{ color: C.gold }}>src/data/countries.js</code>. يمكنك إضافة دول جديدة من الملف مباشرة.
-              </p>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 10 }}>
-              {COUNTRIES.map(c => (
-                <div key={c.code} style={{ background: "#fff", border: `1px solid rgba(201,168,76,.1)`, borderRadius: 8, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ fontSize: "1.4rem" }}>{c.flag}</span>
-                  <div>
-                    <div style={{ color: C.g800, fontSize: ".88rem", fontWeight: 600 }}>{c.nameAr}</div>
-                    <div style={{ color: C.g400, fontSize: ".75rem" }}>{c.name} · {c.code}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {tab === "countries" && <CountriesManager />}
+
       </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// مكوّن إدارة الدول الكاملة
+// ══════════════════════════════════════════════════════════════
+const REGIONS_AR = ["الشرق الأوسط", "أوروبا", "الأمريكتان", "آسيا", "أفريقيا", "أوقيانوسيا", "أخرى"];
+
+function CountriesManager() {
+  const [countries, setCountries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [importing, setImporting] = useState(false);
+  const [search, setSearch] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(null);
+
+  const emptyForm = { code: "", name_en: "", name_ar: "", flag: "", region: "الشرق الأوسط", is_active: true };
+  const [form, setForm] = useState(emptyForm);
+  const upd = k => e => setForm(f => ({ ...f, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value }));
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const { data } = await supabase.from("countries_db").select("*").order("name_ar");
+    setCountries(data || []);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  // استيراد الدول الافتراضية
+  const importDefaults = async () => {
+    if (!window.confirm("سيتم استيراد جميع الدول الافتراضية. هل تريد المتابعة؟")) return;
+    setImporting(true);
+    const regionMap = { "Middle East": "الشرق الأوسط", "Europe": "أوروبا", "Americas": "الأمريكتان", "Asia": "آسيا", "Africa": "أفريقيا", "Oceania": "أوقيانوسيا" };
+    const rows = COUNTRIES.map(c => ({
+      code: c.code, name_en: c.name, name_ar: c.nameAr,
+      flag: c.flag, region: regionMap[c.region] || "أخرى", is_active: true,
+    }));
+    const { error } = await supabase.from("countries_db").upsert(rows, { onConflict: "code" });
+    setImporting(false);
+    if (error) return alert("خطأ: " + error.message);
+    alert(`✅ تم استيراد ${rows.length} دولة بنجاح`);
+    load();
+  };
+
+  const openAdd = () => { setEditing(null); setForm(emptyForm); setShowForm(true); };
+  const openEdit = (c) => { setEditing(c); setForm({ code: c.code, name_en: c.name_en, name_ar: c.name_ar, flag: c.flag || "", region: c.region || "أخرى", is_active: c.is_active }); setShowForm(true); window.scrollTo({ top: 0, behavior: "smooth" }); };
+
+  const save = async () => {
+    if (!form.code || !form.name_ar || !form.name_en) return alert("الرمز والاسم بالعربي والإنجليزي مطلوبة");
+    setSaving(true);
+    let error;
+    if (editing) {
+      ({ error } = await supabase.from("countries_db").update(form).eq("id", editing.id));
+    } else {
+      ({ error } = await supabase.from("countries_db").insert([form]));
+    }
+    setSaving(false);
+    if (error) return alert("خطأ: " + error.message);
+    setShowForm(false); setEditing(null); load();
+  };
+
+  const toggleActive = async (c) => {
+    await supabase.from("countries_db").update({ is_active: !c.is_active }).eq("id", c.id);
+    setCountries(cs => cs.map(x => x.id === c.id ? { ...x, is_active: !x.is_active } : x));
+  };
+
+  const deleteCountry = async (id) => {
+    if (!window.confirm("هل تريد حذف هذه الدولة؟")) return;
+    setDeleting(id);
+    await supabase.from("countries_db").delete().eq("id", id);
+    setCountries(cs => cs.filter(c => c.id !== id));
+    setDeleting(null);
+  };
+
+  const filtered = countries.filter(c =>
+    !search || c.name_ar?.includes(search) || c.name_en?.toLowerCase().includes(search.toLowerCase()) || c.code?.includes(search.toUpperCase())
+  );
+
+  return (
+    <div>
+      {/* نموذج الإضافة/التعديل */}
+      {showForm && (
+        <div style={{ background: "#fff", border: `1px solid rgba(201,168,76,.2)`, borderRadius: 12, padding: 28, marginBottom: 24 }}>
+          <h3 style={{ color: C.g800, marginBottom: 20, fontSize: "1rem", fontFamily: ff }}>
+            {editing ? "✏️ تعديل دولة" : "➕ إضافة دولة جديدة"}
+          </h3>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 14 }}>
+            <Field label="رمز الدولة (ISO) *">
+              <input value={form.code} onChange={upd("code")} placeholder="مثال: SY" maxLength={2}
+                style={{ ...inp, textTransform: "uppercase", fontWeight: 700, letterSpacing: ".1em" }}
+                disabled={!!editing} />
+            </Field>
+            <Field label="الاسم بالعربي *">
+              <input value={form.name_ar} onChange={upd("name_ar")} placeholder="مثال: سوريا" style={inp} />
+            </Field>
+            <Field label="الاسم بالإنجليزي *">
+              <input value={form.name_en} onChange={upd("name_en")} placeholder="مثال: Syria" style={inp} />
+            </Field>
+            <Field label="العلم (emoji)">
+              <input value={form.flag} onChange={upd("flag")} placeholder="مثال: 🇸🇾" style={{ ...inp, fontSize: "1.4rem" }} />
+            </Field>
+            <Field label="المنطقة">
+              <select value={form.region} onChange={upd("region")} style={inp}>
+                {REGIONS_AR.map(r => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </Field>
+          </div>
+          <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: C.g600, fontSize: ".9rem", marginBottom: 20, fontFamily: ff }}>
+            <input type="checkbox" checked={form.is_active} onChange={upd("is_active")} style={{ accentColor: C.gold }} />
+            مفعّلة (تظهر في القوائم)
+          </label>
+          <div style={{ display: "flex", gap: 12 }}>
+            <button onClick={save} disabled={saving}
+              style={{ padding: "11px 28px", background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: "none", borderRadius: 6, cursor: saving ? "not-allowed" : "pointer", color: C.dark, fontFamily: ff, fontWeight: 700, opacity: saving ? .7 : 1 }}>
+              {saving ? "جاري الحفظ..." : "💾 حفظ"}
+            </button>
+            <button onClick={() => { setShowForm(false); setEditing(null); }}
+              style={{ padding: "11px 22px", background: "#fff", border: `1px solid rgba(201,168,76,.3)`, borderRadius: 6, cursor: "pointer", color: C.g600, fontFamily: ff }}>
+              إلغاء
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* شريط الأدوات */}
+      <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap", alignItems: "center" }}>
+        <button onClick={openAdd}
+          style={{ padding: "10px 22px", background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, border: "none", borderRadius: 8, cursor: "pointer", color: C.dark, fontFamily: ff, fontWeight: 700, fontSize: ".9rem" }}>
+          ➕ إضافة دولة
+        </button>
+        {countries.length === 0 && (
+          <button onClick={importDefaults} disabled={importing}
+            style={{ padding: "10px 22px", background: "#fff", border: `1px solid rgba(201,168,76,.4)`, borderRadius: 8, cursor: importing ? "not-allowed" : "pointer", color: C.gold, fontFamily: ff, fontWeight: 700, fontSize: ".9rem", opacity: importing ? .7 : 1 }}>
+            {importing ? "جاري الاستيراد..." : "📥 استيراد الدول الافتراضية"}
+          </button>
+        )}
+        <input value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="ابحث عن دولة..."
+          style={{ ...inp, maxWidth: 260 }} />
+        <span style={{ color: C.g400, fontSize: ".82rem", marginRight: "auto" }}>
+          {filtered.length} دولة
+        </span>
+      </div>
+
+      {/* الجدول */}
+      {loading ? (
+        <div style={{ textAlign: "center", padding: 60, color: C.g400, fontFamily: ff }}>جاري التحميل...</div>
+      ) : filtered.length === 0 ? (
+        <div style={{ textAlign: "center", padding: 60 }}>
+          <div style={{ fontSize: "3rem", marginBottom: 12 }}>🌍</div>
+          <p style={{ color: C.g400, fontFamily: ff }}>
+            {countries.length === 0 ? "لا توجد دول. اضغط \"استيراد الدول الافتراضية\" لإضافتها دفعةً واحدة." : "لا توجد نتائج للبحث."}
+          </p>
+        </div>
+      ) : (
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: ".88rem", fontFamily: ff }}>
+            <thead>
+              <tr style={{ background: C.beige }}>
+                {["العلم", "الاسم بالعربي", "الاسم بالإنجليزي", "الرمز", "المنطقة", "الحالة", "إجراءات"].map(h => (
+                  <th key={h} style={{ padding: "11px 14px", textAlign: "right", color: C.g400, fontSize: ".72rem", letterSpacing: ".08em", fontWeight: 700 }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(c => (
+                <tr key={c.id} style={{ borderBottom: `1px solid rgba(201,168,76,.07)` }}
+                  onMouseEnter={e => e.currentTarget.style.background = "rgba(201,168,76,.03)"}
+                  onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                  <td style={{ padding: "10px 14px", fontSize: "1.5rem" }}>{c.flag}</td>
+                  <td style={{ padding: "10px 14px", color: C.g800, fontWeight: 600 }}>{c.name_ar}</td>
+                  <td style={{ padding: "10px 14px", color: C.g600 }}>{c.name_en}</td>
+                  <td style={{ padding: "10px 14px" }}>
+                    <span style={{ background: C.beige, color: C.gold, padding: "2px 10px", borderRadius: 20, fontSize: ".8rem", fontWeight: 700 }}>{c.code}</span>
+                  </td>
+                  <td style={{ padding: "10px 14px", color: C.g400, fontSize: ".82rem" }}>{c.region}</td>
+                  <td style={{ padding: "10px 14px" }}>
+                    <button onClick={() => toggleActive(c)}
+                      style={{ padding: "3px 12px", borderRadius: 20, border: "none", cursor: "pointer", fontSize: ".75rem", fontWeight: 700, fontFamily: ff,
+                        background: c.is_active ? "rgba(39,174,96,.12)" : "rgba(192,57,43,.1)",
+                        color: c.is_active ? "#27ae60" : "#c0392b" }}>
+                      {c.is_active ? "✓ مفعّلة" : "✗ معطّلة"}
+                    </button>
+                  </td>
+                  <td style={{ padding: "10px 14px" }}>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button onClick={() => openEdit(c)}
+                        style={{ padding: "5px 12px", background: "rgba(201,168,76,.1)", border: `1px solid rgba(201,168,76,.25)`, borderRadius: 6, cursor: "pointer", color: C.gold, fontSize: ".8rem", fontFamily: ff }}>
+                        ✏️ تعديل
+                      </button>
+                      <button onClick={() => deleteCountry(c.id)} disabled={deleting === c.id}
+                        style={{ padding: "5px 10px", background: "rgba(192,57,43,.08)", border: "1px solid rgba(192,57,43,.2)", borderRadius: 6, cursor: "pointer", color: "#c0392b", fontSize: ".8rem", opacity: deleting === c.id ? .5 : 1 }}>
+                        🗑
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
