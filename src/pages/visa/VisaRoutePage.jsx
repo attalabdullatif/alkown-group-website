@@ -16,7 +16,7 @@ const C = {
   dark: "#1e1a14", darkMid: "#2a2418",
 };
 
-const ff = "'Cormorant Garamond',Georgia,serif";
+const ff = "'Playfair Display',Georgia,serif";
 
 // Match slug like "syria-to-uae" → { from: "SY", to: "AE" }
 function resolveSlug(slug) {

@@ -402,7 +402,7 @@ const gold = (extra = "") =>
 
 // ── GLOBAL STYLES ─────────────────────────────────────────────
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Noto+Naskh+Arabic:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&family=Cairo:wght@400;600;700;800;900&family=Noto+Naskh+Arabic:wght@400;500;600;700;800&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{-webkit-font-smoothing:antialiased;background:${C.warmWhite}}
@@ -410,7 +410,8 @@ body{-webkit-font-smoothing:antialiased;background:${C.warmWhite}}
 ::-webkit-scrollbar-track{background:${C.g100}}
 ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,${C.gold},${C.goldLight});border-radius:4px}
 ::-webkit-scrollbar-thumb:hover{background:${C.gold}}
-h1,h2,h3,h4{font-weight:700;color:${C.g800};line-height:1.25}
+h1,h2,h3,h4{font-weight:900;color:${C.g800};line-height:1.2}
+button{font-weight:700}
 p{font-weight:400;line-height:1.8}
 a{transition:color .2s}
 ::selection{background:${C.goldGlow};color:${C.g800}}
@@ -577,8 +578,8 @@ function Logo({ size = "md" }) {
         filter: "drop-shadow(0 2px 12px rgba(200,146,42,.5))"
       }}>الكون</span>
       <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.15, gap: 1 }}>
-        <span style={{ fontSize: s[1] + "rem", fontFamily: "'Cormorant Garamond',serif", color: C.gold, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase" }}>ALKOWN</span>
-        <span style={{ fontSize: s[2] + "rem", color: C.g400, letterSpacing: ".24em", fontFamily: "Georgia,serif", textTransform: "uppercase" }}>GLOBAL</span>
+        <span style={{ fontSize: s[1] + "rem", fontFamily: "'Playfair Display',Georgia,serif", color: C.gold, fontWeight: 800, letterSpacing: ".18em", textTransform: "uppercase" }}>ALKOWN</span>
+        <span style={{ fontSize: s[2] + "rem", color: C.g400, letterSpacing: ".28em", fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 700, textTransform: "uppercase" }}>GLOBAL</span>
       </div>
     </div>
   );
@@ -666,7 +667,7 @@ export default function AlkownGroup() {
     setMobileOpen(false);
   }, [page]);
 
-  const ff = lang === "ar" ? "'Cairo','Noto Naskh Arabic',serif" : "'Cormorant Garamond',Georgia,serif";
+  const ff = lang === "ar" ? "'Cairo','Noto Naskh Arabic',sans-serif" : "'Playfair Display',Georgia,serif";
 
   // SEO — update on page change
   useEffect(() => {
@@ -683,8 +684,6 @@ export default function AlkownGroup() {
     { k: "visa-center",      l: t.nav["visa-center"] },
     { k: "residency",        l: t.nav.residency },
     { k: "company-formation",l: t.nav["company-formation"] },
-    { k: "travel",           l: t.nav.travel },
-    { k: "knowledge",        l: t.nav.knowledge },
     { k: "about",            l: t.nav.about },
     { k: "contact",          l: t.nav.contact },
   ];
