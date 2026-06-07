@@ -185,7 +185,7 @@ export default function CompanyFormation({ lang, ff, setPage }) {
         : "Company formation services in UAE, Turkey & UK. Full licensing, bank account, and investor residency.",
       lang, canonical:"/company-formation",
     });
-  }, [ar]);
+  }, [ar, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div style={{ fontFamily:ff, direction:ar?"rtl":"ltr" }}>
