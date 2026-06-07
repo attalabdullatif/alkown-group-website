@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useContent } from "./context/ContentContext";
 import { supabase } from "./lib/supabase";
 import { createRequestForClient, findOrCreateClient, sendContactNotification } from "./lib/crm";
 import VisaCenterPage from "./pages/visa/VisaCenterPage";
 import VisaResultPage from "./pages/visa/VisaResultPage";
 import VisaApplicationPage from "./pages/visa/VisaApplicationPage";
-import VisaAdminPage from "./pages/visa/VisaAdminPage";
+import VisaAdminIntelligencePage from "./pages/visa/VisaAdminIntelligence";
 import VisaTrackPage from "./pages/visa/VisaTrackPage";
 import KnowledgeCenter from "./pages/KnowledgeCenter";
 import CompanyFormation from "./pages/CompanyFormation";
@@ -215,8 +216,8 @@ const T = {
     },
     hero: {
       badge: "خدمات عالمية متميزة",
-      h1: "تأشيرات · إقامة\nوحلول سفر عالمية",
-      sub: "مركز التأشيرات  ·  برامج الإقامة  ·  تأسيس الشركات  ·  السفر والسياحة",
+      h1: "بوابتك\nنحو العالم",
+      sub: "السفر والتأشيرات  ·  برامج الجنسية  ·  وكالة الإعلان  ·  أكاديمية المهارات",
       cta1: "تحقق من تأشيرتك", cta2: "قدّم طلبك الآن"
     },
     about: {
@@ -400,9 +401,23 @@ const C = {
 const gold = (extra = "") =>
   `background:linear-gradient(135deg,${C.gold} 0%,${C.goldLight} 45%,${C.gold} 100%);${extra}`;
 
-// ── GLOBAL STYLES ─────────────────────────────────────────────
-const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&family=Cairo:wght@400;600;700;800;900&family=Noto+Naskh+Arabic:wght@400;500;600;700;800&display=swap');
+// ── Helper: hex → r,g,b ───────────────────────────────────────
+const hexRgb = (hex="") => {
+  const h=hex.replace("#","");
+  if(h.length!==6)return"200,146,42";
+  return `${parseInt(h.slice(0,2),16)},${parseInt(h.slice(2,4),16)},${parseInt(h.slice(4,6),16)}`;
+};
+
+// ── GLOBAL STYLES (function so colors/fonts are dynamic) ──────
+const buildCSS = (C, ff) => `
+@font-face {
+  font-family: 'Dubai';
+  src: url('/fonts/DUBAI-BOLD.TTF') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&family=Cairo:wght@300;400;600;700;800;900&family=Noto+Naskh+Arabic:wght@400;500;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{-webkit-font-smoothing:antialiased;background:${C.warmWhite}}
@@ -410,15 +425,20 @@ body{-webkit-font-smoothing:antialiased;background:${C.warmWhite}}
 ::-webkit-scrollbar-track{background:${C.g100}}
 ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,${C.gold},${C.goldLight});border-radius:4px}
 ::-webkit-scrollbar-thumb:hover{background:${C.gold}}
-h1,h2,h3,h4{font-weight:900;color:${C.g800};line-height:1.2}
+h1,h2,h3,h4{font-weight:800;color:${C.g800};line-height:1.2}
 button{font-weight:700}
 p{font-weight:400;line-height:1.8}
 a{transition:color .2s}
 ::selection{background:${C.goldGlow};color:${C.g800}}
 
 /* ── تحسين الموبايل ── */
-@media(max-width:768px){
-  nav{flex-wrap:wrap;gap:8px!important;padding:12px 16px!important}
+.nav-desktop{display:flex}
+.nav-hamburger{display:none}
+.mob-overlay{display:none}
+@media(max-width:860px){
+  .nav-desktop{display:none!important}
+  .nav-hamburger{display:flex!important}
+  .mob-overlay{display:block}
   h1{font-size:clamp(1.7rem,7vw,2.6rem)!important}
   h2{font-size:clamp(1.3rem,5vw,2rem)!important}
   section{padding:52px 20px!important}
@@ -431,6 +451,7 @@ a{transition:color .2s}
   .grid-3{grid-template-columns:1fr!important}
   .grid-4{grid-template-columns:1fr 1fr!important}
 }
+@keyframes slideDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
 
 /* ── Animations ── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
@@ -567,19 +588,20 @@ input::placeholder,textarea::placeholder{color:${C.g400};opacity:.7}
 `;
 
 // ── LOGO ──────────────────────────────────────────────────────
+// (buildCSS is now a function — called inside AlkownGroup with dynamic values)
 function Logo({ size = "md" }) {
   const s = { sm: [1.5, .58, .5], md: [1.9, .66, .58], lg: [3.2, .95, .82] }[size];
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", userSelect: "none" }}>
       <span style={{
-        fontSize: s[0] + "rem", fontFamily: "'Noto Naskh Arabic',serif", fontWeight: 800, lineHeight: 1,
+        fontSize: s[0] + "rem", fontFamily: "'Dubai','Cairo',sans-serif", fontWeight: 700, lineHeight: 1,
         background: `linear-gradient(135deg,${C.goldDark} 0%,${C.goldLight} 38%,${C.gold} 65%,${C.goldDark} 100%)`,
         WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
         filter: "drop-shadow(0 2px 12px rgba(200,146,42,.5))"
       }}>الكون</span>
       <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.15, gap: 1 }}>
-        <span style={{ fontSize: s[1] + "rem", fontFamily: "'Playfair Display',Georgia,serif", color: C.gold, fontWeight: 800, letterSpacing: ".18em", textTransform: "uppercase" }}>ALKOWN</span>
-        <span style={{ fontSize: s[2] + "rem", color: C.g400, letterSpacing: ".28em", fontFamily: "'Playfair Display',Georgia,serif", fontWeight: 700, textTransform: "uppercase" }}>GLOBAL</span>
+        <span style={{ fontSize: s[1] + "rem", fontFamily: "'Cormorant Garamond','Playfair Display',Georgia,serif", color: C.gold, fontWeight: 700, letterSpacing: ".22em", textTransform: "uppercase" }}>ALKOWN</span>
+        <span style={{ fontSize: s[2] + "rem", color: C.g400, letterSpacing: ".30em", fontFamily: "'Cormorant Garamond','Playfair Display',Georgia,serif", fontWeight: 400, textTransform: "uppercase" }}>GLOBAL</span>
       </div>
     </div>
   );
@@ -652,9 +674,237 @@ export default function AlkownGroup() {
   const [lang, setLang] = useState("ar");
   const [page, setPage] = useState("home");
   const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false); // eslint-disable-line no-unused-vars
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [visaParams, setVisaParams] = useState(null);
-  const t = T[lang];
+  const { get: cGet, getSection } = useContent();
+  const g = (sec, key) => cGet(sec, key, lang);
+
+  // ── ألوان وخطوط ديناميكية من قاعدة البيانات ──────────────────
+  const dynGold      = cGet("colors","primary","ar")      || C.gold;
+  const dynGoldLight = cGet("colors","primary_light","ar") || C.goldLight;
+  const dynDark      = cGet("colors","dark_bg","ar")       || C.dark;
+  const dynG800      = cGet("colors","text_main","ar")     || C.g800;
+  const dynG400      = cGet("colors","text_sub","ar")      || C.g400;
+  const dynBgWarm    = cGet("colors","bg_warm","ar")       || C.warmWhite;
+  const dynFontAr    = cGet("typography","font_arabic","ar") || "Dubai";
+  const dynFontEn    = cGet("typography","font_english","ar") || "Dubai";
+  const dynFf        = `'Dubai','${dynFontAr}','Cairo','Noto Naskh Arabic',sans-serif`;
+  const dynSizeHero  = cGet("typography","size_hero","ar")    || "clamp(2.8rem,6vw,5.5rem)";
+  const dynSizeSec   = cGet("typography","size_section","ar") || "clamp(1.8rem,4vw,3rem)";
+
+  const DC = useMemo(() => ({
+    ...C,
+    gold:      dynGold,
+    goldLight: dynGoldLight,
+    goldDark:  dynGold,
+    goldMid:   dynGoldLight,
+    goldGlow:  `rgba(${hexRgb(dynGold)},0.40)`,
+    dark:      dynDark,
+    darkMid:   dynDark,
+    g800:      dynG800,
+    g400:      dynG400,
+    warmWhite: dynBgWarm,
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [dynGold,dynGoldLight,dynDark,dynG800,dynG400,dynBgWarm]);
+
+  const dynamicCSS = useMemo(
+    () => buildCSS(DC, dynFf),
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  [dynGold,dynGoldLight,dynDark,dynG800,dynG400,dynBgWarm,dynFf]);
+
+  // Merge DB cards with T[] defaults — DB wins per index, extras appended
+  const mergeCards = (section, prefix, defaults) => {
+    const sec = getSection(section, "ar"); // JSON has both langs
+    const dbKeys = Object.keys(sec)
+      .filter(k => k.startsWith(prefix + "_"))
+      .sort((a,b)=>(parseInt(a.split("_").pop())||0)-(parseInt(b.split("_").pop())||0));
+    if (!dbKeys.length) return null; // no DB data → use hardcoded T
+    // Build map: index → raw JSON
+    const dbMap = {};
+    dbKeys.forEach(k => { const n=parseInt(k.split("_").pop()); if(n) dbMap[n]=sec[k]; });
+    const maxN = Math.max(...dbKeys.map(k=>parseInt(k.split("_").pop())||0), defaults.length);
+    const result = [];
+    for (let i = 1; i <= maxN; i++) {
+      const def = defaults[i-1] || defaults[0];
+      if (dbMap[i]) result.push(dbMap[i]); // raw JSON string
+      else if (i <= defaults.length) result.push(null); // use T default
+      // skip if beyond defaults and no DB key
+    }
+    return result; // array of (raw JSON string | null for T-default)
+  };
+
+  // Parse JSON card from DB, merge with default
+  const parseCard = (raw, def) => {
+    if (!raw) return def;
+    try {
+      const d = JSON.parse(raw);
+      const l = lang;
+      return {
+        ...def,
+        icon:     d.icon           || def.icon,
+        title:    d[`title_${l}`]  || def.title,
+        sub:      d[`sub_${l}`]    || def.sub,
+        desc:     d[`desc_${l}`]   || def.desc,
+        cta:      def.cta,
+        bg_color: d.bg_color       || "",
+        bg_image: d.bg_image       || "",
+      };
+    } catch { return def; }
+  };
+  const parseSvc = (raw, def) => {
+    if (!raw) return def;
+    try {
+      const d = JSON.parse(raw);
+      const l = lang;
+      return { ...def, icon: d.icon||def.icon, title: d[`title_${l}`]||def.title, desc: d[`desc_${l}`]||def.desc,
+        bg_color: d.bg_color||"", bg_image: d.bg_image||"" };
+    } catch { return def; }
+  };
+  const parseCourse = (raw, def) => {
+    if (!raw) return def;
+    try {
+      const d = JSON.parse(raw);
+      const l = lang;
+      return { ...def, icon: d.icon||def.icon, title: d[`title_${l}`]||def.title, level: d[`level_${l}`]||def.level,
+        weeks: d.weeks||def.weeks, cert: d.cert??def.cert, bg_color: d.bg_color||"", bg_image: d.bg_image||"" };
+    } catch { return def; }
+  };
+
+  const t = {
+    ...T[lang],
+    nav: {
+      ...T[lang].nav,
+      home:               g("nav","home")         || T[lang].nav.home,
+      "visa-center":      g("nav","visa_center")  || T[lang].nav["visa-center"],
+      residency:          g("nav","residency")    || T[lang].nav.residency,
+      "company-formation":g("nav","company")      || T[lang].nav["company-formation"],
+      travel:             g("nav","travel")       || T[lang].nav.travel,
+      knowledge:          g("nav","knowledge")    || T[lang].nav.knowledge,
+      about:              g("nav","about")        || T[lang].nav.about,
+      contact:            g("nav","contact")      || T[lang].nav.contact,
+      book:               g("nav","book_btn")     || T[lang].nav.book,
+      dashboard:          g("nav","dashboard")    || T[lang].nav.dashboard,
+      citizenship:        g("nav","citizenship")  || T[lang].nav.citizenship,
+      advertising:        g("nav","advertising")  || T[lang].nav.advertising,
+      academy:            g("nav","academy")      || T[lang].nav.academy,
+    },
+    hero: {
+      ...T[lang].hero,
+      badge: g("hero","badge")       || T[lang].hero.badge,
+      h1: (() => { const l1=g("hero","title_line1"), l2=g("hero","title_line2"); return (l1&&l2)?`${l1}\n${l2}`:T[lang].hero.h1; })(),
+      sub:   g("hero","subtitle")    || T[lang].hero.sub,
+      cta1:  g("hero","cta1")        || T[lang].hero.cta1,
+      cta2:  g("hero","cta2")        || T[lang].hero.cta2,
+      trust1:g("hero","trust1")      || T[lang].hero.trust1,
+      trust2:g("hero","trust2")      || T[lang].hero.trust2,
+      trust3:g("hero","trust3")      || T[lang].hero.trust3,
+    },
+    about: {
+      ...T[lang].about,
+      label:  g("about","label")       || T[lang].about.label,
+      h2:     g("about","title")       || T[lang].about.h2,
+      p:      g("about","description") || T[lang].about.p,
+      stat1v: g("about","stat1_value") || T[lang].about.stat1v,
+      stat1l: g("about","stat1_label") || T[lang].about.stat1l,
+      stat2v: g("about","stat2_value") || T[lang].about.stat2v,
+      stat2l: g("about","stat2_label") || T[lang].about.stat2l,
+      stat3v: g("about","stat3_value") || T[lang].about.stat3v,
+      stat3l: g("about","stat3_label") || T[lang].about.stat3l,
+      stat4v: g("about","stat4_value") || T[lang].about.stat4v,
+      stat4l: g("about","stat4_label") || T[lang].about.stat4l,
+    },
+    divisions: {
+      ...T[lang].divisions,
+      label: g("divisions","label") || T[lang].divisions.label,
+      h2:    g("divisions","title") || T[lang].divisions.h2,
+      cards: (() => {
+        const merged = mergeCards("divisions","card",T[lang].divisions.cards);
+        if (!merged) return T[lang].divisions.cards;
+        return merged.map((raw,i) => raw ? parseCard(raw, T[lang].divisions.cards[i]||T[lang].divisions.cards[0]) : (T[lang].divisions.cards[i]||T[lang].divisions.cards[0]));
+      })(),
+    },
+    travel: {
+      ...T[lang].travel,
+      hero:    g("travel","hero_title") || T[lang].travel.hero,
+      heroSub: g("travel","hero_sub")   || T[lang].travel.heroSub,
+      intro:   g("travel","intro")      || T[lang].travel.intro,
+      services: (() => {
+        const merged = mergeCards("travel","service",T[lang].travel.services);
+        if (!merged) return T[lang].travel.services;
+        return merged.map((raw,i) => raw ? parseSvc(raw, T[lang].travel.services[i]||T[lang].travel.services[0]) : (T[lang].travel.services[i]||T[lang].travel.services[0]));
+      })(),
+    },
+    citizenship: {
+      ...T[lang].citizenship,
+      programs: (() => {
+        const merged = mergeCards("citizenship","program",T[lang].citizenship.programs);
+        if (!merged) return T[lang].citizenship.programs;
+        return merged.map((raw,i) => {
+          const def = T[lang].citizenship.programs[i]||T[lang].citizenship.programs[0];
+          if (!raw) return def;
+          try {
+            const d = JSON.parse(raw);
+            return {...def,flag:d.flag||def.flag,name:d[`name_${lang}`]||def.name,type:d[`type_${lang}`]||def.type,min:d.min||def.min,time:d.time||def.time};
+          } catch { return def; }
+        });
+      })(),
+    },
+    advertising: {
+      ...T[lang].advertising,
+      hero:    g("advertising","hero_title") || T[lang].advertising.hero,
+      heroSub: g("advertising","hero_sub")   || T[lang].advertising.heroSub,
+      intro:   g("advertising","intro")      || T[lang].advertising.intro,
+      services: (() => {
+        const merged = mergeCards("advertising","service",T[lang].advertising.services);
+        if (!merged) return T[lang].advertising.services;
+        return merged.map((raw,i) => raw ? parseSvc(raw, T[lang].advertising.services[i]||T[lang].advertising.services[0]) : (T[lang].advertising.services[i]||T[lang].advertising.services[0]));
+      })(),
+    },
+    academy: {
+      ...T[lang].academy,
+      hero:    g("academy","hero_title") || T[lang].academy.hero,
+      heroSub: g("academy","hero_sub")   || T[lang].academy.heroSub,
+      intro:   g("academy","intro")      || T[lang].academy.intro,
+      courses: (() => {
+        const merged = mergeCards("academy","course",T[lang].academy.courses);
+        if (!merged) return T[lang].academy.courses;
+        return merged.map((raw,i) => raw ? parseCourse(raw, T[lang].academy.courses[i]||T[lang].academy.courses[0]) : (T[lang].academy.courses[i]||T[lang].academy.courses[0]));
+      })(),
+    },
+    cta: {
+      ...T[lang].cta,
+      h2:   g("cta","title")    || T[lang].cta.h2,
+      sub:  g("cta","subtitle") || T[lang].cta.sub,
+      btn1: g("cta","btn1")     || T[lang].cta.btn1,
+      btn2: g("cta","btn2")     || T[lang].cta.btn2,
+    },
+    why: {
+      ...T[lang].why,
+      label: g("why","label") || T[lang].why.label,
+      h2:    g("why","title") || T[lang].why.h2,
+      items: T[lang].why.items.map((def,i) => ({
+        ...def,
+        icon:  g("why",`item${i+1}_icon`)  || def.icon,
+        title: g("why",`item${i+1}_title`) || def.title,
+        desc:  g("why",`item${i+1}_desc`)  || def.desc,
+      })),
+    },
+    footer: {
+      ...T[lang].footer,
+      tagline:   g("footer","tagline")          || T[lang].footer.tagline,
+      copy:      g("footer","copyright")        || T[lang].footer.copy,
+      address:   g("contact","address")         || T[lang].footer.address,
+      email:     g("contact","email")           || T[lang].footer.email,
+      newsletter: g("footer","newsletter_title")|| T[lang].footer.newsletter,
+      nlSub:     g("footer","newsletter_sub")   || T[lang].footer.nlSub,
+      nlPh:      g("footer","newsletter_ph")    || T[lang].footer.nlPh,
+      subscribe: g("footer","subscribe_btn")    || T[lang].footer.subscribe,
+      qlinks:    g("footer","quick_links_title")|| T[lang].footer.qlinks,
+      services:  g("footer","services_title")   || T[lang].footer.services,
+      contact:   g("footer","contact_title")    || T[lang].footer.contact,
+      phone: (() => { const p1=g("contact","phone1"),p2=g("contact","phone2"),p3=g("contact","phone3"); return (p1&&p2&&p3)?`${p1} | ${p2} | ${p3}`:T[lang].footer.phone; })(),
+    },
+  };
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 55);
@@ -667,7 +917,7 @@ export default function AlkownGroup() {
     setMobileOpen(false);
   }, [page]);
 
-  const ff = lang === "ar" ? "'Cairo','Noto Naskh Arabic',sans-serif" : "'Playfair Display',Georgia,serif";
+  const ff = lang === "ar" ? dynFf : `'${dynFontEn}',Georgia,serif`;
 
   // SEO — update on page change
   useEffect(() => {
@@ -690,7 +940,21 @@ export default function AlkownGroup() {
 
   return (
     <div style={{ fontFamily: ff, direction: t.dir, background: C.warmWhite, minHeight: "100vh", overflowX: "hidden", color: C.g800 }}>
-      <style>{CSS}</style>
+      {/* Dynamic Google Fonts import */}
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=${encodeURIComponent(dynFontAr).replace(/%20/g,"+")}:wght@400;600;700;800;900&family=${encodeURIComponent(dynFontEn).replace(/%20/g,"+")}&display=swap');`}</style>
+      <style>{dynamicCSS}</style>
+      <style>{`:root{
+        --gold:${DC.gold};--goldL:${DC.goldLight};--goldD:${DC.goldDark};
+        --dark:${DC.dark};--g800:${DC.g800};--g600:${C.g600};--g400:${DC.g400};
+        --bgWarm:${DC.warmWhite};
+        --ff:'Dubai','${dynFontAr}','Noto Naskh Arabic',sans-serif;
+        --ffEn:'Dubai','${dynFontEn}',sans-serif;
+        --sizeHero:${dynSizeHero};
+        --sizeSec:${dynSizeSec};
+      }
+      *{font-family:var(--ff)!important}
+      body{background:var(--bgWarm)!important}
+      `}</style>
 
       {/* ── شريط ذهبي علوي ── */}
       <div className="gold-bar" style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000, height: 3 }} />
@@ -712,15 +976,14 @@ export default function AlkownGroup() {
           </div>
 
           {/* Desktop links */}
-          <div style={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center" }}>
+          <div className="nav-desktop" style={{ gap: 2, flexWrap: "wrap", alignItems: "center" }}>
             {navItems.map(n => (
               <button key={n.k} onClick={() => setPage(n.k)} style={{
                 background: page === n.k ? "rgba(200,146,42,.08)" : "transparent",
                 border: "none", cursor: "pointer", fontFamily: ff,
                 fontSize: ".82rem", letterSpacing: ".06em", padding: "7px 13px", borderRadius: 20,
                 color: page === n.k ? C.gold : C.g600,
-                fontWeight: page === n.k ? 700 : 400,
-                transition: "color .25s"
+                fontWeight: page === n.k ? 700 : 400, transition: "color .25s"
               }}
                 onMouseEnter={e => e.target.style.color = C.gold}
                 onMouseLeave={e => e.target.style.color = page === n.k ? C.gold : C.g600}
@@ -728,8 +991,8 @@ export default function AlkownGroup() {
             ))}
           </div>
 
-          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            {/* Dashboard link */}
+          {/* Desktop actions */}
+          <div className="nav-desktop" style={{ gap: 10, alignItems: "center" }}>
             <button onClick={() => setPage("dashboard")} style={{
               background: "transparent", border: `1px solid rgba(201,168,76,.3)`, cursor: "pointer",
               fontFamily: ff, fontSize: ".75rem", letterSpacing: ".1em", padding: "6px 12px",
@@ -738,19 +1001,81 @@ export default function AlkownGroup() {
               onMouseEnter={e => { e.target.style.color = C.gold; e.target.style.borderColor = C.gold; }}
               onMouseLeave={e => { e.target.style.color = C.g400; e.target.style.borderColor = "rgba(201,168,76,.3)"; }}
             >{t.nav.dashboard}</button>
-
             <button onClick={() => setLang(lang === "en" ? "ar" : "en")} style={{
               background: "transparent", border: `1px solid rgba(201,168,76,.38)`,
               color: C.gold, padding: "6px 14px", fontSize: ".73rem", letterSpacing: ".1em",
               cursor: "pointer", borderRadius: 2, fontFamily: ff, transition: "all .3s", fontWeight: 700
             }}>{t.switchLabel}</button>
-
             <button className="gbtn" style={{ padding: "9px 20px", fontSize: ".72rem", fontFamily: ff }} onClick={() => setPage("booking")}>
               {t.nav.book}
             </button>
           </div>
+
+          {/* Mobile: lang + hamburger */}
+          <div className="nav-hamburger" style={{ gap: 10, alignItems: "center" }}>
+            <button onClick={() => setLang(lang === "en" ? "ar" : "en")} style={{
+              background:"transparent", border:`1px solid rgba(201,168,76,.38)`,
+              color:C.gold, padding:"5px 12px", fontSize:".72rem", cursor:"pointer",
+              borderRadius:2, fontFamily:ff, fontWeight:700
+            }}>{t.switchLabel}</button>
+            <button onClick={() => setMobileOpen(o => !o)} style={{
+              background: mobileOpen ? "rgba(201,168,76,.12)" : "transparent",
+              border: `1px solid rgba(201,168,76,${mobileOpen?".5":".28"})`,
+              borderRadius: 8, cursor: "pointer", padding: "8px 10px",
+              display: "flex", flexDirection: "column", gap: 5, transition: "all .25s"
+            }}>
+              {[0,1,2].map(i => (
+                <span key={i} style={{
+                  display: "block", width: 22, height: 2,
+                  background: C.gold, borderRadius: 2, transition: "all .3s",
+                  transform: mobileOpen
+                    ? i===0 ? "translateY(7px) rotate(45deg)"
+                    : i===2 ? "translateY(-7px) rotate(-45deg)"
+                    : "scaleX(0)"
+                    : "none",
+                  opacity: mobileOpen && i===1 ? 0 : 1,
+                }} />
+              ))}
+            </button>
+          </div>
         </div>
       </nav>
+
+      {/* ── Mobile Menu Overlay ── */}
+      {mobileOpen && (
+        <div className="mob-overlay" style={{
+          position: "fixed", top: 77, left: 0, right: 0, zIndex: 998,
+          background: "rgba(255,252,245,.98)", backdropFilter: "blur(24px)",
+          borderBottom: `1px solid rgba(201,168,76,.18)`,
+          boxShadow: "0 8px 40px rgba(120,80,10,.1)",
+          animation: "slideDown .25s ease",
+          direction: t.dir,
+        }}>
+          <div style={{ maxWidth: 480, margin: "0 auto", padding: "20px 24px 28px" }}>
+            {/* Nav links */}
+            {[...navItems,
+              {k:"booking", l:t.nav.book},
+              {k:"dashboard", l:t.nav.dashboard},
+            ].map(n => (
+              <button key={n.k} onClick={() => { setPage(n.k); setMobileOpen(false); }} style={{
+                display: "block", width: "100%", padding: "14px 0",
+                background: "transparent", border: "none", borderBottom: `1px solid rgba(201,168,76,.1)`,
+                cursor: "pointer", fontFamily: ff, fontSize: "1rem",
+                color: page === n.k ? C.gold : C.g700 || C.g800,
+                fontWeight: page === n.k ? 700 : 400,
+                textAlign: t.dir === "rtl" ? "right" : "left",
+                transition: "color .2s",
+              }}>{n.l}</button>
+            ))}
+
+            {/* Book CTA */}
+            <button className="gbtn" onClick={() => { setPage("booking"); setMobileOpen(false); }}
+              style={{ width:"100%", marginTop:20, padding:"14px", fontFamily:ff, fontSize:".95rem" }}>
+              {t.nav.book}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── PAGES ── */}
       <div style={{ paddingTop: 80 }}>
@@ -767,7 +1092,7 @@ export default function AlkownGroup() {
         {page === "visa-center" && <VisaCenterPage lang={lang} ff={ff} setPage={setPage} setVisaParams={setVisaParams} />}
         {page === "visa-result" && <VisaResultPage params={visaParams} lang={lang} ff={ff} setPage={setPage} setVisaParams={setVisaParams} />}
         {page === "visa-apply" && <VisaApplicationPage lang={lang} ff={ff} setPage={setPage} initialParams={visaParams} />}
-        {page === "visa-admin" && <VisaAdminPage ff={ff} />}
+        {page === "visa-admin" && <VisaAdminIntelligencePage />}
         {page === "visa-track" && <VisaTrackPage lang={lang} ff={ff} setPage={setPage} />}
         {page === "knowledge" && <KnowledgeCenter lang={lang} ff={ff} setPage={setPage} />}
         {page === "company-formation" && <CompanyFormation lang={lang} ff={ff} setPage={setPage} />}
@@ -823,7 +1148,7 @@ function HomePage({ t, lang, ff, setPage }) {
           <div className="fu2"><Divider /></div>
 
           <h1 className="fu3" style={{
-            fontSize: "clamp(2.6rem,6.5vw,5.4rem)", fontWeight: 800, color: C.g800,
+            fontSize: "var(--sizeHero,clamp(2.6rem,6.5vw,5.4rem))", fontWeight: 700, color: C.g800,
             lineHeight: 1.12, margin: "18px 0 14px", letterSpacing: lang === "ar" ? ".02em" : "-.025em",
             whiteSpace: "pre-line"
           }}>{t.hero.h1}</h1>
@@ -856,7 +1181,7 @@ function HomePage({ t, lang, ff, setPage }) {
         <div style={{ maxWidth: 1220, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 60 }}>
             <Label text={t.about.label} />
-            <h2 style={{ fontSize: "clamp(1.8rem,4vw,3rem)", fontWeight: 800, color: C.g800, marginTop: 10, whiteSpace: "pre-line", lineHeight: 1.25 }}>{t.about.h2}</h2>
+            <h2 style={{ fontSize: "var(--sizeSec,clamp(1.8rem,4vw,3rem))", fontWeight: 800, color: C.g800, marginTop: 10, whiteSpace: "pre-line", lineHeight: 1.25 }}>{t.about.h2}</h2>
             <Divider />
             <p style={{ maxWidth: 680, margin: "16px auto 0", color: C.g600, lineHeight: 2, fontSize: "1rem" }}>{t.about.p}</p>
           </div>
@@ -1144,16 +1469,23 @@ function TravelPage({ t, lang, ff, setPage }) {
         <div style={{ maxWidth: 1220, margin: "0 auto" }}>
           <p style={{ textAlign: "center", maxWidth: 700, margin: "0 auto 52px", color: C.g600, lineHeight: 2, fontSize: "1rem" }}>{t.travel.intro}</p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(270px,1fr))", gap: 20 }}>
-            {t.travel.services.map((svc, i) => (
-              <div key={i} className="card" style={{ padding: "36px 32px", display: "flex", gap: 18, alignItems: "flex-start" }}>
+            {t.travel.services.map((svc, i) => {
+              const hasBg = svc.bg_image || svc.bg_color;
+              const cardStyle = hasBg ? {
+                backgroundImage: svc.bg_image ? `url(${svc.bg_image})` : "none",
+                backgroundColor: svc.bg_color || "#fff",
+                backgroundSize: "cover", backgroundPosition: "center",
+              } : {};
+              return (
+              <div key={i} className="card" style={{ padding: "36px 32px", display: "flex", gap: 18, alignItems: "flex-start", ...cardStyle }}>
                 <div style={{ width: 48, height: 48, background: `linear-gradient(135deg,rgba(201,168,76,.14),rgba(240,208,128,.08))`, border: `1px solid rgba(201,168,76,.3)`, borderRadius: 3, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.3rem", flexShrink: 0 }}>{svc.icon}</div>
                 <div>
-                  <h3 style={{ color: C.g800, fontWeight: 700, marginBottom: 7, fontSize: ".98rem" }}>{svc.title}</h3>
+                  <h3 style={{ color: hasBg&&svc.bg_image?"#fff":C.g800, fontWeight: 700, marginBottom: 7, fontSize: ".98rem" }}>{svc.title}</h3>
                   <div className="gl" style={{ marginBottom: 8 }} />
-                  <p style={{ color: C.g400, fontSize: ".84rem", lineHeight: 1.7 }}>{svc.desc}</p>
+                  <p style={{ color: hasBg&&svc.bg_image?"rgba(255,255,255,.8)":C.g400, fontSize: ".84rem", lineHeight: 1.7 }}>{svc.desc}</p>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
 
           {/* قائمة الأسعار من قاعدة البيانات */}
@@ -1242,14 +1574,17 @@ function AdvertisingPage({ t, lang, ff, setPage }) {
         <div style={{ maxWidth: 1220, margin: "0 auto" }}>
           <p style={{ textAlign: "center", maxWidth: 700, margin: "0 auto 52px", color: C.g600, lineHeight: 2 }}>{t.advertising.intro}</p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 20 }}>
-            {t.advertising.services.map((svc, i) => (
-              <div key={i} className="card" style={{ padding: "34px 30px" }}>
+            {t.advertising.services.map((svc, i) => {
+              const hasBg = svc.bg_image || svc.bg_color;
+              const cardStyle = hasBg ? { backgroundImage: svc.bg_image?`url(${svc.bg_image})`:"none", backgroundColor: svc.bg_color||"#fff", backgroundSize:"cover", backgroundPosition:"center" } : {};
+              return (
+              <div key={i} className="card" style={{ padding: "34px 30px", ...cardStyle }}>
                 <div style={{ fontSize: "2rem", marginBottom: 14 }}>{svc.icon}</div>
-                <h3 style={{ color: C.g800, fontWeight: 700, marginBottom: 6, fontSize: ".98rem" }}>{svc.title}</h3>
+                <h3 style={{ color: hasBg&&svc.bg_image?"#fff":C.g800, fontWeight: 700, marginBottom: 6, fontSize: ".98rem" }}>{svc.title}</h3>
                 <div className="gl" />
-                <p style={{ color: C.g400, fontSize: ".84rem", lineHeight: 1.7 }}>{svc.desc}</p>
+                <p style={{ color: hasBg&&svc.bg_image?"rgba(255,255,255,.8)":C.g400, fontSize: ".84rem", lineHeight: 1.7 }}>{svc.desc}</p>
               </div>
-            ))}
+            )})}
           </div>
           <div style={{ textAlign: "center", marginTop: 52 }}>
             <button className="gbtn" style={{ fontFamily: ff }} onClick={() => setPage("booking")}>{t.nav.book}</button>
@@ -1271,11 +1606,14 @@ function AcademyPage({ t, lang, ff, setPage }) {
         <div style={{ maxWidth: 1220, margin: "0 auto" }}>
           <p style={{ textAlign: "center", maxWidth: 700, margin: "0 auto 52px", color: C.g600, lineHeight: 2 }}>{t.academy.intro}</p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 20 }}>
-            {t.academy.courses.map((course, i) => (
-              <div key={i} className="card" style={{ padding: "36px 32px", position: "relative", overflow: "hidden" }}>
+            {t.academy.courses.map((course, i) => {
+              const hasBg = course.bg_image || course.bg_color;
+              const cardStyle = hasBg ? { backgroundImage: course.bg_image?`url(${course.bg_image})`:"none", backgroundColor: course.bg_color||"#fff", backgroundSize:"cover", backgroundPosition:"center" } : {};
+              return (
+              <div key={i} className="card" style={{ padding: "36px 32px", position: "relative", overflow: "hidden", ...cardStyle }}>
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,${C.gold},${C.goldLight})` }} />
                 <div style={{ fontSize: "2.2rem", marginBottom: 12 }}>{course.icon}</div>
-                <h3 style={{ color: C.g800, fontWeight: 700, marginBottom: 8, fontSize: "1rem" }}>{course.title}</h3>
+                <h3 style={{ color: hasBg&&course.bg_image?"#fff":C.g800, fontWeight: 700, marginBottom: 8, fontSize: "1rem" }}>{course.title}</h3>
                 <div className="gl" />
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 18 }}>
                   {[
@@ -1292,7 +1630,8 @@ function AcademyPage({ t, lang, ff, setPage }) {
                   {lang === "ar" ? "سجّل الآن" : "Enroll Now"}
                 </button>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -1312,7 +1651,7 @@ function AboutPage({ t, lang, ff, setPage }) {
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
             <Label text={t.about.label} />
-            <h2 style={{ fontSize: "clamp(1.8rem,4vw,3rem)", fontWeight: 800, color: C.g800, marginTop: 10, whiteSpace: "pre-line", lineHeight: 1.25 }}>{t.about.h2}</h2>
+            <h2 style={{ fontSize: "var(--sizeSec,clamp(1.8rem,4vw,3rem))", fontWeight: 800, color: C.g800, marginTop: 10, whiteSpace: "pre-line", lineHeight: 1.25 }}>{t.about.h2}</h2>
             <Divider />
             <p style={{ maxWidth: 700, margin: "18px auto 0", color: C.g600, lineHeight: 2, fontSize: "1rem" }}>{t.about.p}</p>
           </div>
@@ -2140,16 +2479,6 @@ function Footer({ t, lang, ff, setPage }) {
             ))}
           </div>
 
-          {/* Services */}
-          <div>
-            <h4 style={{ color: C.gold, fontSize: ".72rem", letterSpacing: ".22em", textTransform: "uppercase", marginBottom: 20 }}>{ft.services}</h4>
-            {[t.nav.travel, t.nav.citizenship, t.nav.advertising, t.nav.academy, t.nav.book, t.nav.dashboard].map((s, i) => (
-              <div key={i} style={{ color: "#6a6054", fontSize: ".84rem", marginBottom: 11, cursor: "pointer", transition: "color .25s" }}
-                onMouseEnter={e => e.target.style.color = C.gold}
-                onMouseLeave={e => e.target.style.color = "#6a6054"}
-              >{s}</div>
-            ))}
-          </div>
 
           {/* Contact */}
           <div>

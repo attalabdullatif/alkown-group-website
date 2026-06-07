@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom";
 import VisaRoutePage from "./pages/visa/VisaRoutePage";
-import VisaAdminPage from "./pages/visa/VisaAdminPage";
+// VisaAdminPage replaced by VisaAdminIntelligence (unified system)
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext";
 import { signOut } from "./lib/auth";
+import { ContentProvider } from "./context/ContentContext";
+import SiteAdminPage from "./pages/SiteAdminPage";
 
 import MainWebsite from "./MainWebsite";
 
@@ -12,10 +14,24 @@ import Login from "./pages/Login";
 import Services from "./pages/Services";
 import Clients from "./pages/Clients";
 import Requests from "./pages/Requests";
-import Invoices from "./pages/Invoices";
+import Accounting from "./pages/Accounting";
+import VisaChecker from "./pages/visa/VisaChecker";
+import VisaAdminIntelligence from "./pages/visa/VisaAdminIntelligence";
 import TrackRequest from "./pages/TrackRequest";
 import VerifyInvoice from "./pages/VerifyInvoice";
 import ClientPortal from "./pages/ClientPortal";
+
+const NAV_LINKS = [
+  { to: "/dashboard",    label: "📊 لوحة التحكم",      roles: ["admin","manager","staff"] },
+  { to: "/clients",      label: "👥 العملاء",           roles: ["admin","manager"] },
+  { to: "/services",     label: "🛎️ الخدمات",           roles: ["admin","manager"] },
+  { to: "/requests",     label: "📋 الطلبات",           roles: ["admin","manager","staff"] },
+  { to: "/accounting",   label: "💼 الفواتير والمحاسبة",  roles: ["admin","manager"] },
+  { to: "/visa-admin",       label: "🛂 إدارة التأشيرات",   roles: ["admin","manager"] },
+  { to: "/site-admin",   label: "✏️ تعديل الموقع",      roles: ["admin"] },
+  { to: "/track-request",label: "🔍 تتبع الطلب",        roles: null },
+  { to: "/portal",       label: "🚪 بوابة العملاء",     roles: null },
+];
 
 function Navigation() {
   const { user, role } = useAuth();
@@ -26,48 +42,59 @@ function Navigation() {
     navigate("/login");
   }
 
+  const visible = NAV_LINKS.filter(n => !n.roles || !user || n.roles.includes(role));
+
   return (
     <div className="no-print" style={{
-      display: "flex", justifyContent: "center", gap: "10px",
-      flexWrap: "wrap", padding: "20px", alignItems: "center"
+      background: "linear-gradient(135deg,#1a1510,#2a2018)",
+      borderBottom: "1px solid rgba(201,168,76,.18)",
+      padding: "0 24px",
+      direction: "rtl",
+      fontFamily: "'Dubai','Cairo','Noto Naskh Arabic',sans-serif",
     }}>
-      <LinkButton to="/dashboard">Dashboard</LinkButton>
-      <LinkButton to="/clients">Clients</LinkButton>
-      <LinkButton to="/services">Services</LinkButton>
-      <LinkButton to="/requests">Requests</LinkButton>
-      <LinkButton to="/invoices">Invoices</LinkButton>
-      <LinkButton to="/visa-admin">🛂 Visa Admin</LinkButton>
-      <LinkButton to="/track-request">Track Request</LinkButton>
-      <LinkButton to="/portal">بوابة العملاء</LinkButton>
-      {user && (
-        <button
-          onClick={handleSignOut}
-          style={{
-            background: "#2a1a1a", color: "#ff6b6b", border: "1px solid #4a1a1a",
-            padding: "12px 18px", borderRadius: "10px", fontWeight: "600",
-            cursor: "pointer", fontSize: "14px"
-          }}
-        >
-          تسجيل الخروج ({role})
-        </button>
-      )}
+      {/* Top bar */}
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", maxWidth:1400, margin:"0 auto", padding:"10px 0" }}>
+        <Link to="/" style={{ textDecoration:"none", display:"flex", alignItems:"center", gap:8 }}>
+          <span style={{ color:"#c9a84c", fontWeight:800, fontSize:"1.1rem", letterSpacing:".05em" }}>الكون</span>
+          <span style={{ color:"rgba(255,255,255,.35)", fontSize:".72rem", letterSpacing:".18em" }}>GLOBAL · CRM</span>
+        </Link>
+        {user && (
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <span style={{ color:"rgba(255,255,255,.35)", fontSize:".78rem" }}>
+              {role === "admin" ? "👑" : role === "manager" ? "🏢" : "👤"} {role}
+            </span>
+            <button onClick={handleSignOut} style={{
+              background:"rgba(255,80,80,.08)", color:"#ff6b6b",
+              border:"1px solid rgba(255,80,80,.25)", padding:"6px 14px",
+              borderRadius:8, cursor:"pointer", fontFamily:"inherit", fontSize:".78rem", fontWeight:700,
+            }}>
+              تسجيل الخروج
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Nav links */}
+      <div style={{ display:"flex", gap:4, overflowX:"auto", paddingBottom:1, maxWidth:1400, margin:"0 auto" }}>
+        {visible.map(n => (
+          <NavLink key={n.to} to={n.to}>{n.label}</NavLink>
+        ))}
+      </div>
     </div>
   );
 }
 
-function LinkButton({ to, children }) {
+function NavLink({ to, children }) {
+  const active = window.location.pathname === to;
   return (
-    <Link
-      to={to}
-      style={{
-        textDecoration: "none",
-        background: "#111",
-        color: "#fff",
-        padding: "12px 18px",
-        borderRadius: "10px",
-        fontWeight: "600",
-      }}
-    >
+    <Link to={to} style={{
+      textDecoration:"none", whiteSpace:"nowrap",
+      padding:"10px 16px", fontSize:".85rem", fontWeight: active ? 700 : 500,
+      color: active ? "#c9a84c" : "rgba(255,255,255,.6)",
+      borderBottom: active ? "2px solid #c9a84c" : "2px solid transparent",
+      fontFamily:"'Cairo','Noto Naskh Arabic',sans-serif",
+      transition:"all .2s",
+    }}>
       {children}
     </Link>
   );
@@ -117,10 +144,10 @@ function RequestsPage() {
   );
 }
 
-function InvoicesPage() {
+function AccountingPage() {
   return (
     <PageLayout>
-      <Invoices />
+      <Accounting />
     </PageLayout>
   );
 }
@@ -131,6 +158,7 @@ function LoginPage() {
 
 export default function App() {
   return (
+    <ContentProvider>
     <BrowserRouter>
       <Routes>
 
@@ -164,7 +192,21 @@ export default function App() {
 
         <Route path="/invoices" element={
           <ProtectedRoute allowed={["admin", "manager"]}>
-            <InvoicesPage />
+            <AccountingPage />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/accounting" element={
+          <ProtectedRoute allowed={["admin", "manager"]}>
+            <AccountingPage />
+          </ProtectedRoute>
+        } />
+
+        {/* Visa Intelligence */}
+        <Route path="/visa-checker" element={<VisaChecker />} />
+        <Route path="/visa-intelligence" element={
+          <ProtectedRoute allowed={["admin","manager"]}>
+            <PageLayout><VisaAdminIntelligence /></PageLayout>
           </ProtectedRoute>
         } />
 
@@ -174,7 +216,7 @@ export default function App() {
         <Route path="/visa/:slug" element={<VisaRoutePage />} />
         <Route path="/visa-admin" element={
           <ProtectedRoute allowed={["admin", "manager"]}>
-            <VisaAdminPage ff="'Cormorant Garamond',Georgia,serif" />
+            <PageLayout><VisaAdminIntelligence /></PageLayout>
           </ProtectedRoute>
         } />
 
@@ -183,7 +225,14 @@ export default function App() {
           element={<LoginPage />}
         />
 
+        <Route path="/site-admin" element={
+          <ProtectedRoute allowed={["admin"]}>
+            <SiteAdminPage />
+          </ProtectedRoute>
+        } />
+
       </Routes>
     </BrowserRouter>
+    </ContentProvider>
   );
 }

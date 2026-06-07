@@ -22,11 +22,21 @@
     <meta name="twitter:title" content="Alkown Group | مجموعة الكون" />
     <meta name="twitter:description" content="Premium UAE consultancy — Travel, Citizenship, Advertising & Academy" />
 
-    <!-- Fonts preload -->
+    <!-- Dubai Bold — primary font for the entire platform -->
+    <style>
+      @font-face {
+        font-family: 'Dubai';
+        src: url('/fonts/DUBAI-BOLD.TTF') format('truetype');
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+    </style>
+    <!-- Fallback Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Cairo:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Noto+Naskh+Arabic:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
 
@@ -38,7 +48,7 @@
       html { scroll-behavior: smooth; }
       body {
         margin: 0;
-        font-family: 'Cormorant Garamond', 'Noto Naskh Arabic', 'Cairo', Georgia, serif;
+        font-family: 'Dubai', 'Cairo', 'Noto Naskh Arabic', sans-serif;
         background: #fffdf8;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
@@ -55,7 +65,7 @@
       }
       #loading-screen.hidden { opacity: 0; pointer-events: none; }
       .loading-logo {
-        font-family: 'Noto Naskh Arabic', serif;
+        font-family: 'Dubai', 'Cairo', sans-serif;
         font-size: 3rem; font-weight: 700;
         background: linear-gradient(135deg, #c9a84c 0%, #f0d080 40%, #c9a84c 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;

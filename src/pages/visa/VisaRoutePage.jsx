@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { COUNTRIES, toSlug } from "../../data/countries";
 import { VISA_RULES, VISA_TYPE_COLORS, VISA_TYPE_LABELS } from "../../data/visaRules";
 import { generateSEOMeta } from "../../services/visaService";
+import { checkVisaBySlug, REQUIREMENT_COLOR, REQUIREMENT_EN } from "../../lib/visaIntelligenceService";
 
 const C = {
   gold: "#c9a84c", goldLight: "#f0d080", cream: "#faf8f4",
@@ -50,15 +51,54 @@ function SEOHead({ title, description, keywords }) {
   return null;
 }
 
+// Convert DB vis_rules result → local rule shape so existing rendering works unchanged
+function dbToLocalRule(db) {
+  if (!db?.found) return null;
+  return {
+    type:       db.visa_requirement,
+    stay:       db.stay_days ? `${db.stay_days} days` : "Contact us",
+    processing: db.processing_text || (db.processing_min === 0 ? "Instant" : "Contact us"),
+    fee: {
+      amount:   db.fee_usd || 0,
+      currency: "USD",
+      note:     db.fee_usd ? `$${db.fee_usd} USD` : "Free of charge",
+    },
+    documents:  (db.documents || []).map(d => ({ en: d.label_ar || d.type, ar: d.label_ar || d.type, notes: d.notes_ar })),
+    notes:      { en: db.notes_en || "", ar: db.notes_ar || "" },
+    updatedAt:  db.last_verified || "2025",
+    faqs:       [],
+  };
+}
+
 export default function VisaRoutePage() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const [faqOpen, setFaqOpen] = useState(null);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [faqOpen,    setFaqOpen]    = useState(null);
+  const [activeTab,  setActiveTab]  = useState("overview");
+  const [dbResult,   setDbResult]   = useState(null);
+  const [dbLoading,  setDbLoading]  = useState(true);
+
+  // Fetch from vis_rules DB (primary source)
+  useEffect(() => {
+    if (slug) {
+      setDbLoading(true);
+      checkVisaBySlug(slug)
+        .then(r => { if (r?.found) setDbResult(r); })
+        .catch(() => {})
+        .finally(() => setDbLoading(false));
+    }
+  }, [slug]);
 
   const resolved = resolveSlug(slug);
-  const rule = resolved ? findRule(resolved.from.code, resolved.to.code) : null;
+  const localRule = resolved ? findRule(resolved.from.code, resolved.to.code) : null;
+
+  // DB is primary source; local data is fallback only
+  const rule = dbResult ? dbToLocalRule(dbResult) : localRule;
+
   const seo = resolved ? generateSEOMeta({ fromCountry: resolved.from, toCountry: resolved.to }) : {};
+
+  const typeColor = rule ? (VISA_TYPE_COLORS[rule.type] || REQUIREMENT_COLOR[rule.type] || "#aaa") : "#aaa";
+  const typeLabel = rule ? (VISA_TYPE_LABELS.en[rule.type] || REQUIREMENT_EN[rule.type] || "Check Required") : "Check Required";
 
   if (!resolved) return (
     <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: ff }}>
@@ -71,9 +111,6 @@ export default function VisaRoutePage() {
       </div>
     </div>
   );
-
-  const typeColor = rule ? VISA_TYPE_COLORS[rule.type] : "#aaa";
-  const typeLabel = rule ? VISA_TYPE_LABELS.en[rule.type] : "Check Required";
 
   const tabs = ["Overview", "Documents", "Application Steps", "FAQ"];
 

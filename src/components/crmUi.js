@@ -34,7 +34,7 @@ export const pageStyle = {
   background: CRM_COLORS.warm,
   padding: "32px",
   color: CRM_COLORS.text,
-  fontFamily: "'Cairo', 'Segoe UI', Arial, sans-serif",
+  fontFamily: "'Dubai', 'Cairo', 'Noto Naskh Arabic', sans-serif",
 };
 
 export const cardStyle = {
