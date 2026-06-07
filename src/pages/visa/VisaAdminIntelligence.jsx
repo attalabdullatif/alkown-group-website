@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import {
   fetchCountries, codeToFlag,
-  REQUIREMENT_AR, REQUIREMENT_COLOR,
+  REQUIREMENT_AR, REQUIREMENT_COLOR, // eslint-disable-line no-unused-vars
 } from "../../lib/visaIntelligenceService";
+// formatDate unused in this component
 import { CSVImporter, JSONImporter } from "../../lib/visaDataImporter";
 import {
   CRM_COLORS, buttonStyle, cardStyle, inputStyle,
-  outlineButtonStyle, pageStyle, formatDate,
+  outlineButtonStyle, pageStyle,
 } from "../../components/crmUi";
 
 const VISA_TYPES = ["visa_free","visa_on_arrival","evisa","eta","embassy_visa"];

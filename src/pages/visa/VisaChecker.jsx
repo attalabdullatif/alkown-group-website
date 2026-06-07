@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   fetchCountries, checkVisa, codeToFlag,
-  REQUIREMENT_COLOR, REQUIREMENT_AR, DOCUMENT_AR,
 } from "../../lib/visaIntelligenceService";
 
 // ─── Constants ────────────────────────────────────────────────────────────────

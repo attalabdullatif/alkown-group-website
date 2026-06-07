@@ -344,7 +344,7 @@ function DiagnosticPanel({onClose}) {
 
     // 1. Connection
     try {
-      const{data,error}=await supabase.from("site_content").select("count").limit(1);
+      const{error}=await supabase.from("site_content").select("count").limit(1);
       if(error) add("الاتصال بـ Supabase",false,error.message);
       else       add("الاتصال بـ Supabase",true,"متصل ✓");
     } catch(e){ add("الاتصال بـ Supabase",false,e.message); }
@@ -372,7 +372,7 @@ function DiagnosticPanel({onClose}) {
 
     // 4. Storage bucket
     try {
-      const{data,error}=await supabase.storage.getBucket("site-images");
+      const{error}=await supabase.storage.getBucket("site-images");
       if(error) add("Storage (site-images)",false,"الـ bucket غير موجود — أنشئه من Supabase → Storage");
       else       add("Storage (site-images)",true,"موجود ✓");
     } catch(e){ add("Storage (site-images)",false,e.message); }

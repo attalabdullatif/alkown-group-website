@@ -725,7 +725,6 @@ export default function AlkownGroup() {
     const maxN = Math.max(...dbKeys.map(k=>parseInt(k.split("_").pop())||0), defaults.length);
     const result = [];
     for (let i = 1; i <= maxN; i++) {
-      const def = defaults[i-1] || defaults[0];
       if (dbMap[i]) result.push(dbMap[i]); // raw JSON string
       else if (i <= defaults.length) result.push(null); // use T default
       // skip if beyond defaults and no DB key

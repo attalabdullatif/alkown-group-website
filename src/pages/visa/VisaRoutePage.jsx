@@ -76,16 +76,13 @@ export default function VisaRoutePage() {
   const [faqOpen,    setFaqOpen]    = useState(null);
   const [activeTab,  setActiveTab]  = useState("overview");
   const [dbResult,   setDbResult]   = useState(null);
-  const [dbLoading,  setDbLoading]  = useState(true);
 
   // Fetch from vis_rules DB (primary source)
   useEffect(() => {
     if (slug) {
-      setDbLoading(true);
       checkVisaBySlug(slug)
         .then(r => { if (r?.found) setDbResult(r); })
-        .catch(() => {})
-        .finally(() => setDbLoading(false));
+        .catch(() => {});
     }
   }, [slug]);
 
