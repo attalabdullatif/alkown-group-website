@@ -61,12 +61,14 @@ function CountriesTab() {
     try {
       const payload = { code: form.code.toUpperCase(), name_en: form.name_en, name_ar: form.name_ar, flag: form.flag, region: form.region, is_active: form.is_active };
       if (editing) {
-        await supabase.from("vis_countries").update(payload).eq("id", editing.id);
+        const { error: updateErr } = await supabase.from("vis_countries").update(payload).eq("id", editing.id);
+        if (updateErr) throw new Error(updateErr.message);
       } else {
-        await supabase.from("vis_countries").insert([payload]);
+        const { error: insertErr } = await supabase.from("vis_countries").insert([payload]);
+        if (insertErr) throw new Error(insertErr.message);
       }
       reset(); await load();
-    } catch (e) { setError(e.message); }
+    } catch (err) { setError("❌ " + (err.message || "حدث خطأ")); }
     setSaving(false);
   }
 
@@ -195,26 +197,41 @@ function VisaRulesTab({ countries }) {
     }
     setSaving(true); setError("");
     try {
+      // residence_code is NOT NULL DEFAULT '' in DB — must send '' not null
+      const residenceCode = form.residence_code ? form.residence_code.toUpperCase() : "";
+
       const payload = {
         nationality_code: form.nationality_code.toUpperCase(),
         destination_code: form.destination_code.toUpperCase(),
-        residence_code:   form.residence_code?.toUpperCase() || null,
+        residence_code:   residenceCode,
         visa_requirement: form.visa_requirement,
-        stay_days:        form.stay_days    ? parseInt(form.stay_days)    : null,
-        processing_min:   form.processing_min ? parseInt(form.processing_min) : null,
-        processing_max:   form.processing_max ? parseInt(form.processing_max) : null,
-        fee_usd:          form.fee_usd ? parseFloat(form.fee_usd) : null,
+        stay_days:        form.stay_days    !== "" ? parseInt(form.stay_days)    : null,
+        processing_min:   form.processing_min !== "" ? parseInt(form.processing_min) : null,
+        processing_max:   form.processing_max !== "" ? parseInt(form.processing_max) : null,
+        fee_usd:          form.fee_usd !== "" ? parseFloat(form.fee_usd) : null,
         notes_ar:         form.notes_ar || null,
         notes_en:         form.notes_en || null,
-        is_popular:       form.is_popular,
+        is_popular:       !!form.is_popular,
+        is_active:        true,
       };
+
       if (editing) {
-        await supabase.from("vis_rules").update(payload).eq("id", editing.id);
+        const { error: updateErr } = await supabase
+          .from("vis_rules").update(payload).eq("id", editing.id);
+        if (updateErr) throw new Error(updateErr.message);
       } else {
-        await supabase.from("vis_rules").insert([payload]);
+        // UNIQUE(nationality_code, destination_code, residence_code) — use upsert
+        const { error: upsertErr } = await supabase
+          .from("vis_rules")
+          .upsert([payload], { onConflict: "nationality_code,destination_code,residence_code" });
+        if (upsertErr) throw new Error(upsertErr.message);
       }
-      reset(); await load();
-    } catch (e) { setError(e.message); }
+
+      reset();
+      await load();
+    } catch (err) {
+      setError("❌ " + (err.message || "حدث خطأ غير متوقع"));
+    }
     setSaving(false);
   }
 
