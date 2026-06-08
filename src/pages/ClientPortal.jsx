@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react"; // eslint-disable-line no-unused-vars
 import { supabase } from "../lib/supabase";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -26,7 +26,7 @@ const STATUS_STEPS = ["New", "In Progress", "Pending Documents", "Approved", "Co
 
 // ── Styles ────────────────────────────────────────────────────
 const S = {
-  page: { minHeight: "100vh", background: BG, fontFamily: "'Cairo','Segoe UI',sans-serif", direction: "rtl", color: "#fff" },
+  page: { minHeight: "100vh", background: BG, fontFamily: "'Dubai','Cairo','Segoe UI',sans-serif", direction: "rtl", color: "#fff" },
   card: { background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16 },
   input: { width: "100%", padding: "12px 16px", background: "#1a1a1a", border: `1px solid ${BORDER}`, borderRadius: 10, color: "#fff", fontSize: 15, outline: "none", boxSizing: "border-box", fontFamily: "'Cairo',sans-serif" },
   btn: { background: GOLD, color: "#000", border: "none", borderRadius: 10, padding: "13px 24px", fontWeight: 700, cursor: "pointer", fontSize: 15, width: "100%" },
@@ -312,32 +312,65 @@ function TrackView({ setView, ar }) {
 
 // ── Portal (بعد تسجيل الدخول) ─────────────────────────────────
 function PortalView({ user, client, ar, onSignOut }) {
-  const [tab, setTab] = useState("requests");
-  const [requests, setRequests] = useState([]);
-  const [invoices, setInvoices] = useState([]);
-  const [files, setFiles] = useState([]);
+  const [tab,         setTab]         = useState("requests");
+  const [requests,    setRequests]    = useState([]);
+  const [invoices,    setInvoices]    = useState([]);
+  const [files,       setFiles]       = useState([]);
+  const [messages,    setMessages]    = useState([]);
+  const [notifications, setNotifs]   = useState([]);
   const [selectedReq, setSelectedReq] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
+  const [loading,     setLoading]     = useState(true);
+  const [uploading,   setUploading]   = useState(false);
+  const [clientData,  setClientData]  = useState(client);
+
+  const unreadMsgs  = messages.filter(m => !m.is_read && m.sender === "staff").length;
+  const unreadNotifs = notifications.filter(n => !n.is_read).length;
 
   useEffect(() => {
-    if (client) loadData();
-    else setLoading(false);
+    if (client) {
+      loadData();
+      // Real-time subscription for new messages
+      const sub = supabase
+        .channel(`msgs-${client.id}`)
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "client_messages", filter: `client_id=eq.${client.id}` },
+          payload => setMessages(prev => [payload.new, ...prev])
+        )
+        .subscribe();
+      return () => supabase.removeChannel(sub);
+    } else {
+      setLoading(false);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client]);
 
   async function loadData() {
     setLoading(true);
-    const [reqRes, invRes] = await Promise.all([
+    const [reqRes, invRes, msgRes, notifRes] = await Promise.all([
       supabase.from("requests").select("*, services(name, price, price_min, price_max)").eq("client_id", client.id).order("created_at", { ascending: false }),
       supabase.from("invoices").select("*, requests(request_number, services(name))").order("created_at", { ascending: false }),
+      supabase.from("client_messages").select("*").eq("client_id", client.id).order("created_at", { ascending: false }).limit(100),
+      supabase.from("client_notifications").select("*").eq("client_id", client.id).order("created_at", { ascending: false }).limit(50),
     ]);
     const allReqs = reqRes.data || [];
     const allInvs = invRes.data || [];
-    const reqIds = allReqs.map(r => r.id);
+    const reqIds  = allReqs.map(r => r.id);
     setRequests(allReqs);
     setInvoices(allInvs.filter(i => reqIds.includes(i.request_id)));
+    setMessages(msgRes.data || []);
+    setNotifs(notifRes.data || []);
     setLoading(false);
+  }
+
+  async function markNotifsRead() {
+    if (!client) return;
+    await supabase.from("client_notifications").update({ is_read: true }).eq("client_id", client.id).eq("is_read", false);
+    setNotifs(prev => prev.map(n => ({ ...n, is_read: true })));
+  }
+
+  async function markMessagesRead() {
+    if (!client) return;
+    await supabase.from("client_messages").update({ is_read: true }).eq("client_id", client.id).eq("sender", "staff").eq("is_read", false);
+    setMessages(prev => prev.map(m => ({ ...m, is_read: true })));
   }
 
   async function loadFiles(requestId) {
@@ -401,10 +434,33 @@ function PortalView({ user, client, ar, onSignOut }) {
       </div>
 
       {/* Tabs */}
-      <div style={{ borderBottom: `1px solid ${BORDER}`, marginBottom: 24, display: "flex", gap: 0 }}>
-        {[["requests", `طلباتي (${requests.length})`], ["invoices", `الفواتير (${invoices.length})`], ["docs", "المستندات"]].map(([k, lbl]) => (
-          <button key={k} style={S.tab(tab === k)} onClick={() => setTab(k)}>{lbl}</button>
-        ))}
+      <div style={{ borderBottom: `1px solid ${BORDER}`, marginBottom: 24, display: "flex", gap: 0, overflowX: "auto" }}>
+        {[
+          ["requests",  `طلباتي (${requests.length})`],
+          ["invoices",  `الفواتير (${invoices.length})`],
+          ["docs",      "المستندات"],
+          ["messages",  null],
+          ["notifs",    null],
+          ["profile",   "الملف الشخصي"],
+        ].map(([k, lbl]) => {
+          const badge = k === "messages" ? unreadMsgs : k === "notifs" ? unreadNotifs : 0;
+          const label = lbl || (k === "messages" ? "رسائل" : "إشعارات");
+          return (
+            <button key={k} style={{ ...S.tab(tab === k), position: "relative", whiteSpace: "nowrap" }}
+              onClick={() => {
+                setTab(k);
+                if (k === "messages") markMessagesRead();
+                if (k === "notifs") markNotifsRead();
+              }}>
+              {label}
+              {badge > 0 && (
+                <span style={{ position: "absolute", top: 4, right: 4, minWidth: 16, height: 16, background: "#e05252", borderRadius: 10, fontSize: 10, fontWeight: 900, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px" }}>
+                  {badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {loading && <p style={{ color: MUTED, textAlign: "center", padding: 40 }}>جارٍ التحميل...</p>}
@@ -553,6 +609,25 @@ function PortalView({ user, client, ar, onSignOut }) {
         </div>
       )}
 
+      {/* Messages Tab */}
+      {!loading && tab === "messages" && (
+        <MessagesTab client={client} messages={messages} setMessages={setMessages} requests={requests} />
+      )}
+
+      {/* Notifications Tab */}
+      {!loading && tab === "notifs" && (
+        <NotificationsTab notifications={notifications} />
+      )}
+
+      {/* Profile Tab */}
+      {!loading && tab === "profile" && (
+        <ProfileTab
+          user={user}
+          client={clientData}
+          onUpdate={(updated) => setClientData(updated)}
+        />
+      )}
+
       {/* Contact */}
       <div style={{ ...S.card, padding: 20, marginTop: 24, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
         <div>
@@ -562,6 +637,303 @@ function PortalView({ user, client, ar, onSignOut }) {
         <div style={{ display: "flex", gap: 10 }}>
           <a href="https://wa.me/971544909522" target="_blank" rel="noreferrer" style={{ ...S.ghost, textDecoration: "none", fontSize: 13 }}>💬 واتساب</a>
           <a href="mailto:info@alkownglobal.com" style={{ ...S.ghost, textDecoration: "none", fontSize: 13 }}>✉️ إيميل</a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Messages Tab ──────────────────────────────────────────────
+function MessagesTab({ client, messages, setMessages, requests }) {
+  const [text, setText] = useState("");
+  const [reqId, setReqId] = useState("");
+  const [sending, setSending] = useState(false);
+
+  async function sendMessage(e) {
+    e.preventDefault();
+    if (!text.trim() || !client) return;
+    setSending(true);
+    const payload = {
+      client_id:   client.id,
+      request_id:  reqId || null,
+      sender:      "client",
+      sender_name: client.full_name || "العميل",
+      message:     text.trim(),
+      is_read:     false,
+    };
+    const { data, error } = await supabase.from("client_messages").insert([payload]).select().single();
+    if (!error && data) {
+      setMessages(prev => [data, ...prev]);
+      setText("");
+    }
+    setSending(false);
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Send form */}
+      <div style={{ ...S.card, padding: 20 }}>
+        <div style={{ color: GOLD, fontWeight: 700, marginBottom: 14, fontSize: 14 }}>💬 رسالة جديدة لفريق الدعم</div>
+        <form onSubmit={sendMessage} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {requests.length > 0 && (
+            <select value={reqId} onChange={e => setReqId(e.target.value)} style={{ ...S.input, cursor: "pointer" }}>
+              <option value="">اختر الطلب المرتبط (اختياري)</option>
+              {requests.map(r => <option key={r.id} value={r.id}>{r.request_number} — {r.services?.name || "—"}</option>)}
+            </select>
+          )}
+          <textarea
+            required value={text} onChange={e => setText(e.target.value)}
+            placeholder="اكتب رسالتك هنا..."
+            style={{ ...S.input, minHeight: 90, resize: "vertical" }}
+          />
+          <button type="submit" disabled={sending || !text.trim()} style={{ ...S.btn, opacity: sending ? .7 : 1 }}>
+            {sending ? "جارٍ الإرسال..." : "إرسال الرسالة ✉️"}
+          </button>
+        </form>
+      </div>
+
+      {/* Messages list */}
+      {messages.length === 0 ? (
+        <EmptyState icon="💬" text="لا توجد رسائل بعد — أرسل رسالتك الأولى" />
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {messages.map(m => (
+            <div key={m.id} style={{
+              display: "flex", flexDirection: "column",
+              alignItems: m.sender === "client" ? "flex-end" : "flex-start",
+            }}>
+              <div style={{
+                maxWidth: "75%", padding: "12px 16px", borderRadius: 14,
+                background: m.sender === "client" ? `${GOLD}22` : "#1a1a1a",
+                border: `1px solid ${m.sender === "client" ? GOLD + "44" : BORDER}`,
+              }}>
+                <div style={{ fontSize: 13, lineHeight: 1.7 }}>{m.message}</div>
+                <div style={{ fontSize: 11, color: MUTED, marginTop: 6, display: "flex", gap: 8, justifyContent: "space-between" }}>
+                  <span style={{ color: m.sender === "client" ? GOLD : "#3d6f9f", fontWeight: 700 }}>
+                    {m.sender === "client" ? "أنت" : m.sender_name}
+                  </span>
+                  <span>{new Date(m.created_at).toLocaleString("ar", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Notifications Tab ─────────────────────────────────────────
+const NOTIF_ICON = {
+  status_update: "🔄", new_message: "💬", invoice_ready: "💰",
+  document_request: "📄", approval: "✅", rejection: "❌", general: "🔔",
+};
+
+function NotificationsTab({ notifications }) {
+  if (notifications.length === 0) return <EmptyState icon="🔔" text="لا توجد إشعارات بعد" />;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {notifications.map(n => (
+        <div key={n.id} style={{
+          ...S.card, padding: "14px 18px",
+          borderRight: `3px solid ${n.is_read ? BORDER : GOLD}`,
+          opacity: n.is_read ? .75 : 1,
+        }}>
+          <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+            <span style={{ fontSize: 22 }}>{NOTIF_ICON[n.type] || "🔔"}</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{n.title_ar}</div>
+              {n.body_ar && <div style={{ color: MUTED, fontSize: 13, lineHeight: 1.6 }}>{n.body_ar}</div>}
+              <div style={{ color: MUTED, fontSize: 11, marginTop: 6 }}>
+                {new Date(n.created_at).toLocaleString("ar", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+              </div>
+            </div>
+            {!n.is_read && <div style={{ width: 8, height: 8, borderRadius: "50%", background: GOLD, flexShrink: 0, marginTop: 4 }} />}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Profile Tab ───────────────────────────────────────────────
+function ProfileTab({ user, client, onUpdate }) {
+  const [editing, setEditing] = useState(false);
+  const [saving,  setSaving]  = useState(false);
+  const [toast,   setToast]   = useState("");
+  const [pwMode,  setPwMode]  = useState(false);
+  const [form, setForm] = useState({
+    full_name: client?.full_name || "",
+    phone:     client?.phone     || "",
+    email:     client?.email     || user?.email || "",
+    address:   client?.address   || "",
+    nationality: client?.nationality || "",
+    passport_number: client?.passport_number || "",
+  });
+  const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
+
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const setPw = (k, v) => setPwForm(f => ({ ...f, [k]: v }));
+
+  function showToast(msg) { setToast(msg); setTimeout(() => setToast(""), 3000); }
+
+  async function saveProfile() {
+    if (!form.full_name.trim()) { showToast("⚠️ الاسم مطلوب"); return; }
+    setSaving(true);
+    try {
+      if (client?.id) {
+        const { data, error } = await supabase
+          .from("clients")
+          .update({ full_name: form.full_name, phone: form.phone, address: form.address, nationality: form.nationality, passport_number: form.passport_number })
+          .eq("id", client.id)
+          .select()
+          .single();
+        if (error) throw error;
+        onUpdate(data);
+      }
+      setEditing(false);
+      showToast("✅ تم حفظ البيانات");
+    } catch (e) {
+      showToast("❌ " + e.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function changePassword() {
+    if (pwForm.next !== pwForm.confirm) { showToast("⚠️ كلمتا المرور غير متطابقتين"); return; }
+    if (pwForm.next.length < 6) { showToast("⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل"); return; }
+    setSaving(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: pwForm.next });
+      if (error) throw error;
+      setPwForm({ current: "", next: "", confirm: "" });
+      setPwMode(false);
+      showToast("✅ تم تغيير كلمة المرور");
+    } catch (e) {
+      showToast("❌ " + e.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const initial = (client?.full_name || user?.email || "A")[0].toUpperCase();
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Toast */}
+      {toast && (
+        <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", background: "#1a1a1a", color: "#fff", padding: "10px 24px", borderRadius: 30, fontSize: 13, zIndex: 9999, border: `1px solid ${GOLD}44`, whiteSpace: "nowrap" }}>
+          {toast}
+        </div>
+      )}
+
+      {/* Avatar + name */}
+      <div style={{ ...S.card, padding: "28px 24px", display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }}>
+        <div style={{ width: 72, height: 72, borderRadius: "50%", background: `linear-gradient(135deg, ${GOLD}, #f0d080)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 900, color: "#000", flexShrink: 0 }}>
+          {initial}
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 4 }}>{client?.full_name || "—"}</div>
+          <div style={{ color: MUTED, fontSize: 13, marginBottom: 4 }}>{user?.email}</div>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: `${GOLD}18`, border: `1px solid ${GOLD}33`, borderRadius: 20, padding: "3px 12px", fontSize: 12, color: GOLD, fontWeight: 700 }}>
+            👑 عميل متميز
+          </div>
+        </div>
+        {!editing && (
+          <button onClick={() => setEditing(true)} style={{ ...S.ghost, fontSize: 13, padding: "9px 18px", whiteSpace: "nowrap" }}>
+            ✏️ تعديل البيانات
+          </button>
+        )}
+      </div>
+
+      {/* Info / Edit form */}
+      <div style={{ ...S.card, padding: 24 }}>
+        <div style={{ color: GOLD, fontWeight: 700, fontSize: 14, marginBottom: 18 }}>📋 البيانات الشخصية</div>
+
+        {!editing ? (
+          /* View mode */
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px,1fr))", gap: 0 }}>
+            {[
+              ["👤 الاسم الكامل", form.full_name || "—"],
+              ["📧 البريد الإلكتروني", user?.email || "—"],
+              ["📞 رقم الهاتف", form.phone || "—"],
+              ["🏠 العنوان", form.address || "—"],
+              ["🌍 الجنسية", form.nationality || "—"],
+              ["🛂 رقم جواز السفر", form.passport_number ? form.passport_number.replace(/.(?=.{4})/g, "*") : "—"],
+            ].map(([label, value]) => (
+              <div key={label} style={{ padding: "12px 0", borderBottom: `1px solid ${BORDER}` }}>
+                <div style={{ color: MUTED, fontSize: 11, marginBottom: 4 }}>{label}</div>
+                <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: label.includes("جواز") ? ".15em" : "normal" }}>{value}</div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          /* Edit mode */
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {[
+              ["full_name",      "👤 الاسم الكامل",       "text",  "محمد عبدالله"],
+              ["phone",          "📞 رقم الهاتف",          "tel",   "+971 50 000 0000"],
+              ["address",        "🏠 العنوان",             "text",  "دبي، الإمارات"],
+              ["nationality",    "🌍 الجنسية",             "text",  "سوري / إماراتي..."],
+              ["passport_number","🛂 رقم جواز السفر",      "text",  "A12345678"],
+            ].map(([key, label, type, ph]) => (
+              <div key={key}>
+                <label style={{ display: "block", color: MUTED, fontSize: 12, marginBottom: 5 }}>{label}</label>
+                <input
+                  type={type} value={form[key]} placeholder={ph}
+                  onChange={e => set(key, e.target.value)}
+                  style={S.input}
+                />
+              </div>
+            ))}
+            <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+              <button onClick={saveProfile} disabled={saving} style={{ ...S.btn, flex: 1, opacity: saving ? .7 : 1 }}>
+                {saving ? "جارٍ الحفظ..." : "💾 حفظ البيانات"}
+              </button>
+              <button onClick={() => setEditing(false)} style={{ ...S.ghost, flex: 1 }}>إلغاء</button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Security */}
+      <div style={{ ...S.card, padding: 24 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: pwMode ? 18 : 0 }}>
+          <div style={{ color: GOLD, fontWeight: 700, fontSize: 14 }}>🔐 الأمان وكلمة المرور</div>
+          {!pwMode && (
+            <button onClick={() => setPwMode(true)} style={{ ...S.ghost, fontSize: 12, padding: "7px 14px" }}>تغيير كلمة المرور</button>
+          )}
+        </div>
+        {pwMode && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {[
+              ["next",    "كلمة المرور الجديدة"],
+              ["confirm", "تأكيد كلمة المرور"],
+            ].map(([k, label]) => (
+              <div key={k}>
+                <label style={{ display: "block", color: MUTED, fontSize: 12, marginBottom: 5 }}>{label}</label>
+                <input type="password" value={pwForm[k]} onChange={e => setPw(k, e.target.value)} style={S.input} placeholder="••••••••" />
+              </div>
+            ))}
+            <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+              <button onClick={changePassword} disabled={saving} style={{ ...S.btn, flex: 1, opacity: saving ? .7 : 1 }}>
+                {saving ? "جارٍ التحديث..." : "🔐 تحديث كلمة المرور"}
+              </button>
+              <button onClick={() => setPwMode(false)} style={{ ...S.ghost, flex: 1 }}>إلغاء</button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Account info */}
+      <div style={{ ...S.card, padding: "14px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+        <div style={{ color: MUTED, fontSize: 12 }}>
+          🗓 عضو منذ: {user?.created_at ? new Date(user.created_at).toLocaleDateString("ar", { year: "numeric", month: "long" }) : "—"}
+        </div>
+        <div style={{ display: "flex", gap: 6, fontSize: 12, color: MUTED }}>
+          <span>معرّف الحساب:</span>
+          <span style={{ fontFamily: "monospace", letterSpacing: ".05em" }}>{user?.id?.slice(0, 8)}...</span>
         </div>
       </div>
     </div>
