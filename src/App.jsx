@@ -8,6 +8,9 @@ import { ContentProvider } from "./context/ContentContext";
 import SiteAdminPage from "./pages/SiteAdminPage";
 
 import MainWebsite from "./MainWebsite";
+import VisaCenterPage from "./pages/visa/VisaCenterPage";
+import CompanyFormation from "./pages/CompanyFormation";
+import KnowledgeCenter from "./pages/KnowledgeCenter";
 
 import Dashboard from "./dashboard/Dashboard";
 import Login from "./pages/Login";
@@ -210,7 +213,11 @@ export default function App() {
           </ProtectedRoute>
         } />
 
+        <Route path="/visa-center" element={<VisaCenterPage />} />
+        <Route path="/company-formation" element={<CompanyFormation />} />
+        <Route path="/knowledge-center" element={<KnowledgeCenter />} />
         <Route path="/track-request" element={<TrackRequest />} />
+        <Route path="/track-application" element={<TrackRequest />} />
         <Route path="/verify-invoice" element={<VerifyInvoice />} />
         <Route path="/portal" element={<ClientPortal />} />
         <Route path="/visa/:slug" element={<VisaRoutePage />} />

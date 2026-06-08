@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- Home -->
+  <url>
+    <loc>https://alkownglobal.com/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Visa Checker -->
+  <url>
+    <loc>https://alkownglobal.com/visa-checker</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Client Portal -->
+  <url>
+    <loc>https://alkownglobal.com/portal</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Track Request -->
+  <url>
+    <loc>https://alkownglobal.com/track-request</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Verify Invoice -->
+  <url>
+    <loc>https://alkownglobal.com/verify-invoice</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- ── Dynamic Visa Routes ──────────────────────────────── -->
+  <!-- Syria routes -->
+  <url><loc>https://alkownglobal.com/visa/syria-to-uae</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://alkownglobal.com/visa/syria-to-turkey</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://alkownglobal.com/visa/syria-to-jordan</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/syria-to-georgia</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/syria-to-malaysia</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/syria-to-germany</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://alkownglobal.com/visa/syria-to-japan</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://alkownglobal.com/visa/syria-to-united-kingdom</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/syria-to-united-states</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/syria-to-canada</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/syria-to-russia</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://alkownglobal.com/visa/syria-to-thailand</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://alkownglobal.com/visa/syria-to-azerbaijan</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://alkownglobal.com/visa/syria-to-france</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+
+  <!-- Jordan routes -->
+  <url><loc>https://alkownglobal.com/visa/jordan-to-uae</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://alkownglobal.com/visa/jordan-to-turkey</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/jordan-to-germany</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://alkownglobal.com/visa/jordan-to-japan</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/jordan-to-united-kingdom</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/jordan-to-malaysia</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://alkownglobal.com/visa/jordan-to-georgia</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+
+  <!-- Saudi Arabia routes -->
+  <url><loc>https://alkownglobal.com/visa/saudi-arabia-to-uae</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://alkownglobal.com/visa/saudi-arabia-to-turkey</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/saudi-arabia-to-japan</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/saudi-arabia-to-germany</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://alkownglobal.com/visa/saudi-arabia-to-united-kingdom</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/saudi-arabia-to-malaysia</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+
+  <!-- Egypt routes -->
+  <url><loc>https://alkownglobal.com/visa/egypt-to-uae</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://alkownglobal.com/visa/egypt-to-turkey</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/egypt-to-germany</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://alkownglobal.com/visa/egypt-to-georgia</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+
+  <!-- Iraq routes -->
+  <url><loc>https://alkownglobal.com/visa/iraq-to-uae</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://alkownglobal.com/visa/iraq-to-turkey</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/iraq-to-georgia</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://alkownglobal.com/visa/iraq-to-malaysia</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+
+  <!-- Lebanon routes -->
+  <url><loc>https://alkownglobal.com/visa/lebanon-to-uae</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://alkownglobal.com/visa/lebanon-to-turkey</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/lebanon-to-germany</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+
+  <!-- Pakistan routes -->
+  <url><loc>https://alkownglobal.com/visa/pakistan-to-uae</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://alkownglobal.com/visa/pakistan-to-turkey</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/pakistan-to-germany</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/pakistan-to-malaysia</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+
+  <!-- India routes -->
+  <url><loc>https://alkownglobal.com/visa/india-to-uae</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://alkownglobal.com/visa/india-to-turkey</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/india-to-germany</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://alkownglobal.com/visa/india-to-malaysia</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+
+</urlset>

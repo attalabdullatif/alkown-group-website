@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useContent } from "./context/ContentContext";
+import { useAuth } from "./context/AuthContext";
 import { supabase } from "./lib/supabase";
 import { createRequestForClient, findOrCreateClient, sendContactNotification } from "./lib/crm";
 import VisaCenterPage from "./pages/visa/VisaCenterPage";
@@ -7,9 +8,45 @@ import VisaResultPage from "./pages/visa/VisaResultPage";
 import VisaApplicationPage from "./pages/visa/VisaApplicationPage";
 import VisaAdminIntelligencePage from "./pages/visa/VisaAdminIntelligence";
 import VisaTrackPage from "./pages/visa/VisaTrackPage";
-import KnowledgeCenter from "./pages/KnowledgeCenter";
-import CompanyFormation from "./pages/CompanyFormation";
 import { setSEOMeta, setStructuredData, ORGANIZATION_SCHEMA, PAGE_SEO } from "./services/seoService";
+
+// ── Company Formation Data ────────────────────────────────────
+const CF_JURISDICTIONS = [
+  { flag:"🇦🇪", nameAr:"دبي — البر الرئيسي", nameEn:"Dubai Mainland",    timeAr:"5-10 أيام",   timeEn:"5-10 days",   descAr:"تجارة محلية حرة، بدون قيود قطاعية",          descEn:"Free local trade, no sector restrictions" },
+  { flag:"🏢", nameAr:"دبي — المنطقة الحرة", nameEn:"Dubai Free Zone",   timeAr:"3-7 أيام",    timeEn:"3-7 days",    descAr:"ملكية 100%، إعفاء ضريبي 50 عاماً",            descEn:"100% ownership, 50-year tax exemption" },
+  { flag:"🇹🇷", nameAr:"تركيا",              nameEn:"Turkey",             timeAr:"7-14 يوم",    timeEn:"7-14 days",   descAr:"بيئة أعمال قوية، سوق أوروبي وآسيوي",         descEn:"Strong business environment, EU & Asian market" },
+  { flag:"🇬🇧", nameAr:"المملكة المتحدة",    nameEn:"United Kingdom",     timeAr:"24-48 ساعة",  timeEn:"24-48 hours", descAr:"أسرع تسجيل شركات في العالم، سمعة عالمية",    descEn:"Fastest registration globally, worldwide reputation" },
+];
+const CF_STEPS = {
+  ar: [{ icon:"💬", t:"استشارة مجانية" },{ icon:"🏢", t:"اختيار نوع الشركة" },{ icon:"📄", t:"تجهيز الوثائق" },{ icon:"✅", t:"التسجيل الرسمي" },{ icon:"📋", t:"الحصول على الرخصة" },{ icon:"🏦", t:"فتح حساب بنكي" }],
+  en: [{ icon:"💬", t:"Free Consultation" },{ icon:"🏢", t:"Choose Company Type" },{ icon:"📄", t:"Document Preparation" },{ icon:"✅", t:"Official Registration" },{ icon:"📋", t:"License Issuance" },{ icon:"🏦", t:"Bank Account Opening" }],
+};
+const CF_PACKAGES = [
+  { icon:"🚀", nameAr:"باقة المبتدئ",  nameEn:"Starter",  priceAr:"يبدأ من 3,500 درهم", priceEn:"From AED 3,500", popular:false, featuresAr:["تسجيل الشركة","رخصة تجارية","عنوان تجاري","خدمة العملاء"], featuresEn:["Company Registration","Trade License","Business Address","Customer Support"] },
+  { icon:"💼", nameAr:"باقة الأعمال",  nameEn:"Business", priceAr:"يبدأ من 7,000 درهم", priceEn:"From AED 7,000", popular:true,  featuresAr:["كل ما في المبتدئ","فيزا المدير","حساب بنكي","مستشار قانوني","خدمة PRO"], featuresEn:["All Starter features","Manager Visa","Bank Account","Legal Advisor","PRO Services"] },
+  { icon:"👑", nameAr:"باقة المستثمر", nameEn:"Investor", priceAr:"حسب الطلب",           priceEn:"Custom Pricing", popular:false, featuresAr:["كل ما في الأعمال","إقامة المستثمر","الفيزا الذهبية","خدمة VIP","مستشار ضريبي"], featuresEn:["All Business features","Investor Residency","Golden Visa","Full VIP Service","Tax Advisor"] },
+];
+const CF_SERVICES = {
+  ar: ["تأسيس سريع خلال 48 ساعة","امتثال قانوني كامل","خدمة متكاملة من التسجيل للبنك","4 مناطق قضائية","دعم VIP شخصي","أسعار تنافسية ومرنة","فيزا المستثمر والإقامة","خدمة PRO متكاملة"],
+  en: ["Fast setup in 48 hours","Full legal compliance","End-to-end service","4 jurisdictions","Personal VIP support","Competitive pricing","Investor visa & residency","Full PRO services"],
+};
+
+// ── Knowledge Center Data ────────────────────────────────────
+const KC_CATEGORIES = {
+  all:       { ar:"الكل",           en:"All",              icon:"🌐" },
+  visa:      { ar:"أدلة التأشيرة", en:"Visa Guides",       icon:"🛂" },
+  residency: { ar:"الإقامة",        en:"Residency",         icon:"🏠" },
+  company:   { ar:"تأسيس الشركات", en:"Company Formation", icon:"🏢" },
+  travel:    { ar:"السفر",          en:"Travel Guides",     icon:"✈️" },
+};
+const KC_DEFAULT_ARTICLES = [
+  { id:"kc1", category:"visa",      featured:true,  date:"2025-01-15", readTime:5,  titleAr:"كيفية الحصول على تأشيرة الإمارات للسوريين",      titleEn:"How Syrians Can Get UAE Visa",            excerptAr:"دليل شامل لمتطلبات تأشيرة الإمارات — الوثائق والرسوم ومدة المعالجة.",         excerptEn:"Complete guide to UAE visa requirements for Syrian passport holders.",            contentAr:"تتطلب تأشيرة الإمارات للسوريين: جواز ساري 6 أشهر، صورة شخصية، كشف حساب، تأمين سفر.", contentEn:"UAE visa for Syrians requires: valid passport (6+ months), photo, bank statement, travel insurance." },
+  { id:"kc2", category:"visa",      featured:true,  date:"2025-01-10", readTime:8,  titleAr:"دليل تأشيرة شنغن للعرب",                          titleEn:"Schengen Visa Guide for Arabs",           excerptAr:"كل ما تحتاجه عن تأشيرة شنغن — 27 دولة أوروبية بتأشيرة واحدة.",              excerptEn:"Everything about the Schengen visa — 27 European countries, one visa.",           contentAr:"تتيح تأشيرة شنغن السفر لـ 27 دولة. المطلوب: جواز، حجز طيران وفندق، تأمين 30,000 يورو.", contentEn:"Schengen visa covers 27 countries. Required: passport, flight/hotel booking, €30,000 insurance." },
+  { id:"kc3", category:"residency", featured:true,  date:"2025-01-12", readTime:10, titleAr:"البرتغال: الجنسية بالاستثمار — الدليل الكامل",    titleEn:"Portugal Golden Visa — Complete Guide",   excerptAr:"كيف تحصل على الإقامة البرتغالية وجواز السفر الأوروبي عبر الاستثمار.",        excerptEn:"How to get Portuguese residency and EU passport through investment.",             contentAr:"يتطلب البرنامج استثمار 250,000+ يورو. بعد 5 سنوات يمكن التقدم للجنسية.",       contentEn:"Program requires €250,000+ investment. After 5 years you can apply for citizenship." },
+  { id:"kc4", category:"company",   featured:true,  date:"2025-01-14", readTime:9,  titleAr:"تأسيس شركة في الإمارات — خطوة بخطوة",            titleEn:"UAE Company Setup — Step by Step",        excerptAr:"كيفية تأسيس شركة في دبي من البداية حتى الحصول على الترخيص.",                 excerptEn:"How to set up a company in Dubai from registration to license.",                  contentAr:"الخطوات: اختيار نوع الشركة، تسجيل الاسم، الترخيص، فتح حساب بنكي.",             contentEn:"Steps: choose company type, register name, get license, open bank account." },
+  { id:"kc5", category:"travel",    featured:false, date:"2025-01-11", readTime:8,  titleAr:"السياحة في تركيا — الدليل الشامل",                titleEn:"Tourism in Turkey — Complete Guide",      excerptAr:"أفضل المدن والمعالم في تركيا وأفضل أوقات الزيارة.",                          excerptEn:"Best cities and attractions in Turkey with timing tips.",                         contentAr:"أبرز الوجهات: إسطنبول، كابادوكيا، أنطاليا. أفضل وقت: ربيع وخريف.",             contentEn:"Top destinations: Istanbul, Cappadocia, Antalya. Best time: spring and autumn." },
+  { id:"kc6", category:"visa",      featured:false, date:"2025-01-05", readTime:6,  titleAr:"تأشيرة المملكة المتحدة من الإمارات",              titleEn:"UK Visa from UAE",                        excerptAr:"خطوات التقديم للتأشيرة البريطانية من الإمارات للمقيمين العرب.",               excerptEn:"Step-by-step UK visa application guide for UAE residents.",                       contentAr:"يمكن التقديم إلكترونياً. المطلوب: جواز، كشف حساب، خطاب توظيف أو أعمال.",      contentEn:"Apply online. Required: passport, bank statement, employment or business letter." },
+];
 
 /* ═══════════════════════════════════════════════════════════════
    ALKOWN GROUP — Complete Bilingual Luxury Corporate Website
@@ -291,7 +328,7 @@ const T = {
       ]
     },
     citizenship: {
-      hero: "برامج الجنسية",
+      hero: "برامج الإقامة الدائمة\nبرامج الجنسية الثانية",
       heroSub: "طريقك نحو التنقل العالمي",
       intro: "تتخصص مجموعة الكون في برامج الجنسية والإقامة المتميزة عبر الاستثمار. يرشدك خبراؤنا القانونيون طوال العملية بأكملها — من اختيار البرنامج حتى تسليم جواز السفر.",
       programs: [
@@ -933,6 +970,7 @@ export default function AlkownGroup() {
     { k: "visa-center",      l: t.nav["visa-center"] },
     { k: "residency",        l: t.nav.residency },
     { k: "company-formation",l: t.nav["company-formation"] },
+    { k: "knowledge",        l: t.nav.knowledge },
     { k: "about",            l: t.nav.about },
     { k: "contact",          l: t.nav.contact },
   ];
@@ -1093,8 +1131,8 @@ export default function AlkownGroup() {
         {page === "visa-apply" && <VisaApplicationPage lang={lang} ff={ff} setPage={setPage} initialParams={visaParams} />}
         {page === "visa-admin" && <VisaAdminIntelligencePage />}
         {page === "visa-track" && <VisaTrackPage lang={lang} ff={ff} setPage={setPage} />}
-        {page === "knowledge" && <KnowledgeCenter lang={lang} ff={ff} setPage={setPage} />}
-        {page === "company-formation" && <CompanyFormation lang={lang} ff={ff} setPage={setPage} />}
+        {page === "knowledge" && <KnowledgeCenterPage lang={lang} ff={ff} setPage={setPage} />}
+        {page === "company-formation" && <CompanyFormationPage lang={lang} ff={ff} setPage={setPage} />}
         {page === "residency" && <CitizenshipPage t={t} lang={lang} ff={ff} setPage={setPage} />}
       </div>
 
@@ -1154,14 +1192,11 @@ function HomePage({ t, lang, ff, setPage }) {
 
           <p className="fu3" style={{ fontSize: "clamp(.8rem,1.8vw,.92rem)", color: C.g400, letterSpacing: ".18em", marginBottom: 44 }}>{t.hero.sub}</p>
 
-          <div className="fu4" style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
-            <button className="gbtn" style={{ fontFamily: ff }} onClick={() => setPage("visa-center")}>{t.hero.cta1}</button>
-            <button className="obtn" style={{ fontFamily: ff }} onClick={() => setPage("visa-apply")}>{t.hero.cta2}</button>
-          </div>
+        
           {/* Trust badges */}
           <div className="fu4" style={{ display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap", marginTop: 36 }}>
             {[
-              lang === "ar" ? "✅ خدمة موثوقة منذ 2014" : "✅ Trusted since 2014",
+              lang === "ar" ? " خدمة موثوقة منذ 2015" : " Trusted since 2015",
               lang === "ar" ? "🌍 195+ دولة" : "🌍 195+ Countries",
               lang === "ar" ? "⚡ نتائج خلال دقائق" : "⚡ Results in minutes",
             ].map((b, i) => (
@@ -1559,6 +1594,456 @@ function CitizenshipPage({ t, lang, ff, setPage }) {
         </div>
       </section>
     </>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COMPANY FORMATION PAGE
+// ═══════════════════════════════════════════════════════════════
+function CompanyFormationPage({ lang, ff, setPage }) {
+  const ar = lang === "ar";
+  const steps = ar ? CF_STEPS.ar : CF_STEPS.en;
+  const services = ar ? CF_SERVICES.ar : CF_SERVICES.en;
+  return (
+    <>
+      <PageHero
+        title={ar ? "تأسيس الشركات" : "Company Formation"}
+        subtitle={ar ? "الإمارات · تركيا · المملكة المتحدة · والعالم" : "UAE · Turkey · UK · Worldwide"}
+      />
+
+      {/* Stats */}
+      <div style={{ background: C.beige, borderBottom: `1px solid rgba(201,168,76,.12)` }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))" }}>
+          {[
+            [ar ? "+500" : "500+", ar ? "شركة مؤسسة" : "Companies Founded"],
+            [ar ? "48h" : "48h", ar ? "أسرع تأسيس" : "Fastest Setup"],
+            [ar ? "4" : "4", ar ? "مناطق قضائية" : "Jurisdictions"],
+            [ar ? "98%" : "98%", ar ? "نسبة النجاح" : "Success Rate"],
+          ].map(([v, l], i, arr) => (
+            <div key={i} style={{ textAlign: "center", padding: "28px 12px", borderInlineEnd: i < arr.length - 1 ? `1px solid rgba(201,168,76,.12)` : "none" }}>
+              <div className="shimmer" style={{ fontSize: "2rem", fontWeight: 800, fontFamily: "Georgia,serif", display: "block" }}>{v}</div>
+              <div style={{ fontSize: ".72rem", color: C.g400, letterSpacing: ".15em", textTransform: "uppercase", marginTop: 6 }}>{l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <section style={{ padding: "80px clamp(20px,6vw,80px)", background: "#fff" }}>
+        <div style={{ maxWidth: 1260, margin: "0 auto" }}>
+
+          {/* Jurisdictions */}
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <Label text={ar ? "المناطق المتاحة" : "Available Jurisdictions"} />
+            <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.2rem)", fontWeight: 800, color: C.g800, marginTop: 8 }}>
+              {ar ? "نؤسس شركتك في" : "We Register Your Company In"}
+            </h2>
+            <Divider />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 18, marginBottom: 72 }}>
+            {CF_JURISDICTIONS.map((j, i) => (
+              <div key={i} className="card" style={{ padding: "36px 26px", textAlign: "center" }}>
+                <div style={{ fontSize: "2.8rem", marginBottom: 10 }}>{j.flag}</div>
+                <h3 style={{ fontSize: "1.05rem", color: C.g800, fontWeight: 700, marginBottom: 4 }}>{ar ? j.nameAr : j.nameEn}</h3>
+                <div style={{ color: C.gold, fontSize: ".72rem", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 10 }}>⏱ {ar ? j.timeAr : j.timeEn}</div>
+                <div className="gl" style={{ margin: "0 auto 12px" }} />
+                <p style={{ color: C.g400, fontSize: ".82rem", lineHeight: 1.65 }}>{ar ? j.descAr : j.descEn}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Process Steps */}
+          <div style={{ textAlign: "center", marginBottom: 36 }}>
+            <Label text={ar ? "خطوات التأسيس" : "The Process"} />
+            <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.2rem)", fontWeight: 800, color: C.g800, marginTop: 8 }}>
+              {ar ? "كيف نؤسس شركتك؟" : "How We Set Up Your Company"}
+            </h2>
+            <Divider />
+          </div>
+          <div style={{ background: `linear-gradient(135deg,${C.dark},${C.darkMid})`, borderRadius: 12, padding: "48px clamp(20px,4vw,52px)", marginBottom: 72, border: `1px solid rgba(201,168,76,.15)` }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(150px,1fr))", gap: 28 }}>
+              {steps.map((step, i) => (
+                <div key={i} style={{ textAlign: "center" }}>
+                  <div style={{ position: "relative", marginBottom: 14 }}>
+                    <div style={{ width: 52, height: 52, borderRadius: "50%", background: `linear-gradient(135deg,${C.goldDark},${C.gold})`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto", fontSize: "1.2rem", boxShadow: `0 4px 18px rgba(201,168,76,.3)` }}>
+                      {step.icon}
+                    </div>
+                    <div style={{ position: "absolute", top: -5, insetInlineEnd: -2, width: 20, height: 20, borderRadius: "50%", background: C.gold, display: "flex", alignItems: "center", justifyContent: "center", fontSize: ".6rem", fontWeight: 800, color: C.dark }}>
+                      {i + 1}
+                    </div>
+                  </div>
+                  <div style={{ color: "rgba(255,255,255,.8)", fontSize: ".84rem", lineHeight: 1.5, fontWeight: 500 }}>{step.t}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Packages */}
+          <div style={{ textAlign: "center", marginBottom: 36 }}>
+            <Label text={ar ? "باقاتنا" : "Our Packages"} />
+            <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.2rem)", fontWeight: 800, color: C.g800, marginTop: 8 }}>
+              {ar ? "اختر الباقة المناسبة" : "Choose the Right Package"}
+            </h2>
+            <Divider />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 20, marginBottom: 72 }}>
+            {CF_PACKAGES.map((pkg, i) => (
+              <div key={i} className="card" style={{ padding: "36px 28px", textAlign: "center", border: `2px solid ${pkg.popular ? C.gold : "rgba(201,168,76,.12)"}`, position: "relative", boxShadow: pkg.popular ? `0 12px 40px rgba(201,168,76,.15)` : "none" }}>
+                {pkg.popular && (
+                  <div style={{ position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)", background: `linear-gradient(135deg,${C.goldDark},${C.gold})`, color: C.dark, padding: "4px 16px", borderRadius: 20, fontSize: ".68rem", fontWeight: 800, whiteSpace: "nowrap" }}>
+                    ⭐ {ar ? "الأكثر طلباً" : "Most Popular"}
+                  </div>
+                )}
+                <div style={{ fontSize: "2.4rem", marginBottom: 12 }}>{pkg.icon}</div>
+                <h3 style={{ fontSize: "1.1rem", color: C.g800, fontWeight: 700, marginBottom: 4 }}>{ar ? pkg.nameAr : pkg.nameEn}</h3>
+                <div style={{ color: C.gold, fontSize: ".72rem", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 10 }}>{ar ? pkg.priceAr : pkg.priceEn}</div>
+                <div className="gl" style={{ margin: "0 auto 18px" }} />
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 24, textAlign: ar ? "right" : "left" }}>
+                  {(ar ? pkg.featuresAr : pkg.featuresEn).map((f, j) => (
+                    <div key={j} style={{ display: "flex", alignItems: "center", gap: 8, color: C.g600, fontSize: ".86rem" }}>
+                      <span style={{ color: C.gold, fontWeight: 800 }}>✓</span>{f}
+                    </div>
+                  ))}
+                </div>
+                <button className={pkg.popular ? "gbtn" : "obtn"} style={{ fontFamily: ff, width: "100%", fontSize: ".86rem" }} onClick={() => setPage("booking")}>
+                  {ar ? "ابدأ الآن" : "Get Started"}
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Services list — same style as CitizenshipPage */}
+          <div style={{ textAlign: "center", marginBottom: 36 }}>
+            <Label text={ar ? "ما نقدمه" : "What We Offer"} />
+            <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.2rem)", fontWeight: 800, color: C.g800, marginTop: 8 }}>
+              {ar ? "خدمات متكاملة من البداية للنهاية" : "End-to-End Services"}
+            </h2>
+            <Divider />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 14, marginBottom: 56 }}>
+            {services.map((s, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "18px 22px", background: C.beige, border: `1px solid rgba(201,168,76,.15)`, borderRadius: 2 }}>
+                <div style={{ width: 8, height: 8, background: C.gold, transform: "rotate(45deg)", flexShrink: 0 }} />
+                <span style={{ color: C.g800, fontSize: ".9rem", fontWeight: 500 }}>{s}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ textAlign: "center" }}>
+            <button className="gbtn" style={{ fontFamily: ff }} onClick={() => setPage("booking")}>
+              {ar ? "احجز استشارة مجانية" : "Book Free Consultation"}
+            </button>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// KNOWLEDGE CENTER PAGE
+// ═══════════════════════════════════════════════════════════════
+function KnowledgeCenterPage({ lang, ff, setPage }) {
+  const ar = lang === "ar";
+  const { role } = useAuth() || {};
+  const canManage = role === "admin" || role === "manager" || role === "staff";
+
+  const [activeCat, setActiveCat]     = useState("all");
+  const [search, setSearch]           = useState("");
+  const [articles, setArticles]       = useState(KC_DEFAULT_ARTICLES);
+  const [loading, setLoading]         = useState(false);
+  const [editorOpen, setEditorOpen]   = useState(false);
+  const [editing, setEditing]         = useState(null);
+  const [delConfirm, setDelConfirm]   = useState(null);
+  const [toast, setToast]             = useState("");
+
+  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
+
+  const loadArticles = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.from("knowledge_articles").select("*").order("date", { ascending: false });
+      if (!error && data?.length) setArticles(data);
+    } catch { /* use defaults */ } finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { loadArticles(); }, [loadArticles]);
+
+  const filtered = articles.filter(a => {
+    if (activeCat !== "all" && a.category !== activeCat) return false;
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return a.titleAr?.includes(search) || a.titleEn?.toLowerCase().includes(q) || a.excerptAr?.includes(search) || a.excerptEn?.toLowerCase().includes(q);
+  });
+  const featured = filtered.filter(a => a.featured);
+  const regular  = filtered.filter(a => !a.featured);
+
+  async function saveArticle(form) {
+    const isDefault = KC_DEFAULT_ARTICLES.find(d => d.id === form.id);
+    if (form.id && !isDefault) {
+      const { id, ...payload } = form;
+      const { error } = await supabase.from("knowledge_articles").update(payload).eq("id", id);
+      if (error) throw error;
+      await loadArticles();
+    } else if (!form.id) {
+      const { error } = await supabase.from("knowledge_articles").insert([form]);
+      if (error) throw error;
+      await loadArticles();
+    } else {
+      setArticles(prev => prev.map(a => a.id === form.id ? { ...form } : a));
+    }
+    showToast(ar ? "✅ تم الحفظ" : "✅ Saved");
+  }
+
+  async function deleteArticle(id) {
+    if (KC_DEFAULT_ARTICLES.find(d => d.id === id)) {
+      setArticles(prev => prev.filter(a => a.id !== id));
+    } else {
+      await supabase.from("knowledge_articles").delete().eq("id", id);
+      await loadArticles();
+    }
+    setDelConfirm(null);
+    showToast(ar ? "🗑️ تم الحذف" : "🗑️ Deleted");
+  }
+
+  return (
+    <>
+      <PageHero
+        title={ar ? "مركز المعرفة" : "Knowledge Center"}
+        subtitle={ar ? "أدلة التأشيرات · الإقامة · الشركات · السفر" : "Visa Guides · Residency · Company · Travel"}
+      >
+        {/* Search inside hero */}
+        <div style={{ position: "relative", maxWidth: 500, margin: "0 auto" }}>
+          <input
+            value={search} onChange={e => setSearch(e.target.value)}
+            placeholder={ar ? "ابحث في المقالات..." : "Search articles..."}
+            style={{ width: "100%", padding: "13px 48px 13px 18px", borderRadius: 6, border: `1px solid rgba(201,168,76,.35)`, background: "rgba(255,255,255,.08)", color: "#fff", fontSize: ".92rem", outline: "none", fontFamily: ff, backdropFilter: "blur(10px)", boxSizing: "border-box" }}
+          />
+          <span style={{ position: "absolute", [ar ? "left" : "right"]: 14, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,.4)", fontSize: "1rem" }}>🔍</span>
+        </div>
+      </PageHero>
+
+      {/* Toast */}
+      {toast && (
+        <div style={{ position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)", background: C.dark, color: "#fff", padding: "11px 24px", borderRadius: 40, fontSize: ".86rem", zIndex: 99999, boxShadow: "0 8px 32px rgba(0,0,0,.3)", border: `1px solid rgba(201,168,76,.3)` }}>{toast}</div>
+      )}
+
+      <section style={{ padding: "64px clamp(20px,6vw,80px)", background: "#fff" }}>
+        <div style={{ maxWidth: 1260, margin: "0 auto" }}>
+
+          {/* Toolbar */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 44, flexWrap: "wrap" }}>
+            {Object.entries(KC_CATEGORIES).map(([key, cat]) => (
+              <button key={key} onClick={() => setActiveCat(key)} style={{
+                padding: "8px 16px", borderRadius: 40, border: `1.5px solid`,
+                borderColor: activeCat === key ? C.gold : "rgba(201,168,76,.2)",
+                background: activeCat === key ? `rgba(201,168,76,.1)` : "transparent",
+                color: activeCat === key ? C.gold : C.g400,
+                cursor: "pointer", fontFamily: ff, fontSize: ".82rem", fontWeight: activeCat === key ? 700 : 400, transition: "all .22s",
+              }}>
+                {cat.icon} {ar ? cat.ar : cat.en}
+              </button>
+            ))}
+            <span style={{ color: C.g400, fontSize: ".76rem", marginInlineStart: "auto" }}>{filtered.length} {ar ? "مقال" : "articles"}</span>
+            {canManage && (
+              <button onClick={() => { setEditing(null); setEditorOpen(true); }} className="gbtn" style={{ fontFamily: ff, fontSize: ".82rem", padding: "9px 20px" }}>
+                ✍️ {ar ? "مقال جديد" : "New Article"}
+              </button>
+            )}
+          </div>
+
+          {loading && <div style={{ textAlign: "center", padding: "48px 0", color: C.g400 }}>⏳ {ar ? "جاري التحميل..." : "Loading..."}</div>}
+
+          {/* Featured */}
+          {!loading && featured.length > 0 && activeCat === "all" && !search && (
+            <div style={{ marginBottom: 52 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+                <div style={{ width: 4, height: 22, background: `linear-gradient(180deg,${C.gold},${C.goldLight})`, borderRadius: 2 }} />
+                <h2 style={{ color: C.g800, fontWeight: 700, fontSize: "1.05rem" }}>{ar ? "المقالات المميزة" : "Featured Articles"}</h2>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(320px,1fr))", gap: 20 }}>
+                {featured.map(a => <KcArticleCard key={a.id} article={a} lang={lang} ff={ff} canManage={canManage} onEdit={art => { setEditing(art); setEditorOpen(true); }} onDelete={id => setDelConfirm(id)} />)}
+              </div>
+            </div>
+          )}
+
+          {/* All / filtered */}
+          {!loading && (
+            <div>
+              {activeCat === "all" && !search && regular.length > 0 && (
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+                  <div style={{ width: 4, height: 22, background: `rgba(201,168,76,.35)`, borderRadius: 2 }} />
+                  <h2 style={{ color: C.g800, fontWeight: 700, fontSize: "1.05rem" }}>{ar ? "جميع المقالات" : "All Articles"}</h2>
+                </div>
+              )}
+              {filtered.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "60px 0" }}>
+                  <div style={{ fontSize: "3rem", marginBottom: 14 }}>📭</div>
+                  <p style={{ color: C.g400 }}>{ar ? "لا توجد مقالات" : "No articles found"}</p>
+                </div>
+              ) : (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 18 }}>
+                  {(search || activeCat !== "all" ? filtered : regular).map(a => (
+                    <KcArticleCard key={a.id} article={a} lang={lang} ff={ff} canManage={canManage} onEdit={art => { setEditing(art); setEditorOpen(true); }} onDelete={id => setDelConfirm(id)} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* CTA */}
+          <div style={{ marginTop: 64, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 14 }}>
+            {[
+              ar ? "برامج الإقامة بالاستثمار" : "Residency by Investment",
+              ar ? "تأسيس الشركات في الإمارات" : "UAE Company Formation",
+              ar ? "فحص متطلبات التأشيرة" : "Visa Requirements Check",
+              ar ? "الجنسية الثانية" : "Second Citizenship",
+            ].map((s, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "18px 22px", background: C.beige, border: `1px solid rgba(201,168,76,.15)`, borderRadius: 2 }}>
+                <div style={{ width: 8, height: 8, background: C.gold, transform: "rotate(45deg)", flexShrink: 0 }} />
+                <span style={{ color: C.g800, fontSize: ".9rem", fontWeight: 500 }}>{s}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ textAlign: "center", marginTop: 48 }}>
+            <button className="gbtn" style={{ fontFamily: ff }} onClick={() => setPage("visa-center")}>
+              {ar ? "🔍 فحص التأشيرة" : "🔍 Check Visa Requirements"}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Article Editor */}
+      {editorOpen && <KcArticleEditor article={editing} lang={lang} ff={ff} onSave={saveArticle} onClose={() => { setEditorOpen(false); setEditing(null); }} />}
+
+      {/* Delete Confirm */}
+      {delConfirm && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.55)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+          <div style={{ background: "#fff", borderRadius: 14, padding: "32px 36px", maxWidth: 360, textAlign: "center", fontFamily: ff }}>
+            <div style={{ fontSize: "2.5rem", marginBottom: 12 }}>🗑️</div>
+            <h3 style={{ color: C.g800, fontWeight: 700, marginBottom: 10 }}>{ar ? "حذف المقال؟" : "Delete Article?"}</h3>
+            <p style={{ color: C.g400, fontSize: ".86rem", marginBottom: 24 }}>{ar ? "لا يمكن التراجع عن هذا الإجراء." : "This cannot be undone."}</p>
+            <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+              <button onClick={() => setDelConfirm(null)} style={{ padding: "9px 20px", background: "transparent", border: "1px solid #ddd", borderRadius: 8, cursor: "pointer", fontFamily: ff }}>{ar ? "إلغاء" : "Cancel"}</button>
+              <button onClick={() => deleteArticle(delConfirm)} style={{ padding: "9px 20px", background: "#e53935", border: "none", borderRadius: 8, cursor: "pointer", color: "#fff", fontFamily: ff, fontWeight: 700 }}>{ar ? "حذف" : "Delete"}</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+// ── Article Card (used by KnowledgeCenterPage) ───────────────
+function KcArticleCard({ article, lang, ff, canManage, onEdit, onDelete }) {
+  const ar = lang === "ar";
+  const [showFull, setShowFull] = useState(false);
+  const title   = ar ? article.titleAr   : article.titleEn;
+  const excerpt = ar ? article.excerptAr : article.excerptEn;
+  const content = ar ? article.contentAr : article.contentEn;
+  const cat     = KC_CATEGORIES[article.category];
+  return (
+    <article className="card" style={{ display: "flex", flexDirection: "column", position: "relative", padding: 0 }}>
+      <div style={{ height: 3, background: `linear-gradient(90deg,${C.goldDark},${C.gold},${C.goldLight})` }} />
+      {canManage && (
+        <div style={{ position: "absolute", top: 14, [ar ? "left" : "right"]: 10, display: "flex", gap: 5, zIndex: 2 }}>
+          <button onClick={() => onEdit(article)} style={{ background: "rgba(201,168,76,.12)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 5, padding: "3px 8px", cursor: "pointer", fontSize: ".68rem", color: C.gold, fontWeight: 700 }}>✏️</button>
+          <button onClick={() => onDelete(article.id)} style={{ background: "rgba(229,57,53,.08)", border: "1px solid rgba(229,57,53,.22)", borderRadius: 5, padding: "3px 8px", cursor: "pointer", fontSize: ".68rem", color: "#e53935", fontWeight: 700 }}>🗑️</button>
+        </div>
+      )}
+      <div style={{ padding: "22px 22px 18px", flex: 1, display: "flex", flexDirection: "column" }}>
+        {article.featured && <span style={{ display: "inline-block", background: `rgba(201,168,76,.1)`, color: C.gold, fontSize: ".6rem", fontWeight: 700, letterSpacing: ".15em", padding: "3px 9px", borderRadius: 20, marginBottom: 10, border: `1px solid rgba(201,168,76,.22)`, width: "fit-content" }}>⭐ {ar ? "مميز" : "Featured"}</span>}
+        <span style={{ fontSize: ".66rem", color: C.g400, marginBottom: 7, display: "block" }}>{cat?.icon} {ar ? cat?.ar : cat?.en}</span>
+        <h3 style={{ color: C.g800, fontWeight: 700, fontSize: ".95rem", lineHeight: 1.5, marginBottom: 8, flex: 1, fontFamily: ff }}>{title}</h3>
+        <p style={{ color: C.g400, fontSize: ".82rem", lineHeight: 1.75, marginBottom: 12 }}>{excerpt}</p>
+        {showFull && content && (
+          <div style={{ background: C.beige, borderRadius: 7, padding: "12px 14px", marginBottom: 12, fontSize: ".83rem", lineHeight: 1.85, color: C.g600, borderInlineStart: `3px solid ${C.gold}` }}>{content}</div>
+        )}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ color: C.g400, fontSize: ".71rem" }}>📖 {article.readTime} {ar ? "دقائق" : "min"} · {article.date}</span>
+          <button onClick={() => setShowFull(v => !v)} style={{ background: "none", border: "none", cursor: "pointer", color: C.gold, fontSize: ".76rem", fontWeight: 700, padding: 0, fontFamily: ff }}>
+            {showFull ? (ar ? "إخفاء ↑" : "Hide ↑") : (ar ? "اقرأ المزيد ←" : "Read more →")}
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+// ── Article Editor Modal (used by KnowledgeCenterPage) ───────
+function KcArticleEditor({ article, lang, ff, onSave, onClose }) {
+  const ar = lang === "ar";
+  const isNew = !article?.id;
+  const [form, setForm] = useState({ titleAr:"", titleEn:"", excerptAr:"", excerptEn:"", contentAr:"", contentEn:"", category:"visa", featured:false, readTime:5, date:new Date().toISOString().split("T")[0], ...(article||{}) });
+  const [saving, setSaving] = useState(false);
+  const [err, setErr]       = useState("");
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  async function handleSave() {
+    if (!form.titleAr.trim() || !form.titleEn.trim()) { setErr(ar ? "العنوانان مطلوبان" : "Both titles are required"); return; }
+    setSaving(true); setErr("");
+    try { await onSave(form); onClose(); } catch(e) { setErr(e.message||"Error"); } finally { setSaving(false); }
+  }
+
+  const inp = { width:"100%", padding:"10px 13px", borderRadius:7, border:`1px solid rgba(201,168,76,.25)`, background:C.warmWhite, fontFamily:ff, fontSize:".86rem", color:C.g800, outline:"none", boxSizing:"border-box", marginBottom:12 };
+  const lbl = { display:"block", color:C.g600, fontSize:".75rem", fontWeight:700, marginBottom:4 };
+
+  return (
+    <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.6)", zIndex:9999, display:"flex", alignItems:"center", justifyContent:"center", padding:20 }} onClick={e => e.target===e.currentTarget && onClose()}>
+      <div style={{ background:"#fff", borderRadius:14, width:"100%", maxWidth:700, maxHeight:"90vh", overflow:"auto", fontFamily:ff, direction:ar?"rtl":"ltr" }}>
+        <div style={{ background:`linear-gradient(135deg,${C.dark},${C.darkMid})`, padding:"20px 26px", borderRadius:"14px 14px 0 0", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+          <h2 style={{ color:"#fff", fontWeight:700, fontSize:"1rem", margin:0 }}>{isNew?(ar?"✍️ مقال جديد":"✍️ New Article"):(ar?"✏️ تعديل المقال":"✏️ Edit Article")}</h2>
+          <button onClick={onClose} style={{ background:"rgba(255,255,255,.1)", border:"none", color:"#fff", borderRadius:7, width:30, height:30, cursor:"pointer", fontSize:"1rem" }}>×</button>
+        </div>
+        <div style={{ padding:24 }}>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:8 }}>
+            <div>
+              <label style={lbl}>{ar?"التصنيف":"Category"}</label>
+              <select value={form.category} onChange={e=>set("category",e.target.value)} style={{...inp,marginBottom:0}}>
+                {Object.entries(KC_CATEGORIES).filter(([k])=>k!=="all").map(([k,v])=><option key={k} value={k}>{v.icon} {ar?v.ar:v.en}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={lbl}>{ar?"تاريخ النشر":"Date"}</label>
+              <input type="date" value={form.date} onChange={e=>set("date",e.target.value)} style={{...inp,marginBottom:0}}/>
+            </div>
+          </div>
+          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16, padding:"9px 12px", background:C.beige, borderRadius:7 }}>
+            <input type="checkbox" id="kcfeat" checked={form.featured} onChange={e=>set("featured",e.target.checked)} style={{width:15,height:15,accentColor:C.gold}}/>
+            <label htmlFor="kcfeat" style={{...lbl,marginBottom:0,cursor:"pointer"}}>⭐ {ar?"مقال مميز":"Featured article"}</label>
+            <div style={{marginInlineStart:"auto",display:"flex",alignItems:"center",gap:6}}>
+              <input type="number" min={1} max={60} value={form.readTime} onChange={e=>set("readTime",+e.target.value)} style={{width:44,padding:"4px 7px",borderRadius:5,border:`1px solid rgba(201,168,76,.25)`,fontFamily:ff,textAlign:"center"}}/>
+              <span style={{color:C.g400,fontSize:".75rem"}}>{ar?"دقيقة":"min"}</span>
+            </div>
+          </div>
+          <div style={{ background:`rgba(201,168,76,.04)`, border:`1px solid rgba(201,168,76,.12)`, borderRadius:9, padding:14, marginBottom:12 }}>
+            <div style={{color:C.gold,fontSize:".68rem",fontWeight:700,letterSpacing:".1em",marginBottom:10}}>🇸🇦 العربية</div>
+            <label style={lbl}>{ar?"العنوان بالعربي":"Title (Arabic)"}</label>
+            <input value={form.titleAr} onChange={e=>set("titleAr",e.target.value)} placeholder="عنوان المقال بالعربي" style={{...inp,direction:"rtl"}}/>
+            <label style={lbl}>{ar?"المقتطف":"Excerpt"}</label>
+            <textarea value={form.excerptAr} onChange={e=>set("excerptAr",e.target.value)} rows={2} style={{...inp,resize:"vertical",direction:"rtl"}}/>
+            <label style={lbl}>{ar?"المحتوى الكامل":"Full Content"}</label>
+            <textarea value={form.contentAr} onChange={e=>set("contentAr",e.target.value)} rows={4} style={{...inp,resize:"vertical",marginBottom:0,direction:"rtl"}}/>
+          </div>
+          <div style={{ background:`rgba(30,21,8,.03)`, border:`1px solid rgba(201,168,76,.12)`, borderRadius:9, padding:14, marginBottom:18 }}>
+            <div style={{color:C.g400,fontSize:".68rem",fontWeight:700,letterSpacing:".1em",marginBottom:10}}>🇬🇧 English</div>
+            <label style={lbl}>Title (English)</label>
+            <input value={form.titleEn} onChange={e=>set("titleEn",e.target.value)} placeholder="Article title in English" style={{...inp,direction:"ltr"}}/>
+            <label style={lbl}>Excerpt</label>
+            <textarea value={form.excerptEn} onChange={e=>set("excerptEn",e.target.value)} rows={2} style={{...inp,resize:"vertical",direction:"ltr"}}/>
+            <label style={lbl}>Full Content</label>
+            <textarea value={form.contentEn} onChange={e=>set("contentEn",e.target.value)} rows={4} style={{...inp,resize:"vertical",marginBottom:0,direction:"ltr"}}/>
+          </div>
+          {err && <div style={{color:"#e53935",fontSize:".82rem",marginBottom:12,padding:"7px 11px",background:"rgba(229,57,53,.07)",borderRadius:5}}>⚠️ {err}</div>}
+          <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
+            <button onClick={onClose} style={{padding:"9px 20px",background:"transparent",border:`1px solid rgba(201,168,76,.3)`,borderRadius:7,cursor:"pointer",color:C.g600,fontFamily:ff,fontSize:".86rem"}}>{ar?"إلغاء":"Cancel"}</button>
+            <button onClick={handleSave} disabled={saving} className="gbtn" style={{fontFamily:ff,fontSize:".86rem",opacity:saving?.7:1}}>
+              {saving?(ar?"جاري الحفظ...":"Saving..."):(ar?"💾 حفظ المقال":"💾 Save Article")}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
