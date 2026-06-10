@@ -1,0 +1,26 @@
+User-agent: *
+Allow: /
+
+# CRM & Admin — no indexing
+Disallow: /dashboard
+Disallow: /clients
+Disallow: /requests
+Disallow: /accounting
+Disallow: /invoices
+Disallow: /visa-admin
+Disallow: /visa-intelligence
+Disallow: /site-admin
+
+# Client-private pages
+Disallow: /portal
+
+# Public pages — allow all
+Allow: /visa-center
+Allow: /visa-checker
+Allow: /company-formation
+Allow: /residency
+Allow: /knowledge-center
+Allow: /track-request
+Allow: /verify-invoice
+
+Sitemap: https://alkownglobal.com/sitemap.xml

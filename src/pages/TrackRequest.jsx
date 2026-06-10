@@ -55,21 +55,32 @@ export default function TrackRequest() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!requestNumber.trim()) return;
+    const term = requestNumber.trim().toUpperCase();
+    if (!term) return;
     setLoading(true);
     setError("");
     setRequest(null);
 
-    const { data, error: err } = await supabase
+    // Search in requests table first
+    const { data: reqData } = await supabase
       .from("requests")
       .select("request_number, status, notes, created_at, updated_at, clients(full_name), services(name)")
-      .eq("request_number", requestNumber.trim().toUpperCase())
+      .eq("request_number", term)
+      .maybeSingle();
+
+    if (reqData) { setLoading(false); setRequest({ ...reqData, _type: "request" }); return; }
+
+    // Search in visa_applications by id prefix or full_name
+    const { data: visaData } = await supabase
+      .from("visa_applications")
+      .select("id, full_name, status, nationality, destination, travel_date, created_at")
+      .or(`full_name.ilike.%${requestNumber.trim()}%,id.eq.${isNaN(requestNumber.trim()) ? 0 : Number(requestNumber.trim())}`)
+      .limit(1)
       .maybeSingle();
 
     setLoading(false);
-    if (err) { setError(err.message); return; }
-    if (!data) { setError(T.notFound); return; }
-    setRequest(data);
+    if (visaData) { setRequest({ ...visaData, _type: "visa", request_number: `VISA-${visaData.id}` }); return; }
+    setError(T.notFound);
   }
 
   const stepIndex = request ? STATUS_STEP.indexOf(request.status) : -1;
@@ -131,8 +142,28 @@ export default function TrackRequest() {
           )}
         </div>
 
-        {/* Result */}
-        {request && (
+        {/* Visa Application Result */}
+        {request?._type === "visa" && (
+          <div style={{ background: "#111", border: "1px solid #c9a84c33", borderRadius: 16, padding: "28px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
+              <span style={{ color: "#c9a84c", fontWeight: 800, fontSize: 15 }}>{request.request_number}</span>
+              <span style={{ background: "#c9a84c22", color: "#c9a84c", padding: "5px 16px", borderRadius: 20, fontWeight: 700, fontSize: 13 }}>
+                🛂 {lang === "ar" ? "طلب تأشيرة" : "Visa Application"}
+              </span>
+            </div>
+            <div style={{ display: "grid", gap: 0 }}>
+              <Row label={lang === "ar" ? "الاسم" : "Name"} value={request.full_name} />
+              <Row label={lang === "ar" ? "الجنسية" : "Nationality"} value={request.nationality} />
+              <Row label={lang === "ar" ? "الوجهة" : "Destination"} value={request.destination} />
+              {request.travel_date && <Row label={lang === "ar" ? "تاريخ السفر" : "Travel Date"} value={request.travel_date} />}
+              <Row label={lang === "ar" ? "الحالة" : "Status"} value={request.status} />
+              <Row label={lang === "ar" ? "تاريخ التقديم" : "Submitted"} value={new Date(request.created_at).toLocaleDateString(lang === "ar" ? "ar" : "en")} />
+            </div>
+          </div>
+        )}
+
+        {/* Request Result */}
+        {request?._type === "request" && (
           <div style={{ background: "#111", border: "1px solid #222", borderRadius: 16, padding: "28px", animation: "fadeIn .3s" }}>
 
             {/* Status Badge */}
@@ -195,6 +226,7 @@ export default function TrackRequest() {
             </div>
           </div>
         )}
+
       </div>
     </div>
   );

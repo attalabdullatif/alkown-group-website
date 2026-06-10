@@ -326,7 +326,7 @@ export default function CompanyFormation({ lang, ff, setPage }) {
                     background:`linear-gradient(135deg,var(--goldD,#8a6010),var(--gold,#c9a84c))`,
                     color:"var(--dark,#16100a)", padding:"5px 18px", borderRadius:20,
                     fontSize:".7rem", fontWeight:800, letterSpacing:".1em", whiteSpace:"nowrap",
-                  }}>⭐ {ar?"الأكثر طلباً":"Most Popular"}</div>
+                  }}> {ar?"الأكثر طلباً":"Most Popular"}</div>
                 )}
                 <div style={{ fontSize:"2.4rem", marginBottom:14 }}>{pkg.icon}</div>
                 <h3 style={{ fontWeight:800, fontSize:"1.1rem", color:"var(--g800,#1e1508)", marginBottom:6 }}>{ar?pkg.nameAr:pkg.nameEn}</h3>

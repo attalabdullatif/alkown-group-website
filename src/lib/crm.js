@@ -94,7 +94,7 @@ export async function createRequestForClient({ clientId, serviceId = null, statu
 
 export async function sendContactNotification({ requestNumber, client, form }) {
   try {
-    await fetch("/.netlify/functions/send-contact-email", {
+    await fetch("/api/send-contact-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ requestNumber, client, form }),
@@ -106,7 +106,7 @@ export async function sendContactNotification({ requestNumber, client, form }) {
 
 export async function sendStatusNotification({ requestNumber, client, form, status }) {
   try {
-    await fetch("/.netlify/functions/send-contact-email", {
+    await fetch("/api/send-contact-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

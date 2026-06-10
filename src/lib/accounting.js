@@ -130,6 +130,30 @@ export function computeDashboard(invoices, expenses) {
   return { totalRevenue, totalExpenses, outstanding, monthProfit: monthRevenue - monthExpenses };
 }
 
+// ─── Monthly Revenue & Expense Trends (last 12 months) ───────────────────────
+export function computeMonthlyData(payments, expenses) {
+  const months = [];
+  const now = new Date();
+
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const labelAr = d.toLocaleString("ar", { month: "short" });
+    const labelEn = d.toLocaleString("en", { month: "short", year: "2-digit" });
+
+    const revenue = payments
+      .filter(p => (p.payment_date || "").startsWith(key))
+      .reduce((s, p) => s + Number(p.amount || 0), 0);
+
+    const expense = expenses
+      .filter(e => (e.expense_date || "").startsWith(key))
+      .reduce((s, e) => s + Number(e.amount || 0), 0);
+
+    months.push({ key, labelAr, labelEn, revenue, expense, profit: revenue - expense });
+  }
+  return months;
+}
+
 // ─── Client Financial Summary ──────────────────────────────────────────────────
 export function clientFinancials(invoices, clientId) {
   const clientInvoices = invoices.filter(i => i.client_id === clientId);

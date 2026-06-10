@@ -665,6 +665,17 @@ function MessagesTab({ client, messages, setMessages, requests }) {
     if (!error && data) {
       setMessages(prev => [data, ...prev]);
       setText("");
+      // إشعار الموظفين برسالة جديدة
+      fetch("/api/send-contact-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type:          "new_message",
+          client:        { full_name: client?.full_name, email: client?.email, phone: client?.phone },
+          message:       text.trim(),
+          requestNumber: reqId ? requests.find(r => r.id === reqId)?.request_number : "",
+        }),
+      }).catch(e => console.warn("Message notification failed:", e));
     }
     setSending(false);
   }

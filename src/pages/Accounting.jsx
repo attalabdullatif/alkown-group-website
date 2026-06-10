@@ -8,13 +8,13 @@ import {
   fetchInvoices, createInvoice, updateInvoice, deleteInvoice,
   fetchPayments, recordPayment, deletePayment,
   fetchExpenses, createExpense, deleteExpense,
-  computeDashboard, clientFinancials,
+  computeDashboard, computeMonthlyData, clientFinancials,
 } from "../lib/accounting";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const INVOICE_STATUSES = ["Draft","Sent","Paid","Partially Paid","Overdue"];
+const INVOICE_STATUSES = ["Draft","Sent","Paid","Partially Paid","Overdue","Cancelled"];
 const PAYMENT_METHODS  = ["Cash","Bank Transfer","Card","Online Payment"];
-const EXPENSE_CATS     = ["Embassy Fees","Courier","Translation","Medical","Marketing","Operations"];
+const EXPENSE_CATS     = ["Salaries","Rent","Embassy Fees","Courier","Translation","Medical","Marketing","Operations"];
 
 const STATUS_COLOR = {
   Draft:           "#888",
@@ -22,6 +22,7 @@ const STATUS_COLOR = {
   Paid:            CRM_COLORS.success,
   "Partially Paid":"#c28a25",
   Overdue:         CRM_COLORS.danger,
+  Cancelled:       "#aaa",
 };
 const STATUS_AR = {
   Draft:           "مسودة",
@@ -29,6 +30,7 @@ const STATUS_AR = {
   Paid:            "مدفوعة",
   "Partially Paid":"مدفوعة جزئياً",
   Overdue:         "متأخرة",
+  Cancelled:       "ملغاة",
 };
 const METHOD_AR = {
   Cash:            "نقداً",
@@ -37,6 +39,8 @@ const METHOD_AR = {
   "Online Payment":"دفع إلكتروني",
 };
 const CAT_AR = {
+  Salaries:        "رواتب",
+  Rent:            "إيجار",
   "Embassy Fees":  "رسوم سفارة",
   Courier:         "بريد سريع",
   Translation:     "ترجمة",
@@ -71,17 +75,99 @@ function StatusBadge({ status }) {
   );
 }
 
-function SummaryCard({ label, value, accent, sub }) {
+function SummaryCard({ label, value, accent, sub, icon }) {
   return (
     <div style={{
       ...cardStyle,
       flex:"1 1 200px", minWidth:180,
       borderTop:`3px solid ${accent}`,
-      textAlign:"center",
+      padding:"16px 18px",
     }}>
-      <div style={{ color: CRM_COLORS.textMuted, fontSize:".8rem", marginBottom:4 }}>{label}</div>
-      <div style={{ color: accent, fontSize:"1.55rem", fontWeight:800 }}>{value}</div>
-      {sub && <div style={{ color: CRM_COLORS.textMuted, fontSize:".72rem", marginTop:4 }}>{sub}</div>}
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
+        <div style={{ color: CRM_COLORS.muted, fontSize:".78rem", letterSpacing:".08em", textTransform:"uppercase" }}>{label}</div>
+        {icon && <span style={{ fontSize:"1.2rem", opacity:.7 }}>{icon}</span>}
+      </div>
+      <div style={{ color: accent, fontSize:"1.6rem", fontWeight:900, marginTop:8 }}>{value}</div>
+      {sub && <div style={{ color: CRM_COLORS.muted, fontSize:".72rem", marginTop:4 }}>{sub}</div>}
+    </div>
+  );
+}
+
+// ── Monthly Bar Chart (CSS-based, no external lib) ────────────────────────────
+function MonthlyChart({ data }) {
+  const maxVal = Math.max(...data.flatMap(d => [d.revenue, d.expense]), 1);
+  const chartH = 140;
+
+  return (
+    <div>
+      <div style={{ display:"flex", alignItems:"flex-end", gap:6, height:chartH + 30, paddingBottom:24, position:"relative" }}>
+        {/* Y-axis grid lines */}
+        {[0,.25,.5,.75,1].map(ratio => (
+          <div key={ratio} style={{
+            position:"absolute", left:0, right:0,
+            bottom: 24 + ratio * chartH,
+            borderBottom:`1px dashed ${CRM_COLORS.border}`,
+            zIndex:0,
+          }}>
+            <span style={{ position:"absolute", right:"100%", paddingRight:4, fontSize:9, color: CRM_COLORS.muted, whiteSpace:"nowrap", transform:"translateY(50%)" }}>
+              {USD(maxVal * ratio)}
+            </span>
+          </div>
+        ))}
+
+        {data.map((m, idx) => {
+          const revH = Math.round((m.revenue / maxVal) * chartH);
+          const expH = Math.round((m.expense / maxVal) * chartH);
+          const isCurrentMonth = idx === data.length - 1;
+          return (
+            <div key={m.key} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:1, height:"100%", justifyContent:"flex-end", position:"relative", zIndex:1 }}>
+              <div style={{ display:"flex", gap:2, alignItems:"flex-end", width:"100%", justifyContent:"center" }}>
+                {/* Revenue bar */}
+                <div
+                  title={`إيرادات: ${USD(m.revenue)}`}
+                  style={{
+                    flex:1, minHeight:2, height: revH,
+                    background: isCurrentMonth
+                      ? `linear-gradient(180deg, ${CRM_COLORS.gold}, ${CRM_COLORS.goldDark})`
+                      : `${CRM_COLORS.gold}88`,
+                    borderRadius:"3px 3px 0 0", transition:"height .4s",
+                    cursor:"default",
+                  }}
+                />
+                {/* Expense bar */}
+                <div
+                  title={`مصاريف: ${USD(m.expense)}`}
+                  style={{
+                    flex:1, minHeight:2, height: expH,
+                    background: isCurrentMonth
+                      ? `linear-gradient(180deg, ${CRM_COLORS.danger}, #e07070)`
+                      : `${CRM_COLORS.danger}66`,
+                    borderRadius:"3px 3px 0 0", transition:"height .4s",
+                    cursor:"default",
+                  }}
+                />
+              </div>
+              {/* Month label */}
+              <div style={{
+                position:"absolute", bottom:0, fontSize:9, color: isCurrentMonth ? CRM_COLORS.goldDark : CRM_COLORS.muted,
+                fontWeight: isCurrentMonth ? 800 : 400, whiteSpace:"nowrap",
+              }}>
+                {m.labelAr}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Legend */}
+      <div style={{ display:"flex", gap:16, justifyContent:"center", marginTop:4 }}>
+        <span style={{ fontSize:11, color: CRM_COLORS.goldDark, display:"flex", alignItems:"center", gap:4 }}>
+          <span style={{ width:10, height:10, background: CRM_COLORS.gold, borderRadius:2, display:"inline-block" }} /> الإيرادات
+        </span>
+        <span style={{ fontSize:11, color: CRM_COLORS.danger, display:"flex", alignItems:"center", gap:4 }}>
+          <span style={{ width:10, height:10, background: CRM_COLORS.danger, borderRadius:2, display:"inline-block" }} /> المصاريف
+        </span>
+      </div>
     </div>
   );
 }
@@ -148,7 +234,7 @@ export default function Accounting() {
         <div style={{ textAlign:"center", color: CRM_COLORS.textMuted, padding:40 }}>جار التحميل…</div>
       ) : (
         <>
-          {tab === "dashboard" && <DashboardTab dashboard={dashboard} invoices={invoices} expenses={expenses} clients={clients} />}
+          {tab === "dashboard" && <DashboardTab dashboard={dashboard} invoices={invoices} expenses={expenses} payments={payments} clients={clients} />}
           {tab === "invoices"  && <InvoicesTab  invoices={invoices}  clients={clients}  requests={requests} reload={loadAll} setError={setError} />}
           {tab === "payments"  && <PaymentsTab  payments={payments}  invoices={invoices} clients={clients} reload={loadAll} setError={setError} />}
           {tab === "expenses"  && <ExpensesTab  expenses={expenses}  reload={loadAll} setError={setError} />}
@@ -160,30 +246,77 @@ export default function Accounting() {
 }
 
 // ─── Dashboard Tab ─────────────────────────────────────────────────────────────
-function DashboardTab({ dashboard, invoices, clients }) {
-  const overdue = invoices.filter(i => i.status === "Overdue" || (i.status !== "Paid" && i.due_date && i.due_date < today()));
-  const recent  = invoices.slice(0, 6);
+function DashboardTab({ dashboard, invoices, expenses, payments, clients }) {
+  const overdue  = invoices.filter(i => i.status === "Overdue" || (i.status !== "Paid" && i.status !== "Cancelled" && i.due_date && i.due_date < today()));
+  const recent   = invoices.slice(0, 5);
+  const monthly  = computeMonthlyData(payments, expenses);
+
+  // Current month stats
+  const thisMonthKey = new Date().toISOString().slice(0, 7);
+  const thisMonth    = monthly.find(m => m.key === thisMonthKey) || { revenue: 0, expense: 0, profit: 0 };
+
+  // Annual totals
+  const thisYear    = new Date().getFullYear().toString();
+  const annualRev   = monthly.filter(m => m.key.startsWith(thisYear)).reduce((s, m) => s + m.revenue, 0);
+  const annualExp   = monthly.filter(m => m.key.startsWith(thisYear)).reduce((s, m) => s + m.expense, 0);
+
+  // Invoice status breakdown
+  const statusCounts = {};
+  INVOICE_STATUSES.forEach(s => { statusCounts[s] = invoices.filter(i => i.status === s).length; });
 
   return (
-    <div>
-      {/* Summary Cards */}
-      <div style={{ display:"flex", flexWrap:"wrap", gap:14, marginBottom:24 }}>
-        <SummaryCard label="إجمالي الإيرادات"    value={USD(dashboard.totalRevenue)}  accent={CRM_COLORS.gold}    />
-        <SummaryCard label="إجمالي المصاريف"      value={USD(dashboard.totalExpenses)} accent={CRM_COLORS.danger}  />
-        <SummaryCard label="الفواتير المعلّقة"    value={USD(dashboard.outstanding)}   accent="#4a90d9"            />
-        <SummaryCard label="صافي ربح الشهر"       value={USD(dashboard.monthProfit)}   accent={dashboard.monthProfit >= 0 ? CRM_COLORS.success : CRM_COLORS.danger} sub="تقديري" />
+    <div style={{ display:"flex", flexDirection:"column", gap:18 }}>
+
+      {/* ── KPI Row ── */}
+      <div style={{ display:"flex", flexWrap:"wrap", gap:12 }}>
+        <SummaryCard icon="💰" label="إجمالي الإيرادات"      value={USD(dashboard.totalRevenue)}  accent={CRM_COLORS.gold}    sub={`هذا العام: ${USD(annualRev)}`} />
+        <SummaryCard icon="📤" label="إجمالي المصاريف"        value={USD(dashboard.totalExpenses)} accent={CRM_COLORS.danger}  sub={`هذا العام: ${USD(annualExp)}`} />
+        <SummaryCard icon="⏳" label="مستحقات غير محصّلة"    value={USD(dashboard.outstanding)}   accent="#4a90d9"            sub={`${overdue.length} فاتورة متأخرة`} />
+        <SummaryCard icon="📊" label="صافي ربح هذا الشهر"    value={USD(thisMonth.profit)}        accent={thisMonth.profit >= 0 ? CRM_COLORS.success : CRM_COLORS.danger} sub={`إيرادات: ${USD(thisMonth.revenue)}`} />
+      </div>
+
+      {/* ── Monthly Chart ── */}
+      <div style={{ ...cardStyle, padding:"20px 24px" }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
+          <h3 style={{ color: CRM_COLORS.goldDark, fontSize:".95rem", fontWeight:700, margin:0 }}>
+            📈 الإيرادات والمصاريف — آخر 12 شهراً
+          </h3>
+          <div style={{ fontSize:".8rem", color: CRM_COLORS.muted }}>
+            صافي ربح {new Date().getFullYear()}: <strong style={{ color: annualRev - annualExp >= 0 ? CRM_COLORS.success : CRM_COLORS.danger }}>{USD(annualRev - annualExp)}</strong>
+          </div>
+        </div>
+        <MonthlyChart data={monthly} />
+      </div>
+
+      {/* ── Invoice Status Breakdown ── */}
+      <div style={{ ...cardStyle, padding:"16px 20px" }}>
+        <h3 style={{ color: CRM_COLORS.goldDark, fontSize:".9rem", fontWeight:700, marginBottom:12, margin:"0 0 12px" }}>
+          🧾 حالة الفواتير
+        </h3>
+        <div style={{ display:"flex", flexWrap:"wrap", gap:10 }}>
+          {INVOICE_STATUSES.map(s => (
+            <div key={s} style={{
+              flex:"1 1 90px", textAlign:"center", padding:"10px 8px",
+              background:`${STATUS_COLOR[s]}10`, border:`1px solid ${STATUS_COLOR[s]}33`,
+              borderRadius:8,
+            }}>
+              <div style={{ fontWeight:900, fontSize:"1.4rem", color: STATUS_COLOR[s] }}>{statusCounts[s] || 0}</div>
+              <div style={{ fontSize:".72rem", color: STATUS_COLOR[s], fontWeight:600, marginTop:2 }}>{STATUS_AR[s]}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
         {/* Recent Invoices */}
-        <div style={cardStyle}>
-          <h3 style={{ color: CRM_COLORS.gold, fontSize:".95rem", fontWeight:700, marginBottom:12 }}>🧾 آخر الفواتير</h3>
+        <div style={{ ...cardStyle, padding:"16px 18px" }}>
+          <h3 style={{ color: CRM_COLORS.gold, fontSize:".9rem", fontWeight:700, marginBottom:12, margin:"0 0 12px" }}>🧾 آخر الفواتير</h3>
           {recent.length === 0 ? <Empty /> : recent.map(inv => (
             <div key={inv.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center",
               padding:"8px 0", borderBottom:`1px solid ${CRM_COLORS.border}` }}>
               <div>
-                <div style={{ fontWeight:700, fontSize:".85rem", color: CRM_COLORS.text }}>{inv.invoice_number}</div>
-                <div style={{ fontSize:".75rem", color: CRM_COLORS.textMuted }}>{inv.clients?.full_name || "—"}</div>
+                <div style={{ fontWeight:700, fontSize:".85rem" }}>{inv.invoice_number}</div>
+                <div style={{ fontSize:".75rem", color: CRM_COLORS.muted }}>{inv.clients?.full_name || "—"}</div>
               </div>
               <div style={{ textAlign:"left" }}>
                 <div style={{ fontWeight:700, color: CRM_COLORS.gold, fontSize:".85rem" }}>{USD(inv.amount)}</div>
@@ -194,16 +327,18 @@ function DashboardTab({ dashboard, invoices, clients }) {
         </div>
 
         {/* Overdue */}
-        <div style={cardStyle}>
-          <h3 style={{ color: CRM_COLORS.danger, fontSize:".95rem", fontWeight:700, marginBottom:12 }}>⚠️ فواتير متأخرة ({overdue.length})</h3>
+        <div style={{ ...cardStyle, padding:"16px 18px" }}>
+          <h3 style={{ color: CRM_COLORS.danger, fontSize:".9rem", fontWeight:700, margin:"0 0 12px" }}>
+            ⚠️ فواتير متأخرة ({overdue.length})
+          </h3>
           {overdue.length === 0
             ? <div style={{ color: CRM_COLORS.success, fontSize:".85rem" }}>✅ لا توجد فواتير متأخرة</div>
-            : overdue.slice(0,6).map(inv => (
+            : overdue.slice(0, 5).map(inv => (
               <div key={inv.id} style={{ display:"flex", justifyContent:"space-between", padding:"7px 0",
                 borderBottom:`1px solid ${CRM_COLORS.border}` }}>
                 <div>
-                  <div style={{ fontWeight:700, fontSize:".83rem", color: CRM_COLORS.text }}>{inv.clients?.full_name || "—"}</div>
-                  <div style={{ fontSize:".72rem", color: CRM_COLORS.textMuted }}>{inv.service_name}</div>
+                  <div style={{ fontWeight:700, fontSize:".83rem" }}>{inv.clients?.full_name || "—"}</div>
+                  <div style={{ fontSize:".72rem", color: CRM_COLORS.muted }}>{inv.service_name}</div>
                 </div>
                 <div style={{ color: CRM_COLORS.danger, fontWeight:800, fontSize:".85rem" }}>
                   {USD(Number(inv.amount) - Number(inv.paid_amount || 0))}
@@ -216,8 +351,8 @@ function DashboardTab({ dashboard, invoices, clients }) {
 
       {/* Client Financial Overview */}
       {clients.length > 0 && (
-        <div style={{ ...cardStyle, marginTop:16 }}>
-          <h3 style={{ color: CRM_COLORS.gold, fontSize:".95rem", fontWeight:700, marginBottom:12 }}>👥 ملخص العملاء المالي</h3>
+        <div style={{ ...cardStyle, padding:"16px 18px" }}>
+          <h3 style={{ color: CRM_COLORS.gold, fontSize:".9rem", fontWeight:700, margin:"0 0 12px" }}>👥 ملخص العملاء المالي</h3>
           <ClientFinancialTable invoices={invoices} clients={clients} />
         </div>
       )}
@@ -312,8 +447,28 @@ function InvoicesTab({ invoices, clients, requests, reload, setError }) {
         status:       form.status,
         notes:        form.notes,
       };
-      if (editing) await updateInvoice(editing.id, payload);
-      else         await createInvoice(payload);
+      if (editing) {
+        await updateInvoice(editing.id, payload);
+      } else {
+        const created = await createInvoice(payload);
+        // إشعار العميل بالفاتورة الجديدة
+        const clientObj = clients.find(c => c.id === payload.client_id);
+        if (clientObj?.email) {
+          fetch("/api/send-contact-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type:          "invoice_ready",
+              invoiceNumber: created?.invoice_number,
+              client:        clientObj,
+              serviceName:   payload.service_name,
+              amount:        payload.amount,
+              dueDate:       payload.due_date,
+              notes:         payload.notes,
+            }),
+          }).catch(e => console.warn("Invoice notification failed:", e));
+        }
+      }
       reset(); await reload();
     } catch (e) { setError(e.message); }
     setSaving(false);

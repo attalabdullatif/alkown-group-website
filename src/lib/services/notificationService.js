@@ -8,7 +8,7 @@
  * so a notification failure never breaks a business operation.
  */
 
-const NETLIFY_EMAIL = "/.netlify/functions/send-contact-email";
+const NETLIFY_EMAIL = "/api/send-contact-email";
 
 // ─── Internal dispatcher ──────────────────────────────────────────────────────
 async function dispatch(payload) {
