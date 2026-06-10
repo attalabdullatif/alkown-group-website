@@ -6,6 +6,7 @@
 import { lookupVisa } from "../../data/visaRules";
 
 // ── System Prompt Template ────────────────────────────────────
+// eslint-disable-next-line no-unused-vars
 const SYSTEM_PROMPT = `You are ALKOWN Global's expert Visa AI Assistant — a knowledgeable, professional, and multilingual consultant.
 
 You specialize in:
