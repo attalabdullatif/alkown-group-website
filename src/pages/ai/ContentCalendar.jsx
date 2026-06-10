@@ -23,7 +23,7 @@ export default function ContentCalendar() {
   const [loading, setLoading] = useState(true);
   const [selected,setSelected]= useState(null);
 
-  useEffect(() => { load(); }, [year, month]);
+  useEffect(() => { load(); }, [year, month]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function load() {
     setLoading(true);

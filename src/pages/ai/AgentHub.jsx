@@ -25,7 +25,7 @@ export default function AgentHub() {
   const [messages,  setMessages]  = useState([]);
   const [input,     setInput]     = useState("");
   const [loading,   setLoading]   = useState(false);
-  const [sessions,  setSessions]  = useState([]);
+  const [, setSessions]  = useState([]);
   const [lang,      setLang]      = useState("ar");
   const bottomRef = useRef();
 

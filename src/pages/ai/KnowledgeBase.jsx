@@ -31,7 +31,7 @@ export default function KnowledgeBase() {
   const [uploadForm, setUploadForm] = useState({ title: "", collection_id: "", raw_text: "", file_type: "text" });
   const fileRef = useRef();
 
-  useEffect(() => { load(); }, [activeCol]);
+  useEffect(() => { load(); }, [activeCol]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function load() {
     setLoading(true);

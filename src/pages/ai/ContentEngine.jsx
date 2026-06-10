@@ -42,7 +42,7 @@ export default function ContentEngine() {
     tone:  "professional",
   });
 
-  useEffect(() => { loadItems(); }, [filterStatus]);
+  useEffect(() => { loadItems(); }, [filterStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function loadItems() {
     setLoading(true);

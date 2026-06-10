@@ -242,7 +242,7 @@ export default function ResidencyAdmin() {
   const [tab, setTab] = useState("residency");
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState(null);
-  const [loaded, setLoaded] = useState(false);
+  const [, setLoaded] = useState(false);
 
   const [heroTitleAr, setHeroTitleAr] = useState("إقامتك وجنسيتك الثانية\nفي متناول يدك");
   const [heroTitleEn, setHeroTitleEn] = useState("Your Residency & Second\nCitizenship Within Reach");
@@ -261,10 +261,10 @@ export default function ResidencyAdmin() {
       .maybeSingle()
       .then(({ data }) => {
         if (data) {
-          setHeroTitleAr(data.hero_title_ar || heroTitleAr);
-          setHeroTitleEn(data.hero_title_en || heroTitleEn);
-          setHeroDescAr(data.hero_desc_ar || heroDescAr);
-          setHeroDescEn(data.hero_desc_en || heroDescEn);
+          setHeroTitleAr(prev => data.hero_title_ar || prev);
+          setHeroTitleEn(prev => data.hero_title_en || prev);
+          setHeroDescAr(prev => data.hero_desc_ar || prev);
+          setHeroDescEn(prev => data.hero_desc_en || prev);
           if (data.residency_programs) setResidencyProgs(JSON.parse(data.residency_programs));
           if (data.citizenship_programs) setCitizenshipProgs(JSON.parse(data.citizenship_programs));
         }
