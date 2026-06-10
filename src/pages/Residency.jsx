@@ -1099,47 +1099,120 @@ export default function Residency({ lang = "ar", ff, setPage }) {
   return (
     <div style={{ fontFamily: ff || "'Dubai','Cairo','Noto Naskh Arabic',sans-serif", direction: ar ? "rtl" : "ltr" }}>
 
-      {/* ══ HERO ═══════════════════════════════════════════════ */}
+      {/* ══ HERO — نفس تصميم PageHero ══════════════════════════ */}
       <section style={{
-        background: "linear-gradient(145deg,var(--dark,#16100a) 0%,#1d1205 100%)",
-        padding: "100px clamp(20px,6vw,80px) 80px",
-        position: "relative", overflow: "hidden",
+        padding: "110px clamp(20px,6vw,80px) 90px",
+        background: `
+          radial-gradient(circle at top right, rgba(212,175,55,0.15), transparent 35%),
+          linear-gradient(140deg, #16100a 0%, #211608 100%)
+        `,
+        textAlign: "center",
+        position: "relative",
+        overflow: "hidden",
+        minHeight: "420px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}>
-        <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(ellipse at 70% 30%,rgba(201,168,76,.08) 0%,transparent 55%)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg,transparent,var(--gold,#c9a84c),transparent)", opacity: .3 }} />
+        {/* HeroBG SVG */}
+        <svg style={{ position:"absolute", inset:0, width:"100%", height:"100%", opacity:.18 }}
+          viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+          <path d="M0,380 Q360,160 720,320 T1440,280" fill="none" stroke="#c9a84c" strokeWidth="1.2"
+            strokeDasharray="1000" style={{ animation:"draw 4s ease both" }} />
+          <path d="M0,560 Q430,360 860,500 T1440,460" fill="none" stroke="#c9a84c" strokeWidth=".6" />
+          <circle cx="1150" cy="180" r="180" fill="none" stroke="#c9a84c" strokeWidth=".7" />
+          <circle cx="1150" cy="180" r="110" fill="none" stroke="#c9a84c" strokeWidth=".4" />
+          <circle cx="240" cy="700" r="120" fill="none" stroke="#c9a84c" strokeWidth=".5" />
+          <path d="M80,80 L116,116 L80,152 L44,116Z" fill="none" stroke="#c9a84c" strokeWidth=".7" />
+          <path d="M1350,650 L1380,680 L1350,710 L1320,680Z" fill="none" stroke="#c9a84c" strokeWidth=".5" />
+        </svg>
 
-        <div style={{ maxWidth: 860, margin: "0 auto", textAlign: "center", position: "relative" }} className="fu">
+        {/* Particles */}
+        <div style={{ position:"absolute", inset:0, overflow:"hidden", pointerEvents:"none" }}>
+          {[...Array(18)].map((_,i) => (
+            <div key={i} style={{
+              position:"absolute", borderRadius:"50%",
+              width: i%4===0 ? 3 : 2, height: i%4===0 ? 3 : 2,
+              background: `rgba(${180+i*3},${140+i*2},60,${.25+(i%5)*.08})`,
+              left: `${(i*19+7)%100}%`, top: `${(i*27+5)%100}%`,
+              animation: `float ${4+i%5}s ease-in-out infinite`,
+              animationDelay: `${i*.38}s`,
+            }} />
+          ))}
+        </div>
+
+        {/* Glow */}
+        <div style={{
+          position:"absolute", width:500, height:500, borderRadius:"50%",
+          background:"rgba(212,175,55,0.08)", filter:"blur(100px)",
+          top:"-150px", right:"-100px", zIndex:1,
+        }} />
+
+        <div style={{ position:"relative", zIndex:2, maxWidth:"900px", margin:"0 auto" }}>
           {/* Badge */}
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 40, padding: "6px 22px", marginBottom: 24 }}>
-            <span style={{ color: "var(--gold,#c9a84c)", fontSize: ".7rem", letterSpacing: ".22em", textTransform: "uppercase", fontWeight: 700 }}>
-              {pageContent?.hero_badge || (ar ? "برامج الإقامة والجنسية" : "Residency & Citizenship")}
-            </span>
-          </div>
+          <span style={{
+            display:"inline-block",
+            padding:"8px 18px",
+            border:"1px solid #c9a84c",
+            borderRadius:"999px",
+            color:"#c9a84c",
+            fontSize:".75rem",
+            letterSpacing:".18em",
+            textTransform:"uppercase",
+            marginBottom:"24px",
+            fontFamily: ff,
+          }}>
+            {pageContent?.hero_badge || "ALKOWN GLOBAL"}
+          </span>
 
-          <h1 className="shimmer fu2" style={{ fontWeight: 800, fontSize: "clamp(2rem,4.5vw,3.4rem)", marginBottom: 18, lineHeight: 1.2 }}>
+          <h1 className="fu" style={{
+            fontSize:"clamp(2.4rem,5vw,4.8rem)",
+            fontWeight:800,
+            color:"#f5f0e8",
+            lineHeight:1.15,
+            marginBottom:"18px",
+            letterSpacing:".02em",
+            fontFamily: ff,
+          }}>
             {heroTitle}
           </h1>
 
-          <p className="fu3" style={{ color: "rgba(255,255,255,.6)", fontSize: "1rem", lineHeight: 1.85, maxWidth: 620, margin: "0 auto 40px" }}>
+          {/* Diamond Divider */}
+          <div style={{ display:"flex", alignItems:"center", gap:12, margin:"16px auto", width:"fit-content" }}>
+            <div style={{ width:44, height:1, background:"linear-gradient(90deg,transparent,#c9a84c)" }} />
+            <div style={{ position:"relative", width:8, height:8 }}>
+              <div style={{ width:8, height:8, background:"#c9a84c", transform:"rotate(45deg)" }} />
+              <div style={{ position:"absolute", inset:-3, border:"1px solid rgba(200,146,42,.3)", transform:"rotate(45deg)" }} />
+            </div>
+            <div style={{ width:44, height:1, background:"linear-gradient(90deg,#c9a84c,transparent)" }} />
+          </div>
+
+          <p className="fu2" style={{
+            color:"#c9a84c",
+            letterSpacing:".22em",
+            fontSize:".82rem",
+            textTransform:"uppercase",
+            marginTop:"14px",
+            marginBottom:"32px",
+            fontFamily: ff,
+          }}>
             {heroDesc}
           </p>
 
-          <div className="fu4" style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
+          <div className="fu3" style={{ display:"flex", gap:14, justifyContent:"center", flexWrap:"wrap" }}>
             <button className="gbtn" style={{ fontFamily: ff }} onClick={handleCTA}>
               {ar ? "احصل على استشارة مجانية" : "Get Free Consultation"}
             </button>
-            <a
-              href="https://wa.me/971544909522"
-              target="_blank" rel="noreferrer"
-              style={{ padding: "14px 28px", background: "rgba(37,211,102,.1)", border: "1.5px solid rgba(37,211,102,.35)", borderRadius: 4, color: "#25d366", fontFamily: ff, fontWeight: 700, fontSize: ".88rem", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}
+            <a href="https://wa.me/971544909522" target="_blank" rel="noreferrer"
+              style={{ padding:"14px 28px", background:"rgba(37,211,102,.1)", border:"1.5px solid rgba(37,211,102,.35)", borderRadius:4, color:"#25d366", fontFamily:ff, fontWeight:700, fontSize:".88rem", textDecoration:"none", display:"inline-flex", alignItems:"center", gap:8 }}
             >💬 WhatsApp</a>
           </div>
         </div>
       </section>
 
       {/* ══ STATS ══════════════════════════════════════════════ */}
-      <div style={{ background: "var(--bgWarm,#faf7f2)", borderBottom: "1px solid rgba(201,168,76,.1)" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))" }}>
+      <div style={{ background: "#f5f0e8", borderBottom: "1px solid rgba(201,168,76,.12)" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))" }}>
           {[
             { n: "11+",     lAr: "برنامج متاح",          lEn: "Programs" },
             { n: "10+",     lAr: "دول حول العالم",        lEn: "Countries" },
@@ -1148,11 +1221,11 @@ export default function Residency({ lang = "ar", ff, setPage }) {
             { n: "10+",     lAr: "سنوات خبرة",            lEn: "Years Experience" },
           ].map((s, i, arr) => (
             <div key={i} style={{
-              textAlign: "center", padding: "28px 14px",
+              textAlign: "center", padding: "28px 12px",
               borderInlineEnd: i < arr.length - 1 ? "1px solid rgba(201,168,76,.12)" : "none",
             }}>
-              <div style={{ fontSize: "2rem", fontWeight: 800, color: "var(--gold,#c9a84c)", fontFamily: ff }}>{s.n}</div>
-              <div style={{ fontSize: ".72rem", color: "var(--g400,#7a6b50)", marginTop: 5, letterSpacing: ".1em" }}>{ar ? s.lAr : s.lEn}</div>
+              <div className="shimmer" style={{ fontSize: "2rem", fontWeight: 800, fontFamily: "Georgia,serif", display: "block" }}>{s.n}</div>
+              <div style={{ fontSize: ".72rem", color: "#7a6b50", letterSpacing: ".15em", textTransform: "uppercase", marginTop: 6 }}>{ar ? s.lAr : s.lEn}</div>
             </div>
           ))}
         </div>
