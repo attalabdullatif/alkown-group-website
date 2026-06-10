@@ -11,6 +11,7 @@ const DEFAULT_CITIZENSHIP = [
   {
     id: "dominica",
     flag: "🇩🇲",
+    color: "#2980b9",
     nameAr: "دومينيكا",
     nameEn: "Dominica",
     tagAr: "الأسرع والأوفر",
@@ -58,6 +59,7 @@ const DEFAULT_CITIZENSHIP = [
   {
     id: "saint-lucia",
     flag: "🇱🇨",
+    color: "#16a085",
     nameAr: "سانت لوسيا",
     nameEn: "Saint Lucia",
     tagAr: null,
@@ -109,6 +111,7 @@ const DEFAULT_CITIZENSHIP = [
   {
     id: "grenada",
     flag: "🇬🇩",
+    color: "#2f8f5b",
     nameAr: "غرينادا",
     nameEn: "Grenada",
     tagAr: "ميزة التأشيرة الأمريكية E-2",
@@ -144,6 +147,7 @@ const DEFAULT_CITIZENSHIP = [
   {
     id: "turkey",
     flag: "🇹🇷",
+    color: "#c9a84c",
     nameAr: "تركيا",
     nameEn: "Turkey",
     tagAr: "الأقوى اقتصادياً",
@@ -179,6 +183,7 @@ const DEFAULT_CITIZENSHIP = [
   {
     id: "saint-kitts",
     flag: "🇰🇳",
+    color: "#8e44ad",
     nameAr: "سانت كيتس ونيفيس",
     nameEn: "St. Kitts & Nevis",
     tagAr: "أقدم برنامج في العالم",
@@ -214,6 +219,7 @@ const DEFAULT_CITIZENSHIP = [
   {
     id: "malta",
     flag: "🇲🇹",
+    color: "#c9284d",
     nameAr: "مالطا",
     nameEn: "Malta",
     tagAr: "VIP — جواز أوروبي",
@@ -252,6 +258,7 @@ const DEFAULT_RESIDENCY = [
   {
     id: "portugal-golden",
     flag: "🇵🇹",
+    color: "#7c3aed",
     nameAr: "البرتغال — الفيزا الذهبية",
     nameEn: "Portugal — Golden Visa",
     tagAr: "الأكثر طلباً",
@@ -313,6 +320,7 @@ const DEFAULT_RESIDENCY = [
   {
     id: "portugal-d7",
     flag: "🇵🇹",
+    color: "#7c3aed",
     nameAr: "البرتغال — D7",
     nameEn: "Portugal — D7",
     tagAr: "للدخل السلبي",
@@ -356,6 +364,7 @@ const DEFAULT_RESIDENCY = [
   {
     id: "portugal-d8",
     flag: "🇵🇹",
+    color: "#7c3aed",
     nameAr: "البرتغال — D8 (نوماد)",
     nameEn: "Portugal — D8 (Digital Nomad)",
     tagAr: "للعمل عن بُعد",
@@ -399,6 +408,7 @@ const DEFAULT_RESIDENCY = [
   {
     id: "portugal-d2",
     flag: "🇵🇹",
+    color: "#7c3aed",
     nameAr: "البرتغال — D2 (ريادة أعمال)",
     nameEn: "Portugal — D2 (Entrepreneur)",
     tagAr: null,
@@ -442,6 +452,7 @@ const DEFAULT_RESIDENCY = [
   {
     id: "spain-golden",
     flag: "🇪🇸",
+    color: "#c9284d",
     nameAr: "إسبانيا — الفيزا الذهبية",
     nameEn: "Spain — Golden Visa",
     tagAr: null,
@@ -485,6 +496,7 @@ const DEFAULT_RESIDENCY = [
   {
     id: "spain-nomad",
     flag: "🇪🇸",
+    color: "#c9284d",
     nameAr: "إسبانيا — نوماد الرقميين",
     nameEn: "Spain — Digital Nomad",
     tagAr: null,
@@ -528,6 +540,7 @@ const DEFAULT_RESIDENCY = [
   {
     id: "greece-golden",
     flag: "🇬🇷",
+    color: "#2980b9",
     nameAr: "اليونان — الفيزا الذهبية",
     nameEn: "Greece — Golden Visa",
     tagAr: "أقل تكلفة في أوروبا",
@@ -585,6 +598,7 @@ const DEFAULT_RESIDENCY = [
   {
     id: "uae-golden",
     flag: "🇦🇪",
+    color: "#c9a84c",
     nameAr: "الإمارات — الإقامة الذهبية",
     nameEn: "UAE — Golden Residency",
     tagAr: "الأكثر طلباً عربياً",
@@ -638,6 +652,7 @@ const DEFAULT_RESIDENCY = [
   {
     id: "usa-eb3",
     flag: "🇺🇸",
+    color: "#2f6eb5",
     nameAr: "الولايات المتحدة — EB3",
     nameEn: "USA — EB3 Green Card",
     tagAr: null,
@@ -681,6 +696,7 @@ const DEFAULT_RESIDENCY = [
   {
     id: "usa-eb5",
     flag: "🇺🇸",
+    color: "#1a5f2c",
     nameAr: "الولايات المتحدة — EB5",
     nameEn: "USA — EB5 Investor",
     tagAr: "للمستثمرين الكبار",
@@ -730,6 +746,7 @@ const DEFAULT_RESIDENCY = [
   {
     id: "canada-startup",
     flag: "🇨🇦",
+    color: "#c9284d",
     nameAr: "كندا — برنامج الشركات الناشئة",
     nameEn: "Canada — Startup Visa",
     tagAr: null,
@@ -790,58 +807,73 @@ function ProgramCard({ prog, ar, ff, onCTA, expanded, onToggle }) {
   const costs = ar ? prog.costsAr : prog.costsEn;
   const family = ar ? prog.familyMembersAr : prog.familyMembersEn;
 
+  const cardColor = prog.color || "#c9a84c";
+
   return (
     <div
       style={{
         background: "#fff",
-        border: `2px solid ${prog.popular ? "var(--gold,#c9a84c)" : "rgba(201,168,76,.18)"}`,
+        border: `1px solid ${cardColor}22`,
         borderRadius: 16,
         overflow: "hidden",
-        boxShadow: prog.popular ? "0 12px 48px rgba(201,168,76,.18)" : "0 2px 12px rgba(0,0,0,.05)",
+        boxShadow: prog.popular
+          ? `0 12px 40px ${cardColor}28`
+          : "0 2px 12px rgba(0,0,0,.06)",
         transition: "all .3s",
         display: "flex",
         flexDirection: "column",
       }}
-      onMouseEnter={e => e.currentTarget.style.transform = "translateY(-4px)"}
-      onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
+      onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-5px)"; e.currentTarget.style.boxShadow = `0 16px 48px ${cardColor}30`; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = prog.popular ? `0 12px 40px ${cardColor}28` : "0 2px 12px rgba(0,0,0,.06)"; }}
     >
-      {/* Header */}
+      {/* Header — ملوّن بلون الدولة */}
       <div style={{
-        background: prog.popular
-          ? "linear-gradient(135deg,var(--dark,#16100a),#2a1e08)"
-          : "linear-gradient(135deg,#faf7f2,#f0ebe0)",
+        background: `${cardColor}12`,
+        borderBottom: `1px solid ${cardColor}28`,
         padding: "22px 24px 18px",
         position: "relative",
       }}>
         {prog.tagAr && (
           <div style={{
-            position: "absolute", top: 14, insetInlineStart: 14,
-            background: "linear-gradient(135deg,#8a6010,var(--gold,#c9a84c))",
-            color: "#1e1508", padding: "3px 12px", borderRadius: 20,
-            fontSize: ".65rem", fontWeight: 800, letterSpacing: ".08em",
+            position: "absolute", top: 12, insetInlineStart: 12,
+            background: cardColor,
+            color: "#fff",
+            padding: "3px 12px", borderRadius: 20,
+            fontSize: ".65rem", fontWeight: 800, letterSpacing: ".06em",
           }}>
             ⭐ {ar ? prog.tagAr : prog.tagEn}
           </div>
         )}
-        <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: prog.tagAr ? 22 : 0 }}>
-          <div style={{ fontSize: "2.6rem", lineHeight: 1 }}>{prog.flag}</div>
-          <div>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: prog.tagAr ? 24 : 0 }}>
+          <div style={{ fontSize: "2.8rem", lineHeight: 1 }}>{prog.flag}</div>
+          <div style={{ flex: 1 }}>
             <h3 style={{
-              fontWeight: 800, fontSize: "1rem",
-              color: prog.popular ? "#fff" : "var(--g800,#1e1508)",
+              fontWeight: 800, fontSize: "1.05rem",
+              color: "var(--g800,#1e1508)",
               marginBottom: 3,
             }}>
               {ar ? prog.nameAr : prog.nameEn}
             </h3>
-            <div style={{ fontSize: ".75rem", color: prog.popular ? "rgba(255,255,255,.5)" : "var(--g400,#7a6b50)" }}>
+            <div style={{ fontSize: ".75rem", color: "var(--g400,#7a6b50)" }}>
               {ar ? prog.typeAr : prog.typeEn}
             </div>
           </div>
+          {/* Visa-free badge */}
+          {(prog.visaFreeAr || prog.visaFreeEn) && (
+            <div style={{ textAlign: "center", flexShrink: 0 }}>
+              <div style={{ fontSize: "1.4rem", fontWeight: 900, color: cardColor, lineHeight: 1 }}>
+                {(ar ? prog.visaFreeAr : prog.visaFreeEn)?.match(/\d+/)?.[0] || "✓"}
+              </div>
+              <div style={{ fontSize: ".55rem", color: "var(--g400,#7a6b50)", lineHeight: 1.2, whiteSpace: "nowrap" }}>
+                {ar ? "دولة بلا تأشيرة" : "visa-free"}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: "1px solid rgba(201,168,76,.1)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: `1px solid ${cardColor}18` }}>
         {[
           { icon: "💰", label: ar ? "الاستثمار" : "Investment", val: ar ? prog.investmentAr : prog.investmentEn },
           { icon: "⏱", label: ar ? "المدة" : "Timeline", val: ar ? prog.durationAr : prog.durationEn },
@@ -850,11 +882,11 @@ function ProgramCard({ prog, ar, ff, onCTA, expanded, onToggle }) {
         ].map((s, i) => (
           <div key={i} style={{
             padding: "12px 14px",
-            borderInlineEnd: i % 2 === 0 ? "1px solid rgba(201,168,76,.1)" : "none",
-            borderBottom: i < 2 ? "1px solid rgba(201,168,76,.1)" : "none",
+            borderInlineEnd: i % 2 === 0 ? `1px solid ${cardColor}18` : "none",
+            borderBottom: i < 2 ? `1px solid ${cardColor}18` : "none",
           }}>
             <div style={{ fontSize: ".65rem", color: "var(--g400,#7a6b50)", marginBottom: 3 }}>{s.icon} {s.label}</div>
-            <div style={{ fontSize: ".8rem", fontWeight: 700, color: "var(--gold,#c9a84c)", lineHeight: 1.3 }}>{s.val}</div>
+            <div style={{ fontSize: ".8rem", fontWeight: 700, color: cardColor, lineHeight: 1.3 }}>{s.val}</div>
           </div>
         ))}
       </div>
@@ -864,7 +896,7 @@ function ProgramCard({ prog, ar, ff, onCTA, expanded, onToggle }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
           {features.map((f, j) => (
             <div key={j} style={{ display: "flex", alignItems: "flex-start", gap: 9, fontSize: ".84rem", color: "var(--g600,#3d3020)" }}>
-              <span style={{ color: "var(--gold,#c9a84c)", fontWeight: 800, flexShrink: 0, marginTop: 1 }}>✓</span>
+              <span style={{ color: cardColor, fontWeight: 800, flexShrink: 0, marginTop: 1 }}>✓</span>
               {f}
             </div>
           ))}
@@ -875,9 +907,9 @@ function ProgramCard({ prog, ar, ff, onCTA, expanded, onToggle }) {
           <button
             onClick={onToggle}
             style={{
-              background: "none", border: "1px solid rgba(201,168,76,.25)", borderRadius: 6,
+              background: "none", border: `1px solid ${cardColor}44`, borderRadius: 6,
               padding: "7px 14px", cursor: "pointer", fontFamily: ff, fontSize: ".8rem",
-              color: "var(--gold,#c9a84c)", fontWeight: 600, width: "100%",
+              color: cardColor, fontWeight: 600, width: "100%",
               transition: "all .2s", marginBottom: expanded ? 16 : 0,
             }}
           >
@@ -908,7 +940,7 @@ function ProgramCard({ prog, ar, ff, onCTA, expanded, onToggle }) {
                 </div>
                 {investOpts.map((o, i) => (
                   <div key={i} style={{ display: "flex", gap: 8, fontSize: ".82rem", color: "var(--g600,#3d3020)", marginBottom: 5 }}>
-                    <span style={{ color: "var(--gold,#c9a84c)", flexShrink: 0 }}>→</span> {o}
+                    <span style={{ color: cardColor, flexShrink: 0 }}>→</span> {o}
                   </div>
                 ))}
               </div>
@@ -947,20 +979,15 @@ function ProgramCard({ prog, ar, ff, onCTA, expanded, onToggle }) {
           onClick={onCTA}
           style={{
             width: "100%", padding: "13px 0", fontFamily: ff,
-            background: prog.popular
-              ? "linear-gradient(135deg,#8a6010,var(--gold,#c9a84c))"
-              : "transparent",
-            border: prog.popular ? "none" : "2px solid var(--gold,#c9a84c)",
-            color: prog.popular ? "#1e1508" : "var(--gold,#c9a84c)",
+            background: cardColor,
+            border: "none",
+            color: "#fff",
             borderRadius: 8, fontWeight: 800, fontSize: ".88rem", cursor: "pointer",
             transition: "all .2s",
+            opacity: 0.92,
           }}
-          onMouseEnter={e => {
-            if (!prog.popular) { e.target.style.background = "rgba(201,168,76,.08)"; }
-          }}
-          onMouseLeave={e => {
-            if (!prog.popular) { e.target.style.background = "transparent"; }
-          }}
+          onMouseEnter={e => { e.target.style.opacity = "1"; e.target.style.transform = "scale(1.01)"; }}
+          onMouseLeave={e => { e.target.style.opacity = "0.92"; e.target.style.transform = "scale(1)"; }}
         >
           {ar ? "احصل على استشارة مجانية" : "Free Consultation"}
         </button>

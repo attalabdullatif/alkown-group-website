@@ -35,7 +35,6 @@ const AgentHub        = lazy(() => import("./pages/ai/AgentHub"));
 const ContentEngine   = lazy(() => import("./pages/ai/ContentEngine"));
 const ContentCalendar = lazy(() => import("./pages/ai/ContentCalendar"));
 const BrandMemory     = lazy(() => import("./pages/ai/BrandMemory"));
-const Citizenship     = lazy(() => import("./pages/Citizenship"));
 
 // ── Lazy fallback ──────────────────────────────────────────────
 function PageLoader() {
@@ -327,7 +326,6 @@ export default function App() {
         <Route path="/visa-center"        element={<VisaCenterPage />} />
         <Route path="/company-formation"  element={<CompanyFormation />} />
         <Route path="/residency"          element={<Residency />} />
-        <Route path="/citizenship"        element={<Citizenship />} />
         <Route path="/travel"             element={<Travel />} />
         <Route path="/knowledge-center"   element={<KnowledgeCenter />} />
         <Route path="/track-request"      element={<TrackRequest />} />
