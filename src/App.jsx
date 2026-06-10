@@ -1,28 +1,51 @@
+import { lazy, Suspense, createContext, useContext, useState as useDarkState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom";
-import VisaRoutePage from "./pages/visa/VisaRoutePage";
-// VisaAdminPage replaced by VisaAdminIntelligence (unified system)
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext";
 import { signOut } from "./lib/auth";
 import { ContentProvider } from "./context/ContentContext";
-import SiteAdminPage from "./pages/SiteAdminPage";
 
+// ── Eager: critical path (landing + auth) ──────────────────────
 import MainWebsite from "./MainWebsite";
-import VisaCenterPage from "./pages/visa/VisaCenterPage";
-import CompanyFormation from "./pages/CompanyFormation";
-import KnowledgeCenter from "./pages/KnowledgeCenter";
-
-import Dashboard from "./dashboard/Dashboard";
 import Login from "./pages/Login";
-import Services from "./pages/Services";
-import Clients from "./pages/Clients";
-import Requests from "./pages/Requests";
-import Accounting from "./pages/Accounting";
-import VisaChecker from "./pages/visa/VisaChecker";
-import VisaAdminIntelligence from "./pages/visa/VisaAdminIntelligence";
-import TrackRequest from "./pages/TrackRequest";
-import VerifyInvoice from "./pages/VerifyInvoice";
-import ClientPortal from "./pages/ClientPortal";
+
+// ── Lazy: all other routes — each becomes its own JS chunk ──────
+const Dashboard            = lazy(() => import("./dashboard/Dashboard"));
+const Clients              = lazy(() => import("./pages/Clients"));
+const Services             = lazy(() => import("./pages/Services"));
+const Requests             = lazy(() => import("./pages/Requests"));
+const Accounting           = lazy(() => import("./pages/Accounting"));
+const SiteAdminPage        = lazy(() => import("./pages/SiteAdminPage"));
+const VisaCenterPage       = lazy(() => import("./pages/visa/VisaCenterPage"));
+const VisaChecker          = lazy(() => import("./pages/visa/VisaChecker"));
+const VisaRoutePage        = lazy(() => import("./pages/visa/VisaRoutePage"));
+const VisaAdminIntelligence= lazy(() => import("./pages/visa/VisaAdminIntelligence"));
+const CompanyFormation     = lazy(() => import("./pages/CompanyFormation"));
+const Residency            = lazy(() => import("./pages/Residency"));
+const Travel               = lazy(() => import("./pages/Travel"));
+const KnowledgeCenter      = lazy(() => import("./pages/KnowledgeCenter"));
+const TrackRequest         = lazy(() => import("./pages/TrackRequest"));
+const VerifyInvoice        = lazy(() => import("./pages/VerifyInvoice"));
+const ClientPortal         = lazy(() => import("./pages/ClientPortal"));
+const ResidencyAdmin       = lazy(() => import("./pages/ResidencyAdmin"));
+
+// ── AI Knowledge Engine — lazy chunks ─────────────────────────
+const AICommandCenter = lazy(() => import("./pages/ai/AICommandCenter"));
+const KnowledgeBase   = lazy(() => import("./pages/ai/KnowledgeBase"));
+const RAGSearch       = lazy(() => import("./pages/ai/RAGSearch"));
+const AgentHub        = lazy(() => import("./pages/ai/AgentHub"));
+const ContentEngine   = lazy(() => import("./pages/ai/ContentEngine"));
+const ContentCalendar = lazy(() => import("./pages/ai/ContentCalendar"));
+const BrandMemory     = lazy(() => import("./pages/ai/BrandMemory"));
+
+// ── Lazy fallback ──────────────────────────────────────────────
+function PageLoader() {
+  return <div className="lazy-fallback">الكون ···</div>;
+}
+
+// ── Dark Mode Context ──────────────────────────────────────────
+const DarkCtx = createContext({ dark: false, toggle: () => {} });
+export const useDark = () => useContext(DarkCtx);
 
 const NAV_LINKS = [
   { to: "/dashboard",    label: "📊 لوحة التحكم",      roles: ["admin","manager","staff"] },
@@ -32,12 +55,15 @@ const NAV_LINKS = [
   { to: "/accounting",   label: "💼 الفواتير والمحاسبة",  roles: ["admin","manager"] },
   { to: "/visa-admin",       label: "🛂 إدارة التأشيرات",   roles: ["admin","manager"] },
   { to: "/site-admin",   label: "✏️ تعديل الموقع",      roles: ["admin"] },
+  { to: "/residency-admin", label: "🌍 إدارة الإقامة والجنسية", roles: ["admin","manager"] },
+  { to: "/ai",             label: "🤖 الذكاء الاصطناعي",  roles: ["admin","manager"] },
   { to: "/track-request",label: "🔍 تتبع الطلب",        roles: null },
   { to: "/portal",       label: "🚪 بوابة العملاء",     roles: null },
 ];
 
 function Navigation() {
   const { user, role } = useAuth();
+  const { dark, toggle } = useDark();
   const navigate = useNavigate();
 
   async function handleSignOut() {
@@ -61,24 +87,40 @@ function Navigation() {
           <span style={{ color:"#c9a84c", fontWeight:800, fontSize:"1.1rem", letterSpacing:".05em" }}>الكون</span>
           <span style={{ color:"rgba(255,255,255,.35)", fontSize:".72rem", letterSpacing:".18em" }}>GLOBAL · CRM</span>
         </Link>
-        {user && (
-          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <span style={{ color:"rgba(255,255,255,.35)", fontSize:".78rem" }}>
-              {role === "admin" ? "👑" : role === "manager" ? "🏢" : "👤"} {role}
-            </span>
-            <button onClick={handleSignOut} style={{
-              background:"rgba(255,80,80,.08)", color:"#ff6b6b",
-              border:"1px solid rgba(255,80,80,.25)", padding:"6px 14px",
-              borderRadius:8, cursor:"pointer", fontFamily:"inherit", fontSize:".78rem", fontWeight:700,
-            }}>
-              تسجيل الخروج
-            </button>
-          </div>
-        )}
+        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={toggle}
+            title={dark ? "الوضع الفاتح" : "الوضع الداكن"}
+            style={{
+              background: dark ? "rgba(201,168,76,.15)" : "rgba(255,255,255,.08)",
+              border: `1px solid ${dark ? "rgba(201,168,76,.4)" : "rgba(255,255,255,.15)"}`,
+              color: dark ? "#c9a84c" : "rgba(255,255,255,.6)",
+              borderRadius: 8, padding: "5px 10px", cursor: "pointer",
+              fontSize: "1rem", lineHeight: 1, transition: "all .2s",
+            }}
+          >
+            {dark ? "☀️" : "🌙"}
+          </button>
+          {user && (
+            <>
+              <span style={{ color:"rgba(255,255,255,.35)", fontSize:".78rem" }}>
+                {role === "admin" ? "👑" : role === "manager" ? "🏢" : "👤"} {role}
+              </span>
+              <button onClick={handleSignOut} style={{
+                background:"rgba(255,80,80,.08)", color:"#ff6b6b",
+                border:"1px solid rgba(255,80,80,.25)", padding:"6px 14px",
+                borderRadius:8, cursor:"pointer", fontFamily:"inherit", fontSize:".78rem", fontWeight:700,
+              }}>
+                تسجيل الخروج
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Nav links */}
-      <div style={{ display:"flex", gap:4, overflowX:"auto", paddingBottom:1, maxWidth:1400, margin:"0 auto" }}>
+      <div style={{ display:"flex", flexWrap:"wrap", gap:0, maxWidth:1400, margin:"0 auto", paddingBottom:6 }}>
         {visible.map(n => (
           <NavLink key={n.to} to={n.to}>{n.label}</NavLink>
         ))}
@@ -104,12 +146,28 @@ function NavLink({ to, children }) {
 }
 
 function PageLayout({ children }) {
-  return (
-    <div>
-      <Navigation />
+  const { dark } = useDark();
 
-      <div style={{ padding: "20px" }}>
-        {children}
+  // تطبيق لون الـ body حسب الوضع
+  useEffect(() => {
+    document.body.style.background = dark ? "#0d0b08" : "";
+    document.body.style.margin = "0";
+  }, [dark]);
+
+  return (
+    <div style={{
+      background: dark ? "#0d0b08" : "#f5f0e8",
+      minHeight: "100vh",
+    }}>
+      {/* Navigation — لا تتأثر بالـ invert */}
+      <Navigation />
+      {/* المحتوى — يتأثر بالوضع الليلي */}
+      <div style={dark ? {
+        filter: "invert(0.88) hue-rotate(180deg) brightness(0.96)",
+      } : {}}>
+        <div style={{ padding: "20px" }}>
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -160,15 +218,20 @@ function LoginPage() {
 }
 
 export default function App() {
+  const [dark, setDark] = useDarkState(() => localStorage.getItem("crm-dark") === "1");
+  const toggleDark = () => setDark(d => { const n = !d; localStorage.setItem("crm-dark", n ? "1" : "0"); return n; });
+
   return (
+    <DarkCtx.Provider value={{ dark, toggle: toggleDark }}>
     <ContentProvider>
     <BrowserRouter>
+      <Suspense fallback={<PageLoader />}>
       <Routes>
 
-        {/* MAIN WEBSITE */}
+        {/* MAIN WEBSITE — eager */}
         <Route path="/" element={<MainWebsite />} />
 
-        {/* CRM — محمي */}
+        {/* CRM — محمي — lazy chunks */}
         <Route path="/dashboard" element={
           <ProtectedRoute allowed={["admin", "manager", "staff"]}>
             <DashboardPage />
@@ -205,7 +268,7 @@ export default function App() {
           </ProtectedRoute>
         } />
 
-        {/* Visa Intelligence */}
+        {/* Visa */}
         <Route path="/visa-checker" element={<VisaChecker />} />
         <Route path="/visa-intelligence" element={
           <ProtectedRoute allowed={["admin","manager"]}>
@@ -213,24 +276,25 @@ export default function App() {
           </ProtectedRoute>
         } />
 
-        <Route path="/visa-center" element={<VisaCenterPage />} />
-        <Route path="/company-formation" element={<CompanyFormation />} />
-        <Route path="/knowledge-center" element={<KnowledgeCenter />} />
-        <Route path="/track-request" element={<TrackRequest />} />
-        <Route path="/track-application" element={<TrackRequest />} />
-        <Route path="/verify-invoice" element={<VerifyInvoice />} />
-        <Route path="/portal" element={<ClientPortal />} />
-        <Route path="/visa/:slug" element={<VisaRoutePage />} />
+        {/* Public pages — lazy */}
+        <Route path="/visa-center"        element={<VisaCenterPage />} />
+        <Route path="/company-formation"  element={<CompanyFormation />} />
+        <Route path="/residency"          element={<Residency />} />
+        <Route path="/travel"             element={<Travel />} />
+        <Route path="/knowledge-center"   element={<KnowledgeCenter />} />
+        <Route path="/track-request"      element={<TrackRequest />} />
+        <Route path="/track-application"  element={<TrackRequest />} />
+        <Route path="/verify-invoice"     element={<VerifyInvoice />} />
+        <Route path="/portal"             element={<ClientPortal />} />
+        <Route path="/visa/:slug"         element={<VisaRoutePage />} />
+
         <Route path="/visa-admin" element={
           <ProtectedRoute allowed={["admin", "manager"]}>
             <PageLayout><VisaAdminIntelligence /></PageLayout>
           </ProtectedRoute>
         } />
 
-        <Route
-          path="/login"
-          element={<LoginPage />}
-        />
+        <Route path="/login"      element={<LoginPage />} />
 
         <Route path="/site-admin" element={
           <ProtectedRoute allowed={["admin"]}>
@@ -238,8 +302,53 @@ export default function App() {
           </ProtectedRoute>
         } />
 
+        <Route path="/residency-admin" element={
+          <ProtectedRoute allowed={["admin","manager"]}>
+            <ResidencyAdmin />
+          </ProtectedRoute>
+        } />
+
+        {/* ── AI Knowledge Engine ────────────────────────────── */}
+        <Route path="/ai" element={
+          <ProtectedRoute allowed={["admin","manager"]}>
+            <PageLayout><AICommandCenter /></PageLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/ai/knowledge" element={
+          <ProtectedRoute allowed={["admin","manager"]}>
+            <PageLayout><KnowledgeBase /></PageLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/ai/search" element={
+          <ProtectedRoute allowed={["admin","manager"]}>
+            <PageLayout><RAGSearch /></PageLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/ai/agents" element={
+          <ProtectedRoute allowed={["admin","manager"]}>
+            <PageLayout><AgentHub /></PageLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/ai/content" element={
+          <ProtectedRoute allowed={["admin","manager"]}>
+            <PageLayout><ContentEngine /></PageLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/ai/calendar" element={
+          <ProtectedRoute allowed={["admin","manager"]}>
+            <PageLayout><ContentCalendar /></PageLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/ai/memory" element={
+          <ProtectedRoute allowed={["admin","manager"]}>
+            <PageLayout><BrandMemory /></PageLayout>
+          </ProtectedRoute>
+        } />
+
       </Routes>
+      </Suspense>
     </BrowserRouter>
     </ContentProvider>
+    </DarkCtx.Provider>
   );
 }
