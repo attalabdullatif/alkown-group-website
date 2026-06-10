@@ -2009,24 +2009,6 @@ function HomePage({ t, lang, ff, setPage }) {
 
           <p className="fu3" style={{ fontSize: "clamp(.8rem,1.8vw,.92rem)", color: C.g400, letterSpacing: ".18em", marginBottom: 36 }}>{t.hero.sub}</p>
 
-          {/* ── CTA Buttons ── */}
-          <div className="fu4" style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", marginBottom: 36 }}>
-            <button
-              className="gbtn"
-              style={{ fontFamily: ff, fontSize: "clamp(.82rem,1.6vw,.95rem)", padding: "14px 32px" }}
-              onClick={() => setPage("visa-center")}
-            >
-              🔍 {t.hero.cta1}
-            </button>
-            <button
-              className="obtn"
-              style={{ fontFamily: ff, fontSize: "clamp(.82rem,1.6vw,.95rem)", padding: "14px 32px" }}
-              onClick={() => setPage("visa-center")}
-            >
-              📋 {t.hero.cta2}
-            </button>
-          </div>
-
           {/* Trust badges */}
           <div className="fu4" style={{ display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap", marginTop: 36 }}>
             {[

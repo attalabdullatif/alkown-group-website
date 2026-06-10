@@ -973,25 +973,6 @@ function ProgramCard({ prog, ar, ff, onCTA, expanded, onToggle }) {
         )}
       </div>
 
-      {/* CTA */}
-      <div style={{ padding: "0 22px 22px" }}>
-        <button
-          onClick={onCTA}
-          style={{
-            width: "100%", padding: "13px 0", fontFamily: ff,
-            background: cardColor,
-            border: "none",
-            color: "#fff",
-            borderRadius: 8, fontWeight: 800, fontSize: ".88rem", cursor: "pointer",
-            transition: "all .2s",
-            opacity: 0.92,
-          }}
-          onMouseEnter={e => { e.target.style.opacity = "1"; e.target.style.transform = "scale(1.01)"; }}
-          onMouseLeave={e => { e.target.style.opacity = "0.92"; e.target.style.transform = "scale(1)"; }}
-        >
-          {ar ? "احصل على استشارة مجانية" : "Free Consultation"}
-        </button>
-      </div>
     </div>
   );
 }
@@ -1199,14 +1180,6 @@ export default function Residency({ lang = "ar", ff, setPage }) {
             {heroDesc}
           </p>
 
-          <div className="fu3" style={{ display:"flex", gap:14, justifyContent:"center", flexWrap:"wrap" }}>
-            <button className="gbtn" style={{ fontFamily: ff }} onClick={handleCTA}>
-              {ar ? "احصل على استشارة مجانية" : "Get Free Consultation"}
-            </button>
-            <a href="https://wa.me/971544909522" target="_blank" rel="noreferrer"
-              style={{ padding:"14px 28px", background:"rgba(37,211,102,.1)", border:"1.5px solid rgba(37,211,102,.35)", borderRadius:4, color:"#25d366", fontFamily:ff, fontWeight:700, fontSize:".88rem", textDecoration:"none", display:"inline-flex", alignItems:"center", gap:8 }}
-            >💬 WhatsApp</a>
-          </div>
         </div>
       </section>
 
