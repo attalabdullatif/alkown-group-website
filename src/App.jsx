@@ -37,6 +37,7 @@ const AgentHub        = lazy(() => import("./pages/ai/AgentHub"));
 const ContentEngine   = lazy(() => import("./pages/ai/ContentEngine"));
 const ContentCalendar = lazy(() => import("./pages/ai/ContentCalendar"));
 const BrandMemory     = lazy(() => import("./pages/ai/BrandMemory"));
+const Citizenship     = lazy(() => import("./pages/Citizenship"));
 
 // ── Lazy fallback ──────────────────────────────────────────────
 function PageLoader() {
@@ -65,10 +66,12 @@ function Navigation() {
   const { user, role } = useAuth();
   const { dark, toggle } = useDark();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useDarkState(false);
 
   async function handleSignOut() {
     await signOut();
     navigate("/login");
+    setMenuOpen(false);
   }
 
   const visible = NAV_LINKS.filter(n => !n.roles || !user || n.roles.includes(role));
@@ -88,7 +91,6 @@ function Navigation() {
           <span style={{ color:"rgba(255,255,255,.35)", fontSize:".72rem", letterSpacing:".18em" }}>GLOBAL · CRM</span>
         </Link>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          {/* Dark Mode Toggle */}
           <button
             onClick={toggle}
             title={dark ? "الوضع الفاتح" : "الوضع الداكن"}
@@ -104,10 +106,10 @@ function Navigation() {
           </button>
           {user && (
             <>
-              <span style={{ color:"rgba(255,255,255,.35)", fontSize:".78rem" }}>
+              <span style={{ color:"rgba(255,255,255,.35)", fontSize:".78rem" }} className="hide-mobile">
                 {role === "admin" ? "👑" : role === "manager" ? "🏢" : "👤"} {role}
               </span>
-              <button onClick={handleSignOut} style={{
+              <button onClick={handleSignOut} className="hide-mobile" style={{
                 background:"rgba(255,80,80,.08)", color:"#ff6b6b",
                 border:"1px solid rgba(255,80,80,.25)", padding:"6px 14px",
                 borderRadius:8, cursor:"pointer", fontFamily:"inherit", fontSize:".78rem", fontWeight:700,
@@ -116,23 +118,72 @@ function Navigation() {
               </button>
             </>
           )}
+          {/* Hamburger — mobile only */}
+          <button
+            onClick={() => setMenuOpen(o => !o)}
+            className="show-mobile"
+            style={{
+              background:"rgba(255,255,255,.06)", border:"1px solid rgba(255,255,255,.12)",
+              color:"rgba(255,255,255,.7)", borderRadius:8, padding:"6px 10px",
+              cursor:"pointer", fontSize:"1.1rem", lineHeight:1,
+              display:"none",
+            }}
+          >
+            {menuOpen ? "✕" : "☰"}
+          </button>
         </div>
       </div>
 
-      {/* Nav links */}
-      <div style={{ display:"flex", flexWrap:"wrap", gap:0, maxWidth:1400, margin:"0 auto", paddingBottom:6 }}>
-        {visible.map(n => (
-          <NavLink key={n.to} to={n.to}>{n.label}</NavLink>
-        ))}
+      {/* Nav links — desktop: wrap, mobile: dropdown */}
+      <div style={{ maxWidth:1400, margin:"0 auto" }}>
+        {/* Desktop */}
+        <div className="nav-desktop" style={{ display:"flex", flexWrap:"wrap", gap:0, paddingBottom:6 }}>
+          {visible.map(n => (
+            <NavLink key={n.to} to={n.to}>{n.label}</NavLink>
+          ))}
+        </div>
+        {/* Mobile dropdown */}
+        {menuOpen && (
+          <div className="nav-mobile" style={{
+            display:"flex", flexDirection:"column", paddingBottom:12,
+            borderTop:"1px solid rgba(201,168,76,.12)",
+          }}>
+            {visible.map(n => (
+              <NavLink key={n.to} to={n.to} onClick={() => setMenuOpen(false)}>{n.label}</NavLink>
+            ))}
+            {user && (
+              <button onClick={handleSignOut} style={{
+                background:"rgba(255,80,80,.08)", color:"#ff6b6b",
+                border:"1px solid rgba(255,80,80,.25)", padding:"10px 16px",
+                borderRadius:8, cursor:"pointer", fontFamily:"inherit", fontSize:".85rem", fontWeight:700,
+                margin:"8px 0 0", textAlign:"right",
+              }}>
+                تسجيل الخروج
+              </button>
+            )}
+          </div>
+        )}
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .nav-desktop { display: none !important; }
+          .show-mobile  { display: flex !important; }
+          .hide-mobile  { display: none !important; }
+        }
+        @media (min-width: 769px) {
+          .nav-mobile   { display: none !important; }
+          .show-mobile  { display: none !important; }
+        }
+      `}</style>
     </div>
   );
 }
 
-function NavLink({ to, children }) {
-  const active = window.location.pathname === to;
+function NavLink({ to, children, onClick }) {
+  const active = window.location.pathname === to || window.location.pathname.startsWith(to + "/");
   return (
-    <Link to={to} style={{
+    <Link to={to} onClick={onClick} style={{
       textDecoration:"none", whiteSpace:"nowrap",
       padding:"10px 16px", fontSize:".85rem", fontWeight: active ? 700 : 500,
       color: active ? "#c9a84c" : "rgba(255,255,255,.6)",
@@ -280,6 +331,7 @@ export default function App() {
         <Route path="/visa-center"        element={<VisaCenterPage />} />
         <Route path="/company-formation"  element={<CompanyFormation />} />
         <Route path="/residency"          element={<Residency />} />
+        <Route path="/citizenship"        element={<Citizenship />} />
         <Route path="/travel"             element={<Travel />} />
         <Route path="/knowledge-center"   element={<KnowledgeCenter />} />
         <Route path="/track-request"      element={<TrackRequest />} />

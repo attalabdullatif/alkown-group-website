@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import {
-  CRM_COLORS, REQUEST_STATUSES, cardStyle, formatDate,
+  CRM_COLORS, LEAD_STAGE_AR, LEAD_STAGE_COLORS, LEAD_STAGES,
+  REQUEST_STATUSES, cardStyle, formatDate,
   outlineButtonStyle, pageStyle, statusColors,
 } from "../components/crmUi";
 
@@ -17,9 +19,11 @@ const STATUS_AR = {
 
 export default function Dashboard() {
   const { user, role } = useAuth();
+  const navigate = useNavigate();
   const [clients, setClients] = useState([]);
   const [requests, setRequests] = useState([]);
   const [invoices, setInvoices] = useState([]);
+  const [aiStats, setAiStats] = useState({ documents: 0, content: 0, queries: 0, sessions: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -28,10 +32,14 @@ export default function Dashboard() {
   async function loadDashboard() {
     setLoading(true);
     setError("");
-    const [clientsRes, requestsRes, invoicesRes] = await Promise.all([
-      supabase.from("clients").select("id, created_at").order("created_at", { ascending: false }),
+    const [clientsRes, requestsRes, invoicesRes, docsRes, contentRes, queriesRes, sessionsRes] = await Promise.all([
+      supabase.from("clients").select("id, created_at, pipeline_stage").order("created_at", { ascending: false }),
       supabase.from("requests").select("*, clients(full_name), services(name)").order("created_at", { ascending: false }),
       supabase.from("invoices").select("*").order("created_at", { ascending: false }),
+      supabase.from("ai_documents").select("id", { count: "exact", head: true }),
+      supabase.from("ai_content_items").select("id", { count: "exact", head: true }),
+      supabase.from("ai_rag_queries").select("id", { count: "exact", head: true }),
+      supabase.from("ai_agent_sessions").select("id", { count: "exact", head: true }),
     ]);
     if (clientsRes.error) setError(clientsRes.error.message);
     if (requestsRes.error) setError(requestsRes.error.message);
@@ -39,12 +47,43 @@ export default function Dashboard() {
     setClients(clientsRes.data || []);
     setRequests(requestsRes.data || []);
     setInvoices(invoicesRes.data || []);
+    setAiStats({
+      documents: docsRes.count  || 0,
+      content:   contentRes.count  || 0,
+      queries:   queriesRes.count  || 0,
+      sessions:  sessionsRes.count || 0,
+    });
     setLoading(false);
   }
 
-  const totalRevenue = useMemo(() => invoices.reduce((s, i) => s + Number(i.amount || 0), 0), [invoices]); // eslint-disable-line no-unused-vars
-  const paidRevenue = useMemo(() => invoices.filter(i => i.status === "Paid").reduce((s, i) => s + Number(i.amount || 0), 0), [invoices]);
-  const pendingRevenue = useMemo(() => invoices.filter(i => i.status === "Pending").reduce((s, i) => s + Number(i.amount || 0), 0), [invoices]);
+  const paidRevenue    = useMemo(() => invoices.filter(i => i.status === "Paid").reduce((s, i) => s + Number(i.amount || 0), 0), [invoices]);
+  const pendingRevenue = useMemo(() => invoices.filter(i => ["Pending","Sent","Partially Paid","Overdue"].includes(i.status)).reduce((s, i) => s + Number(i.amount || 0), 0), [invoices]);
+
+  // Advanced KPIs
+  const avgProcessingDays = useMemo(() => {
+    const completed = requests.filter(r => r.status === "Completed" && r.created_at && r.updated_at);
+    if (!completed.length) return null;
+    const totalDays = completed.reduce((s, r) => {
+      const diff = (new Date(r.updated_at) - new Date(r.created_at)) / (1000 * 60 * 60 * 24);
+      return s + diff;
+    }, 0);
+    return Math.round(totalDays / completed.length);
+  }, [requests]);
+
+  const rejectionRate = useMemo(() => {
+    const done = requests.filter(r => ["Completed","Rejected"].includes(r.status));
+    if (!done.length) return 0;
+    return Math.round((done.filter(r => r.status === "Rejected").length / done.length) * 100);
+  }, [requests]);
+
+  const conversionRate = useMemo(() => {
+    if (!requests.length) return 0;
+    return Math.round((requests.filter(r => r.status === "Completed").length / requests.length) * 100);
+  }, [requests]);
+
+  const activeRequests = useMemo(() =>
+    requests.filter(r => !["Completed","Rejected"].includes(r.status)).length,
+  [requests]);
 
   const statusCounts = useMemo(() => {
     const counts = Object.fromEntries(REQUEST_STATUSES.map(s => [s, 0]));
@@ -92,15 +131,54 @@ export default function Dashboard() {
         <p style={{ color: CRM_COLORS.muted }}>جارٍ تحميل البيانات...</p>
       ) : (
         <>
-          {/* Stats */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px,1fr))", gap: 16, marginBottom: 24 }}>
-            <Metric label="العملاء" value={clients.length} icon="👥" />
-            <Metric label="الطلبات" value={requests.length} icon="📋" />
-            <Metric label="طلبات جديدة" value={statusCounts["New"] || 0} icon="🆕" color={CRM_COLORS.goldDark} />
-            <Metric label="مكتملة" value={statusCounts["Completed"] || 0} icon="✅" color={CRM_COLORS.success} />
-            <Metric label="الإيرادات المدفوعة" value={`$${paidRevenue.toLocaleString()}`} icon="💰" color={CRM_COLORS.success} />
-            <Metric label="الإيرادات المعلّقة" value={`$${pendingRevenue.toLocaleString()}`} icon="⏳" color="#c28a25" />
+          {/* Stats Row 1 */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px,1fr))", gap: 14, marginBottom: 14 }}>
+            <Metric label="إجمالي العملاء"      value={clients.length}                                icon="👥" />
+            <Metric label="إجمالي الطلبات"       value={requests.length}                               icon="📋" />
+            <Metric label="الطلبات النشطة"       value={activeRequests}                                icon="⚡" color={CRM_COLORS.info} />
+            <Metric label="مكتملة"               value={statusCounts["Completed"] || 0}               icon="✅" color={CRM_COLORS.success} />
+            <Metric label="مرفوضة"               value={statusCounts["Rejected"] || 0}                icon="❌" color={CRM_COLORS.danger} />
+            <Metric label="الإيرادات المحصّلة"    value={`$${paidRevenue.toLocaleString()}`}            icon="💰" color={CRM_COLORS.success} />
+            <Metric label="الفواتير المعلّقة"     value={`$${pendingRevenue.toLocaleString()}`}         icon="⏳" color="#c28a25" />
           </div>
+          {/* Stats Row 2 — Advanced KPIs */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px,1fr))", gap: 14, marginBottom: 24 }}>
+            <Metric
+              label="متوسط وقت المعالجة"
+              value={avgProcessingDays !== null ? `${avgProcessingDays} يوم` : "—"}
+              icon="⏱" color={CRM_COLORS.info}
+            />
+            <Metric
+              label="نسبة الإكمال"
+              value={`${conversionRate}%`}
+              icon="📈" color={CRM_COLORS.success}
+            />
+            <Metric
+              label="نسبة الرفض"
+              value={`${rejectionRate}%`}
+              icon="📉" color={rejectionRate > 20 ? CRM_COLORS.danger : CRM_COLORS.muted}
+            />
+          </div>
+
+          {/* Pipeline Summary */}
+          <section style={{ ...cardStyle, padding: 20, marginBottom: 24 }}>
+            <h2 style={{ marginTop: 0, fontSize: 16, marginBottom: 14 }}>Lead Pipeline</h2>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {LEAD_STAGES.map(stage => {
+                const count = clients.filter(c => (c.pipeline_stage || "New Lead") === stage).length;
+                const color = LEAD_STAGE_COLORS[stage];
+                return (
+                  <div key={stage} style={{ textAlign: "center", minWidth: 80, flex: "0 0 auto" }}>
+                    <div style={{ fontWeight: 900, fontSize: 22, color }}>{count}</div>
+                    <div style={{ fontSize: 11, color: CRM_COLORS.muted, marginTop: 2 }}>{LEAD_STAGE_AR[stage]}</div>
+                    <div style={{ height: 3, background: `${color}44`, borderRadius: 2, marginTop: 4 }}>
+                      <div style={{ height: "100%", width: clients.length ? `${(count / clients.length) * 100}%` : "0%", background: color, borderRadius: 2, transition: "width .4s" }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px,1fr))", gap: 22, marginBottom: 24 }}>
             {/* Status Chart */}
@@ -155,6 +233,55 @@ export default function Dashboard() {
               )}
             </section>
           </div>
+
+          {/* AI Command Center Strip */}
+          <section style={{ ...cardStyle, padding: 20, marginBottom: 24, background: "linear-gradient(135deg,#1a1510,#2a2018)", border: "1px solid rgba(201,168,76,.2)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ fontSize: 28 }}>🤖</span>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: "1rem", color: "#fff" }}>مركز الذكاء الاصطناعي</div>
+                  <div style={{ fontSize: ".75rem", color: "rgba(255,255,255,.45)" }}>AI Knowledge Engine</div>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+                {[
+                  { label: "وثائق", value: aiStats.documents, icon: "📄" },
+                  { label: "محتوى", value: aiStats.content,   icon: "✍️" },
+                  { label: "استعلامات", value: aiStats.queries, icon: "🔍" },
+                  { label: "جلسات", value: aiStats.sessions,   icon: "🤖" },
+                ].map(s => (
+                  <div key={s.label} style={{ textAlign: "center" }}>
+                    <div style={{ fontSize: "1.3rem", fontWeight: 900, color: "#c9a84c" }}>{s.value}</div>
+                    <div style={{ fontSize: ".68rem", color: "rgba(255,255,255,.4)" }}>{s.icon} {s.label}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                {[
+                  { label: "قاعدة المعرفة", path: "/ai/knowledge" },
+                  { label: "البحث الذكي",   path: "/ai/search"   },
+                  { label: "المحتوى",        path: "/ai/content"  },
+                ].map(b => (
+                  <button key={b.path} onClick={() => navigate(b.path)} style={{
+                    background: "rgba(201,168,76,.15)", color: "#c9a84c",
+                    border: "1px solid rgba(201,168,76,.3)", borderRadius: 8,
+                    padding: "6px 12px", cursor: "pointer", fontFamily: "inherit",
+                    fontSize: ".75rem", fontWeight: 700, whiteSpace: "nowrap",
+                  }}>
+                    {b.label}
+                  </button>
+                ))}
+                <button onClick={() => navigate("/ai")} style={{
+                  background: "#c9a84c", color: "#000", border: "none",
+                  borderRadius: 8, padding: "6px 14px", cursor: "pointer",
+                  fontFamily: "inherit", fontSize: ".75rem", fontWeight: 800,
+                }}>
+                  فتح الكل →
+                </button>
+              </div>
+            </div>
+          </section>
 
           {/* Recent Activity */}
           <section style={{ ...cardStyle, padding: 22 }}>
