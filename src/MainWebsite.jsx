@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo, useCallback, createContext, useContext } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useContent } from "./context/ContentContext";
 import { useAuth } from "./context/AuthContext";
 import { supabase } from "./lib/supabase";
-import { createRequestForClient, findOrCreateClient, sendContactNotification } from "./lib/crm";
+import { createRequestForClient, findOrCreateClient } from "./lib/crm";
 import VisaCenterPage from "./pages/visa/VisaCenterPage";
 import VisaResultPage from "./pages/visa/VisaResultPage";
 import VisaApplicationPage from "./pages/visa/VisaApplicationPage";
@@ -95,7 +95,7 @@ const CF_STEPS = {
     { icon:"🎯", t:"Start Operations",      d:"Your company is ready to launch!" },
   ],
 };
-const CF_PACKAGES = [
+const CF_PACKAGES = [ // eslint-disable-line no-unused-vars
   { icon:"🚀", nameAr:"باقة المبتدئ",   nameEn:"Starter",   priceAr:"يبدأ من 3,500 درهم", priceEn:"From AED 3,500", popular:false,
     featuresAr:["تسجيل الشركة","رخصة تجارية","عنوان تجاري مرخص","شهادة التأسيس","خدمة العملاء 24/7"],
     featuresEn:["Company Registration","Trade License","Licensed Business Address","Certificate of Incorporation","24/7 Customer Support"],
@@ -2882,7 +2882,7 @@ function KcRichContent({ text }) {
         if (line.startsWith("•") || line.startsWith("-")) return (
           <div key={i} style={{ display: "flex", gap: 8, marginBottom: 5, alignItems: "flex-start" }}>
             <span style={{ color: C.gold, flexShrink: 0, fontWeight: 800, marginTop: 1 }}>✓</span>
-            <span>{line.replace(/^[•\-]\s*/, "")}</span>
+            <span>{line.replace(/^[•-]\s*/, "")}</span>
           </div>
         );
         if (line.startsWith("→")) return (

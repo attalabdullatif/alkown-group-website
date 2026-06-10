@@ -39,7 +39,7 @@ function RichContent({ text, ar }) {
         if (line.startsWith("•") || line.startsWith("-")) return (
           <div key={i} style={{ display: "flex", gap: 8, marginBottom: 5, alignItems: "flex-start" }}>
             <span style={{ color: C.gold, flexShrink: 0, fontWeight: 800, marginTop: 1 }}>✓</span>
-            <span>{line.replace(/^[•\-]\s*/, "")}</span>
+            <span>{line.replace(/^[•-]\s*/, "")}</span>
           </div>
         );
         if (line.startsWith("→")) return (
