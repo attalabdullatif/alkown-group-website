@@ -1937,7 +1937,6 @@ export default function AlkownGroup() {
       } : { paddingTop: 80 }}>
         {page === "home" && <HomePage t={t} lang={lang} ff={ff} setPage={setPage} />}
         {page === "travel" && <TravelFullPage lang={lang} ff={ff} setPage={setPage} />}
-        {page === "citizenship" && <CitizenshipPage t={t} lang={lang} ff={ff} setPage={setPage} />}
         {page === "advertising" && <AdvertisingPage t={t} lang={lang} ff={ff} setPage={setPage} />}
         {page === "academy" && <AcademyPage t={t} lang={lang} ff={ff} setPage={setPage} />}
         {page === "about" && <AboutPage t={t} lang={lang} ff={ff} setPage={setPage} />}
@@ -2392,46 +2391,6 @@ function TravelPage({ t, lang, ff, setPage }) {
 // ═══════════════════════════════════════════════════════════════
 // CITIZENSHIP PAGE
 // ═══════════════════════════════════════════════════════════════
-function CitizenshipPage({ t, lang, ff, setPage }) {
-  return (
-    <>
-      <PageHero title={t.citizenship.hero} subtitle={t.citizenship.heroSub} />
-      <section style={{ padding: "80px clamp(20px,6vw,80px)", background: "#fff" }}>
-        <div style={{ maxWidth: 1260, margin: "0 auto" }}>
-          <p style={{ textAlign: "center", maxWidth: 700, margin: "0 auto 52px", color: C.g600, lineHeight: 2, fontSize: "1rem" }}>{t.citizenship.intro}</p>
-
-          {/* Country cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 18, marginBottom: 60 }}>
-            {t.citizenship.programs.map((prog, i) => (
-              <div key={i} className="card" style={{ padding: "38px 28px", textAlign: "center" }}>
-                <div style={{ fontSize: "3rem", marginBottom: 10 }}>{prog.flag}</div>
-                <h3 style={{ fontSize: "1.15rem", color: C.g800, fontWeight: 700, marginBottom: 4 }}>{prog.name}</h3>
-                <div style={{ color: C.gold, fontSize: ".72rem", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 10 }}>{prog.type}</div>
-                <div className="gl" style={{ margin: "0 auto 10px" }} />
-                <div style={{ color: C.g600, fontSize: ".84rem", marginBottom: 4 }}>{lang === "ar" ? "يبدأ من" : "From"} <strong style={{ color: C.g800 }}>{prog.min}</strong></div>
-                <div style={{ color: C.g400, fontSize: ".76rem" }}>⏱ {prog.time}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Services list */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 16 }}>
-            {t.citizenship.services.map((s, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "18px 22px", background: C.beige, border: `1px solid rgba(201,168,76,.15)`, borderRadius: 2 }}>
-                <div style={{ width: 8, height: 8, background: C.gold, transform: "rotate(45deg)", flexShrink: 0 }} />
-                <span style={{ color: C.g800, fontSize: ".9rem", fontWeight: 500 }}>{s}</span>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ textAlign: "center", marginTop: 52 }}>
-            <button className="gbtn" style={{ fontFamily: ff }} onClick={() => setPage("booking")}>{t.nav.book}</button>
-          </div>
-        </div>
-      </section>
-    </>
-  );
-}
 
 // ═══════════════════════════════════════════════════════════════
 // COMPANY FORMATION PAGE
@@ -3691,7 +3650,7 @@ function Footer({ t, lang, ff, setPage }) {
   const ft = t.footer;
   const navItems = [
     { k: "home", l: t.nav.home }, { k: "travel", l: t.nav.travel },
-    { k: "citizenship", l: t.nav.citizenship }, { k: "advertising", l: t.nav.advertising },
+    { k: "residency", l: t.nav.residency }, { k: "advertising", l: t.nav.advertising },
     { k: "academy", l: t.nav.academy }, { k: "about", l: t.nav.about }
   ];
 
