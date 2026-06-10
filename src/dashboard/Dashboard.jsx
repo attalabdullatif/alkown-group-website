@@ -22,7 +22,6 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [clients, setClients] = useState([]);
   const [requests, setRequests] = useState([]);
-  const [invoices, setInvoices] = useState([]);
   const [aiStats, setAiStats] = useState({ documents: 0, content: 0, queries: 0, sessions: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -32,10 +31,9 @@ export default function Dashboard() {
   async function loadDashboard() {
     setLoading(true);
     setError("");
-    const [clientsRes, requestsRes, invoicesRes, docsRes, contentRes, queriesRes, sessionsRes] = await Promise.all([
+    const [clientsRes, requestsRes, docsRes, contentRes, queriesRes, sessionsRes] = await Promise.all([
       supabase.from("clients").select("id, created_at, pipeline_stage").order("created_at", { ascending: false }),
       supabase.from("requests").select("*, clients(full_name), services(name)").order("created_at", { ascending: false }),
-      supabase.from("invoices").select("*").order("created_at", { ascending: false }),
       supabase.from("ai_documents").select("id", { count: "exact", head: true }),
       supabase.from("ai_content_items").select("id", { count: "exact", head: true }),
       supabase.from("ai_rag_queries").select("id", { count: "exact", head: true }),
@@ -43,10 +41,8 @@ export default function Dashboard() {
     ]);
     if (clientsRes.error) setError(clientsRes.error.message);
     if (requestsRes.error) setError(requestsRes.error.message);
-    if (invoicesRes.error) setError(invoicesRes.error.message);
     setClients(clientsRes.data || []);
     setRequests(requestsRes.data || []);
-    setInvoices(invoicesRes.data || []);
     setAiStats({
       documents: docsRes.count  || 0,
       content:   contentRes.count  || 0,
@@ -56,8 +52,6 @@ export default function Dashboard() {
     setLoading(false);
   }
 
-  const paidRevenue    = useMemo(() => invoices.filter(i => i.status === "Paid").reduce((s, i) => s + Number(i.amount || 0), 0), [invoices]);
-  const pendingRevenue = useMemo(() => invoices.filter(i => ["Pending","Sent","Partially Paid","Overdue"].includes(i.status)).reduce((s, i) => s + Number(i.amount || 0), 0), [invoices]);
 
   // Advanced KPIs
   const avgProcessingDays = useMemo(() => {
@@ -138,8 +132,6 @@ export default function Dashboard() {
             <Metric label="الطلبات النشطة"       value={activeRequests}                                icon="⚡" color={CRM_COLORS.info} />
             <Metric label="مكتملة"               value={statusCounts["Completed"] || 0}               icon="✅" color={CRM_COLORS.success} />
             <Metric label="مرفوضة"               value={statusCounts["Rejected"] || 0}                icon="❌" color={CRM_COLORS.danger} />
-            <Metric label="الإيرادات المحصّلة"    value={`$${paidRevenue.toLocaleString()}`}            icon="💰" color={CRM_COLORS.success} />
-            <Metric label="الفواتير المعلّقة"     value={`$${pendingRevenue.toLocaleString()}`}         icon="⏳" color="#c28a25" />
           </div>
           {/* Stats Row 2 — Advanced KPIs */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px,1fr))", gap: 14, marginBottom: 24 }}>
