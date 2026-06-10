@@ -1059,13 +1059,13 @@ export default function Residency({ lang = "ar", ff, setPage }) {
 
   const heroTitle = pageContent
     ? (ar ? pageContent.hero_title_ar : pageContent.hero_title_en)
-    : (ar ? "إقامتك وجنسيتك الثانية\nفي متناول يدك" : "Your Residency & Second\nCitizenship Within Reach");
+    : (ar ? "إقامتك وجنسيتك الثانية" : "Your Residency & Second Citizenship");
 
   const heroDesc = pageContent
     ? (ar ? pageContent.hero_desc_ar : pageContent.hero_desc_en)
     : (ar
-        ? "نقدّم أشمل برامج الإقامة والجنسية في الإمارات وأوروبا والكاريبي — من الفيزا الذهبية حتى جواز السفر الثاني."
-        : "We offer the most comprehensive residency and citizenship programs in UAE, Europe, and the Caribbean.");
+        ? "الإمارات · أوروبا · الكاريبي · جواز سفر ثانٍ · فيزا ذهبية"
+        : "UAE · Europe · Caribbean · Second Passport · Golden Visa");
 
   const handleCTA = () => {
     if (setPage) setPage("booking");
@@ -1109,13 +1109,14 @@ export default function Residency({ lang = "ar", ff, setPage }) {
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg,transparent,var(--gold,#c9a84c),transparent)", opacity: .3 }} />
 
         <div style={{ maxWidth: 860, margin: "0 auto", textAlign: "center", position: "relative" }} className="fu">
+          {/* Badge */}
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 40, padding: "6px 22px", marginBottom: 24 }}>
             <span style={{ color: "var(--gold,#c9a84c)", fontSize: ".7rem", letterSpacing: ".22em", textTransform: "uppercase", fontWeight: 700 }}>
-              🌍 {ar ? "برامج الإقامة والجنسية" : "Residency & Citizenship Programs"}
+              {pageContent?.hero_badge || (ar ? "برامج الإقامة والجنسية" : "Residency & Citizenship")}
             </span>
           </div>
 
-          <h1 className="shimmer fu2" style={{ fontWeight: 800, fontSize: "clamp(2rem,4.5vw,3.4rem)", marginBottom: 18, lineHeight: 1.3, whiteSpace: "pre-line" }}>
+          <h1 className="shimmer fu2" style={{ fontWeight: 800, fontSize: "clamp(2rem,4.5vw,3.4rem)", marginBottom: 18, lineHeight: 1.2 }}>
             {heroTitle}
           </h1>
 
@@ -1131,9 +1132,7 @@ export default function Residency({ lang = "ar", ff, setPage }) {
               href="https://wa.me/971544909522"
               target="_blank" rel="noreferrer"
               style={{ padding: "14px 28px", background: "rgba(37,211,102,.1)", border: "1.5px solid rgba(37,211,102,.35)", borderRadius: 4, color: "#25d366", fontFamily: ff, fontWeight: 700, fontSize: ".88rem", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}
-            >
-              💬 WhatsApp
-            </a>
+            >💬 WhatsApp</a>
           </div>
         </div>
       </section>
