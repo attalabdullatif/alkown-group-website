@@ -5,9 +5,7 @@
 
 import { supabase } from "../../lib/supabase";
 
-const API_BASE = process.env.NODE_ENV === "development"
-  ? "http://localhost:8888/.netlify/functions"
-  : "/.netlify/functions";
+const API_BASE = "/api";
 
 // ── Generation ─────────────────────────────────────────────────
 
