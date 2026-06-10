@@ -15,7 +15,6 @@ const Clients              = lazy(() => import("./pages/Clients"));
 const Services             = lazy(() => import("./pages/Services"));
 const Requests             = lazy(() => import("./pages/Requests"));
 const Accounting           = lazy(() => import("./pages/Accounting"));
-const SiteAdminPage        = lazy(() => import("./pages/SiteAdminPage"));
 const VisaCenterPage       = lazy(() => import("./pages/visa/VisaCenterPage"));
 const VisaChecker          = lazy(() => import("./pages/visa/VisaChecker"));
 const VisaRoutePage        = lazy(() => import("./pages/visa/VisaRoutePage"));
@@ -27,7 +26,6 @@ const KnowledgeCenter      = lazy(() => import("./pages/KnowledgeCenter"));
 const TrackRequest         = lazy(() => import("./pages/TrackRequest"));
 const VerifyInvoice        = lazy(() => import("./pages/VerifyInvoice"));
 const ClientPortal         = lazy(() => import("./pages/ClientPortal"));
-const ResidencyAdmin       = lazy(() => import("./pages/ResidencyAdmin"));
 
 // ── AI Knowledge Engine — lazy chunks ─────────────────────────
 const AICommandCenter = lazy(() => import("./pages/ai/AICommandCenter"));
@@ -55,8 +53,6 @@ const NAV_LINKS = [
   { to: "/requests",     label: "📋 الطلبات",           roles: ["admin","manager","staff"] },
   { to: "/accounting",   label: "💼 الفواتير والمحاسبة",  roles: ["admin","manager"] },
   { to: "/visa-admin",       label: "🛂 إدارة التأشيرات",   roles: ["admin","manager"] },
-  { to: "/site-admin",   label: "✏️ تعديل الموقع",      roles: ["admin"] },
-  { to: "/residency-admin", label: "🌍 إدارة الإقامة والجنسية", roles: ["admin","manager"] },
   { to: "/ai",             label: "🤖 الذكاء الاصطناعي",  roles: ["admin","manager"] },
   { to: "/track-request",label: "🔍 تتبع الطلب",        roles: null },
   { to: "/portal",       label: "🚪 بوابة العملاء",     roles: null },
@@ -348,17 +344,6 @@ export default function App() {
 
         <Route path="/login"      element={<LoginPage />} />
 
-        <Route path="/site-admin" element={
-          <ProtectedRoute allowed={["admin"]}>
-            <SiteAdminPage />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/residency-admin" element={
-          <ProtectedRoute allowed={["admin","manager"]}>
-            <ResidencyAdmin />
-          </ProtectedRoute>
-        } />
 
         {/* ── AI Knowledge Engine ────────────────────────────── */}
         <Route path="/ai" element={
