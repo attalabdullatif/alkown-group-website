@@ -3,76 +3,97 @@
 // Enterprise-grade dynamic SEO management
 // ═══════════════════════════════════════════════════════════════
 
+const SITE_URL    = "https://alkownglobal.com";
+const SITE_NAME   = "الكون العالمية | ALKOWN Global";
+const DEFAULT_OG  = `${SITE_URL}/og-image.png`;
+
 // ── Dynamic Meta Tag Manager ──────────────────────────────────
 export function setSEOMeta({ title, description, keywords, ogImage, canonical, lang = "ar" } = {}) {
-  const siteName = "الكون العالمية | ALKOWN Global";
   const defaultDesc = lang === "ar"
-    ? "الكون العالمية — خدمات التأشيرة، الإقامة، تأسيس الشركات، والسفر السياحي. خبراء معتمدون في الإمارات وتركيا وسوريا."
-    : "ALKOWN Global — Premium Visa, Residency, Company Formation & Travel Services. Certified experts in UAE, Turkey & Syria.";
+    ? "الكون العالمية — خدمات التأشيرة، الإقامة، تأسيس الشركات، والسفر السياحي. خبراء معتمدون في الإمارات وتركيا."
+    : "ALKOWN Global — Premium Visa, Residency, Company Formation & Travel Services. Certified experts in UAE & Turkey.";
   const defaultKeywords = lang === "ar"
-    ? "تأشيرة، إقامة، تأسيس شركة، سفر، الكون العالمية، دبي، اسطنبول، فيزا"
-    : "visa services, residency programs, company formation, travel, ALKOWN Global, Dubai, Istanbul";
+    ? "تأشيرة، إقامة، فيزا ذهبية، تأسيس شركة، سفر، الكون العالمية، دبي، اسطنبول"
+    : "visa services, golden visa, residency programs, company formation, travel, ALKOWN Global, Dubai, Istanbul";
 
-  const finalTitle = title ? `${title} | ${siteName}` : siteName;
-  const finalDesc = description || defaultDesc;
-  const finalKeywords = keywords || defaultKeywords;
+  const finalTitle    = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
+  const finalDesc     = description || defaultDesc;
+  const finalKeywords = keywords    || defaultKeywords;
+  const finalImage    = ogImage     || DEFAULT_OG;
+  const finalUrl      = canonical   ? `${SITE_URL}${canonical}` : SITE_URL;
 
-  // Title
+  // ── Title ──
   document.title = finalTitle;
 
-  // Helper to set/create meta
-  const setMeta = (selector, attr, content) => {
+  // ── Helper ──
+  const setMeta = (selector, attrStr, content) => {
     let el = document.querySelector(selector);
     if (!el) {
       el = document.createElement("meta");
-      const [attrName, attrVal] = attr.split("=");
-      el.setAttribute(attrName, attrVal.replace(/"/g, ""));
+      const eqIdx  = attrStr.indexOf("=");
+      const aName  = attrStr.slice(0, eqIdx);
+      const aValue = attrStr.slice(eqIdx + 1).replace(/"/g, "");
+      el.setAttribute(aName, aValue);
       document.head.appendChild(el);
     }
     el.setAttribute("content", content);
   };
 
-  setMeta('meta[name="description"]', 'name=description', finalDesc);
-  setMeta('meta[name="keywords"]', 'name=keywords', finalKeywords);
-  setMeta('meta[name="robots"]', 'name=robots', "index, follow");
-  setMeta('meta[name="language"]', 'name=language', lang === "ar" ? "Arabic" : "English");
+  const setLink = (rel, href) => {
+    let el = document.querySelector(`link[rel="${rel}"]`);
+    if (!el) { el = document.createElement("link"); el.setAttribute("rel", rel); document.head.appendChild(el); }
+    el.setAttribute("href", href);
+  };
 
-  // Open Graph
-  setMeta('meta[property="og:title"]', 'property=og:title', finalTitle);
+  // ── Standard meta ──
+  setMeta('meta[name="description"]',  'name=description',  finalDesc);
+  setMeta('meta[name="keywords"]',     'name=keywords',     finalKeywords);
+  setMeta('meta[name="robots"]',       'name=robots',       "index, follow");
+  setMeta('meta[name="language"]',     'name=language',     lang === "ar" ? "Arabic" : "English");
+
+  // ── Open Graph ──
+  setMeta('meta[property="og:title"]',       'property=og:title',       finalTitle);
   setMeta('meta[property="og:description"]', 'property=og:description', finalDesc);
-  setMeta('meta[property="og:type"]', 'property=og:type', "website");
-  setMeta('meta[property="og:site_name"]', 'property=og:site_name', siteName);
-  setMeta('meta[property="og:locale"]', 'property=og:locale', lang === "ar" ? "ar_AE" : "en_US");
-  if (ogImage) setMeta('meta[property="og:image"]', 'property=og:image', ogImage);
+  setMeta('meta[property="og:type"]',        'property=og:type',        "website");
+  setMeta('meta[property="og:site_name"]',   'property=og:site_name',   SITE_NAME);
+  setMeta('meta[property="og:locale"]',      'property=og:locale',      lang === "ar" ? "ar_AE" : "en_US");
+  setMeta('meta[property="og:url"]',         'property=og:url',         finalUrl);
+  setMeta('meta[property="og:image"]',       'property=og:image',       finalImage);
+  setMeta('meta[property="og:image:width"]', 'property=og:image:width', "1200");
+  setMeta('meta[property="og:image:height"]','property=og:image:height',"630");
+  setMeta('meta[property="og:image:alt"]',   'property=og:image:alt',   finalTitle);
 
-  // Twitter Card
-  setMeta('meta[name="twitter:card"]', 'name=twitter:card', "summary_large_image");
-  setMeta('meta[name="twitter:title"]', 'name=twitter:title', finalTitle);
+  // ── Twitter Card ──
+  setMeta('meta[name="twitter:card"]',        'name=twitter:card',        "summary_large_image");
+  setMeta('meta[name="twitter:title"]',       'name=twitter:title',       finalTitle);
   setMeta('meta[name="twitter:description"]', 'name=twitter:description', finalDesc);
+  setMeta('meta[name="twitter:image"]',       'name=twitter:image',       finalImage);
+  setMeta('meta[name="twitter:image:alt"]',   'name=twitter:image:alt',   finalTitle);
 
-  // Canonical
-  if (canonical) {
-    let link = document.querySelector('link[rel="canonical"]');
-    if (!link) { link = document.createElement("link"); link.setAttribute("rel", "canonical"); document.head.appendChild(link); }
-    link.setAttribute("href", `https://alkownglobal.com${canonical}`);
-  }
+  // ── Canonical ──
+  setLink("canonical", finalUrl);
 
-  // Lang attribute
+  // ── HTML lang/dir ──
   document.documentElement.setAttribute("lang", lang === "ar" ? "ar" : "en");
-  document.documentElement.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+  document.documentElement.setAttribute("dir",  lang === "ar" ? "rtl" : "ltr");
 }
 
-// ── Structured Data (JSON-LD) ─────────────────────────────────
-export function setStructuredData(data) {
+// ── Page-specific Structured Data helper ─────────────────────
+export function setPageStructuredData(schemas) {
   const id = "alkown-structured-data";
   let script = document.getElementById(id);
   if (!script) {
     script = document.createElement("script");
     script.type = "application/ld+json";
-    script.id = id;
+    script.id   = id;
     document.head.appendChild(script);
   }
-  script.textContent = JSON.stringify(data);
+  script.textContent = JSON.stringify(Array.isArray(schemas) ? schemas : [schemas]);
+}
+
+// ── Structured Data (JSON-LD) — backward-compat alias ────────
+export function setStructuredData(data) {
+  setPageStructuredData(data);
 }
 
 export const ORGANIZATION_SCHEMA = {
