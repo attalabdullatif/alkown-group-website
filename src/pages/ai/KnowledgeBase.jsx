@@ -3,11 +3,15 @@
 // Upload, manage, and browse knowledge collections
 // ═══════════════════════════════════════════════════════════════
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   getCollections, getDocuments, saveDocument, updateDocumentStatus,
   deleteDocument, extractAndChunkText, saveChunks,
+  seedVisaCollections, getDocumentVersions, saveDocumentVersion,
+  linkDocumentToRequest, getDocumentLinks, removeDocumentLink,
+  buildCitation,
 } from "../../services/ai/knowledgeService";
+import { supabase } from "../../lib/supabase";
 
 const G = "#c9a84c";
 const BORDER = "rgba(201,168,76,.22)";
@@ -28,8 +32,10 @@ export default function KnowledgeBase() {
   const [search,      setSearch]      = useState("");
 
   // Upload form
-  const [uploadForm, setUploadForm] = useState({ title: "", collection_id: "", raw_text: "", file_type: "text" });
+  const [uploadForm, setUploadForm] = useState({ title: "", collection_id: "", raw_text: "", file_type: "text", linked_country: "", visa_type: "", source_url: "" });
   const fileRef = useRef();
+  const [selectedDoc,  setSelectedDoc]  = useState(null); // doc row for detail panel
+  const [seeding,      setSeeding]      = useState(false);
 
   useEffect(() => { load(); }, [activeCol]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -79,11 +85,14 @@ export default function KnowledgeBase() {
     try {
       // 1. Save document
       const { data: doc, error: docErr } = await saveDocument({
-        title:         uploadForm.title.trim(),
-        collection_id: uploadForm.collection_id || null,
-        raw_text:      uploadForm.raw_text,
-        file_type:     uploadForm.file_type,
-        status:        "processing",
+        title:          uploadForm.title.trim(),
+        collection_id:  uploadForm.collection_id || null,
+        raw_text:       uploadForm.raw_text,
+        file_type:      uploadForm.file_type,
+        status:         "processing",
+        linked_country: uploadForm.linked_country || null,
+        visa_type:      uploadForm.visa_type || null,
+        source_url:     uploadForm.source_url || null,
       });
       if (docErr) throw new Error(docErr.message);
 
@@ -100,7 +109,7 @@ export default function KnowledgeBase() {
       await updateDocumentStatus(doc.id, "ready", chunks.length);
 
       setSuccess(`تم رفع "${uploadForm.title}" بنجاح — ${chunks.length} قطعة`);
-      setUploadForm({ title: "", collection_id: "", raw_text: "", file_type: "text" });
+      setUploadForm({ title: "", collection_id: "", raw_text: "", file_type: "text", linked_country: "", visa_type: "", source_url: "" });
       if (fileRef.current) fileRef.current.value = "";
       await load();
       setTab("docs");
@@ -115,6 +124,15 @@ export default function KnowledgeBase() {
     if (!window.confirm(`حذف "${title}"؟`)) return;
     await deleteDocument(id);
     setDocuments(d => d.filter(x => x.id !== id));
+  }
+
+  async function handleSeedCollections() {
+    setSeeding(true);
+    const { inserted, error: seedErr } = await seedVisaCollections();
+    if (seedErr) { setError(seedErr.message); }
+    else if (inserted > 0) { setSuccess(`تم إنشاء ${inserted} مجموعات افتراضية للتأشيرات`); await load(); }
+    else { setSuccess("المجموعات الافتراضية موجودة بالفعل"); }
+    setSeeding(false);
   }
 
   const filtered = documents.filter(d =>
@@ -133,7 +151,7 @@ export default function KnowledgeBase() {
             <p style={{ margin: 0, fontSize: ".8rem", color: "#6f6a61" }}>{documents.length} وثيقة</p>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 10 }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {["docs", "upload"].map(t => (
             <button key={t} onClick={() => setTab(t)} style={{
               background: tab === t ? G : "transparent",
@@ -145,6 +163,13 @@ export default function KnowledgeBase() {
               {t === "docs" ? "📄 الوثائق" : "⬆️ رفع وثيقة"}
             </button>
           ))}
+          <button onClick={handleSeedCollections} disabled={seeding} style={{
+            background: "transparent", color: "#3d6f9f", border: "1px solid #3d6f9f",
+            borderRadius: 10, padding: "8px 16px", cursor: "pointer",
+            fontFamily: "inherit", fontWeight: 700, fontSize: ".82rem", opacity: seeding ? .6 : 1,
+          }}>
+            {seeding ? "جارٍ..." : "🌱 تهيئة مجموعات التأشيرة"}
+          </button>
         </div>
       </div>
 
@@ -210,7 +235,7 @@ export default function KnowledgeBase() {
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {filtered.map(doc => (
-                    <DocumentCard key={doc.id} doc={doc} onDelete={handleDelete} />
+                    <DocumentCard key={doc.id} doc={doc} onDelete={handleDelete} onSelect={setSelectedDoc} selected={selectedDoc?.id === doc.id} />
                   ))}
                 </div>
               )}
@@ -218,6 +243,11 @@ export default function KnowledgeBase() {
           )}
         </div>
       </div>
+
+      {/* Document Detail Panel */}
+      {selectedDoc && (
+        <DocumentDetailPanel doc={selectedDoc} onClose={() => setSelectedDoc(null)} />
+      )}
     </div>
   );
 }
@@ -241,11 +271,11 @@ function CollectionItem({ label, icon, count, active, onClick, color = G }) {
   );
 }
 
-function DocumentCard({ doc, onDelete }) {
+function DocumentCard({ doc, onDelete, onSelect, selected }) {
   const col   = doc.ai_knowledge_collections;
   const color = col?.color || G;
   return (
-    <div style={{ ...cardBase, display: "flex", alignItems: "center", gap: 16, padding: "16px 20px" }}>
+    <div onClick={() => onSelect?.(selected ? null : doc)} style={{ ...cardBase, display: "flex", alignItems: "center", gap: 16, padding: "16px 20px", cursor: "pointer", border: selected ? `2px solid ${G}` : `1px solid ${BORDER}`, background: selected ? `${G}08` : "#fff" }}>
       <div style={{
         width: 44, height: 44, borderRadius: 12, background: `${color}18`,
         display: "flex", alignItems: "center", justifyContent: "center",
@@ -321,7 +351,26 @@ function UploadForm({ form, onChange, collections, onFile, onSubmit, uploading, 
           />
         </label>
 
-        <label style={{ ...labelStyle, marginTop: 16 }}>
+        {/* Visa Metadata */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16, marginTop: 8 }}>
+          <label style={labelStyle}>
+            دولة التأشيرة
+            <input value={form.linked_country || ""} onChange={e => set("linked_country", e.target.value)} placeholder="مثال: AE, US" style={inputStyle} />
+          </label>
+          <label style={labelStyle}>
+            نوع التأشيرة
+            <select value={form.visa_type || ""} onChange={e => set("visa_type", e.target.value)} style={inputStyle}>
+              <option value="">—</option>
+              {["tourist", "business", "student", "work", "transit", "family"].map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </label>
+          <label style={labelStyle}>
+            رابط المصدر
+            <input value={form.source_url || ""} onChange={e => set("source_url", e.target.value)} placeholder="https://..." style={inputStyle} />
+          </label>
+        </div>
+
+        <label style={{ ...labelStyle, marginTop: 8 }}>
           أو ألصق النص مباشرة
           <textarea
             value={form.raw_text}
@@ -391,3 +440,171 @@ function fileTypeIcon(t) {
 
 const labelStyle = { display: "flex", flexDirection: "column", gap: 6, fontSize: ".85rem", color: "#3a3530", fontWeight: 600 };
 const inputStyle = { padding: "10px 14px", border: `1px solid ${BORDER}`, borderRadius: 10, fontFamily: "inherit", fontSize: ".88rem", background: "#fffdf8", outline: "none" };
+
+// ── Document Detail Panel ──────────────────────────────────────
+function DocumentDetailPanel({ doc, onClose }) {
+  const [panelTab,  setPanelTab]  = useState("versions");  // versions | links | citation
+  const [versions,  setVersions]  = useState([]);
+  const [links,     setLinks]     = useState([]);
+  const [requests,  setRequests]  = useState([]);
+  const [linkReqId, setLinkReqId] = useState("");
+  const [linkNote,  setLinkNote]  = useState("");
+  const [vNote,     setVNote]     = useState("");
+  const [loadingV,  setLoadingV]  = useState(true);
+  const [loadingL,  setLoadingL]  = useState(true);
+  const [saving,    setSaving]    = useState(false);
+
+  const loadVersions = useCallback(async () => {
+    setLoadingV(true);
+    const { data } = await getDocumentVersions(doc.id);
+    setVersions(data);
+    setLoadingV(false);
+  }, [doc.id]);
+
+  const loadLinks = useCallback(async () => {
+    setLoadingL(true);
+    const { data } = await getDocumentLinks(doc.id);
+    setLinks(data);
+    setLoadingL(false);
+  }, [doc.id]);
+
+  useEffect(() => {
+    loadVersions();
+    loadLinks();
+    supabase.from("requests").select("id, request_number, status, clients(full_name)").order("created_at", { ascending: false }).limit(100)
+      .then(({ data }) => setRequests(data || []));
+  }, [loadVersions, loadLinks]);
+
+  async function saveVersion() {
+    setSaving(true);
+    await saveDocumentVersion(doc.id, doc.raw_text || "(snapshot)", vNote);
+    setVNote("");
+    await loadVersions();
+    setSaving(false);
+  }
+
+  async function addLink() {
+    if (!linkReqId) return;
+    setSaving(true);
+    await linkDocumentToRequest(doc.id, linkReqId, linkNote);
+    setLinkReqId(""); setLinkNote("");
+    await loadLinks();
+    setSaving(false);
+  }
+
+  async function removeLink(reqId) {
+    await removeDocumentLink(doc.id, reqId);
+    loadLinks();
+  }
+
+  const citation = buildCitation(doc);
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "#0007", zIndex: 900, display: "flex", alignItems: "flex-end", justifyContent: "flex-start" }}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div style={{ width: 420, height: "100vh", background: "#fff", boxShadow: "-4px 0 30px #0002", display: "flex", flexDirection: "column", direction: "rtl", fontFamily: "'Cairo',sans-serif", overflow: "hidden" }}>
+        {/* Header */}
+        <div style={{ padding: "18px 20px", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: ".95rem", color: "#1a1510", marginBottom: 4 }}>{doc.title}</div>
+            <div style={{ fontSize: ".72rem", color: "#6f6a61" }}>
+              {doc.file_type?.toUpperCase()} — {doc.chunk_count || 0} قطعة — v{doc.version || 1}
+            </div>
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#aaa" }}>✕</button>
+        </div>
+
+        {/* Panel Tabs */}
+        <div style={{ display: "flex", borderBottom: `1px solid ${BORDER}` }}>
+          {[["versions", "📜 الإصدارات"], ["links", "🔗 الطلبات"], ["citation", "🗂️ الاستشهاد"]].map(([k, l]) => (
+            <button key={k} onClick={() => setPanelTab(k)} style={{
+              flex: 1, background: "none", border: "none", borderBottom: `2px solid ${panelTab === k ? G : "transparent"}`,
+              color: panelTab === k ? G : "#6f6a61", padding: "10px 4px", cursor: "pointer",
+              fontSize: ".78rem", fontWeight: panelTab === k ? 700 : 400, fontFamily: "inherit",
+            }}>{l}</button>
+          ))}
+        </div>
+
+        {/* Panel Content */}
+        <div style={{ flex: 1, overflowY: "auto", padding: 18 }}>
+
+          {panelTab === "versions" && (
+            <div>
+              <div style={{ marginBottom: 14 }}>
+                <input value={vNote} onChange={e => setVNote(e.target.value)} placeholder="ملاحظة الإصدار (اختياري)" style={{ ...inputStyle, width: "100%", marginBottom: 8, boxSizing: "border-box" }} />
+                <button onClick={saveVersion} disabled={saving} style={{ background: G, color: "#fff", border: "none", borderRadius: 8, padding: "8px 18px", fontWeight: 700, cursor: "pointer", fontSize: ".82rem", opacity: saving ? .7 : 1 }}>
+                  💾 حفظ إصدار الآن
+                </button>
+              </div>
+              {loadingV ? <p style={{ color: "#aaa" }}>تحميل...</p> : versions.length === 0 ? (
+                <p style={{ color: "#aaa", fontSize: ".83rem" }}>لم يُحفظ أي إصدار بعد</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {versions.map((v, i) => (
+                    <div key={v.id} style={{ background: "#f9f7f1", borderRadius: 8, padding: "10px 14px", borderRight: `3px solid ${G}` }}>
+                      <div style={{ fontWeight: 700, fontSize: ".82rem", color: "#1a1510" }}>الإصدار {versions.length - i}</div>
+                      {v.version_note && <div style={{ fontSize: ".75rem", color: "#6f6a61", marginTop: 2 }}>{v.version_note}</div>}
+                      <div style={{ fontSize: ".7rem", color: "#aaa", marginTop: 4 }}>{new Date(v.created_at).toLocaleString("ar-SA")}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {panelTab === "links" && (
+            <div>
+              <div style={{ marginBottom: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+                <select value={linkReqId} onChange={e => setLinkReqId(e.target.value)} style={{ ...inputStyle, width: "100%" }}>
+                  <option value="">اختر طلباً للربط...</option>
+                  {requests.map(r => <option key={r.id} value={r.id}>{r.request_number} — {r.clients?.full_name || "—"}</option>)}
+                </select>
+                <input value={linkNote} onChange={e => setLinkNote(e.target.value)} placeholder="ملاحظة (اختياري)" style={{ ...inputStyle, width: "100%", boxSizing: "border-box" }} />
+                <button onClick={addLink} disabled={saving || !linkReqId} style={{ background: G, color: "#fff", border: "none", borderRadius: 8, padding: "8px 18px", fontWeight: 700, cursor: "pointer", fontSize: ".82rem", opacity: (!linkReqId || saving) ? .6 : 1 }}>
+                  🔗 ربط بالطلب
+                </button>
+              </div>
+              {loadingL ? <p style={{ color: "#aaa" }}>تحميل...</p> : links.length === 0 ? (
+                <p style={{ color: "#aaa", fontSize: ".83rem" }}>لا طلبات مرتبطة</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {links.map(l => (
+                    <div key={l.id} style={{ background: "#f9f7f1", borderRadius: 8, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: ".82rem", color: "#1a1510" }}>{l.requests?.request_number}</div>
+                        <div style={{ fontSize: ".72rem", color: "#6f6a61" }}>{l.requests?.clients?.full_name || "—"}</div>
+                        {l.note && <div style={{ fontSize: ".7rem", color: "#aaa", marginTop: 2 }}>{l.note}</div>}
+                      </div>
+                      <button onClick={() => removeLink(l.request_id)} style={{ background: "none", border: "none", cursor: "pointer", color: "#b94a48", fontSize: 16 }}>🗑️</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {panelTab === "citation" && (
+            <div>
+              <p style={{ fontSize: ".83rem", color: "#6f6a61", marginBottom: 12 }}>انسخ هذا النص للاستشهاد بالوثيقة:</p>
+              <div style={{ background: "#f0ece3", borderRadius: 10, padding: 14, fontSize: ".85rem", fontWeight: 600, color: "#1a1510", marginBottom: 16, border: `1px solid ${BORDER}`, wordBreak: "break-all" }}>
+                {citation}
+              </div>
+              <button onClick={() => navigator.clipboard?.writeText(citation)} style={{ background: G, color: "#fff", border: "none", borderRadius: 8, padding: "8px 18px", fontWeight: 700, cursor: "pointer", fontSize: ".82rem" }}>
+                📋 نسخ الاستشهاد
+              </button>
+              {doc.linked_country && (
+                <div style={{ marginTop: 16, padding: 12, background: "#f9f7f1", borderRadius: 8 }}>
+                  <div style={{ fontSize: ".78rem", fontWeight: 700, color: G, marginBottom: 4 }}>معلومات التأشيرة</div>
+                  <div style={{ fontSize: ".8rem", color: "#3a3530" }}>الدولة: {doc.linked_country}</div>
+                  {doc.visa_type && <div style={{ fontSize: ".8rem", color: "#3a3530" }}>النوع: {doc.visa_type}</div>}
+                  {doc.valid_until && <div style={{ fontSize: ".8rem", color: "#3a3530" }}>صالحة حتى: {new Date(doc.valid_until).toLocaleDateString("ar-SA")}</div>}
+                  {doc.source_url && <a href={doc.source_url} target="_blank" rel="noreferrer" style={{ fontSize: ".78rem", color: "#3d6f9f", display: "block", marginTop: 4 }}>🔗 المصدر</a>}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

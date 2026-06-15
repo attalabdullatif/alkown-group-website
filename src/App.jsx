@@ -27,6 +27,16 @@ const TrackRequest         = lazy(() => import("./pages/TrackRequest"));
 const VerifyInvoice        = lazy(() => import("./pages/VerifyInvoice"));
 const ClientPortal         = lazy(() => import("./pages/ClientPortal"));
 
+// ── Phase 2 — New Features ────────────────────────────────────
+const VisaPipeline         = lazy(() => import("./pages/pipeline/VisaPipeline"));
+const TaskDashboard        = lazy(() => import("./pages/tasks/TaskDashboard"));
+const DocumentCenter       = lazy(() => import("./pages/documents/DocumentCenter"));
+const NotificationCenter   = lazy(() => import("./pages/notifications/NotificationCenter"));
+const ManagementDashboard  = lazy(() => import("./pages/dashboards/ManagementDashboard"));
+const SalesDashboard       = lazy(() => import("./pages/dashboards/SalesDashboard"));
+const FinanceDashboard     = lazy(() => import("./pages/dashboards/FinanceDashboard"));
+const VisaDatabase         = lazy(() => import("./pages/visa/VisaDatabase"));
+
 // ── AI Knowledge Engine — lazy chunks ─────────────────────────
 const AICommandCenter = lazy(() => import("./pages/ai/AICommandCenter"));
 const KnowledgeBase   = lazy(() => import("./pages/ai/KnowledgeBase"));
@@ -50,7 +60,14 @@ const NAV_LINKS = [
   { to: "/clients",      label: "👥 العملاء",           roles: ["admin","manager"] },
   { to: "/services",     label: "🛎️ الخدمات",           roles: ["admin","manager"] },
   { to: "/requests",     label: "📋 الطلبات",           roles: ["admin","manager","staff"] },
+  { to: "/pipeline",     label: "🗂️ خط الطلبات",         roles: ["admin","manager","staff"] },
+  { to: "/tasks",        label: "✅ المهام",              roles: ["admin","manager","staff"] },
+  { to: "/documents",    label: "📁 الوثائق",             roles: ["admin","manager","staff"] },
+  { to: "/notifications",label: "🔔 الإشعارات",           roles: ["admin","manager"] },
   { to: "/accounting",   label: "💼 الفواتير والمحاسبة",  roles: ["admin","manager"] },
+  { to: "/dash/management", label: "📊 الإدارة",          roles: ["admin"] },
+  { to: "/dash/sales",      label: "📈 المبيعات",         roles: ["admin","manager"] },
+  { to: "/dash/finance",    label: "💹 المالية",          roles: ["admin","manager"] },
   { to: "/visa-admin",       label: "🛂 إدارة التأشيرات",   roles: ["admin","manager"] },
   { to: "/ai",             label: "🤖 الذكاء الاصطناعي",  roles: ["admin","manager"] },
   { to: "/track-request",label: "🔍 تتبع الطلب",        roles: null },
@@ -302,6 +319,54 @@ export default function App() {
           </ProtectedRoute>
         } />
 
+        <Route path="/pipeline" element={
+          <ProtectedRoute allowed={["admin", "manager", "staff"]}>
+            <PageLayout><VisaPipeline /></PageLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/visa-database" element={
+          <ProtectedRoute allowed={["admin", "manager"]}>
+            <PageLayout><VisaDatabase /></PageLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/tasks" element={
+          <ProtectedRoute allowed={["admin", "manager", "staff"]}>
+            <PageLayout><TaskDashboard /></PageLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/documents" element={
+          <ProtectedRoute allowed={["admin", "manager", "staff"]}>
+            <PageLayout><DocumentCenter /></PageLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/notifications" element={
+          <ProtectedRoute allowed={["admin", "manager"]}>
+            <PageLayout><NotificationCenter /></PageLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/dash/management" element={
+          <ProtectedRoute allowed={["admin"]}>
+            <PageLayout><ManagementDashboard /></PageLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/dash/sales" element={
+          <ProtectedRoute allowed={["admin", "manager"]}>
+            <PageLayout><SalesDashboard /></PageLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/dash/finance" element={
+          <ProtectedRoute allowed={["admin", "manager"]}>
+            <PageLayout><FinanceDashboard /></PageLayout>
+          </ProtectedRoute>
+        } />
+
         <Route path="/invoices" element={
           <ProtectedRoute allowed={["admin", "manager"]}>
             <AccountingPage />
@@ -316,11 +381,6 @@ export default function App() {
 
         {/* Visa */}
         <Route path="/visa-checker" element={<VisaChecker />} />
-        <Route path="/visa-intelligence" element={
-          <ProtectedRoute allowed={["admin","manager"]}>
-            <PageLayout><VisaAdminIntelligence /></PageLayout>
-          </ProtectedRoute>
-        } />
 
         {/* Public pages — lazy */}
         <Route path="/visa-center"        element={<VisaCenterPage />} />

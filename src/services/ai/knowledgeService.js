@@ -130,6 +130,79 @@ export function extractAndChunkText(rawText, documentId, chunkSize = 500) {
   return chunks;
 }
 
+// ── Document ↔ Request Linking ────────────────────────────────
+
+export async function linkDocumentToRequest(documentId, requestId, note = "") {
+  const { data, error } = await supabase
+    .from("ai_document_links")
+    .upsert([{ document_id: documentId, request_id: requestId, note }], { onConflict: "document_id,request_id" })
+    .select();
+  return { data, error };
+}
+
+export async function getDocumentLinks(documentId) {
+  const { data, error } = await supabase
+    .from("ai_document_links")
+    .select("*, requests(request_number, status, clients(full_name))")
+    .eq("document_id", documentId);
+  return { data: data || [], error };
+}
+
+export async function removeDocumentLink(documentId, requestId) {
+  return supabase.from("ai_document_links").delete()
+    .eq("document_id", documentId).eq("request_id", requestId);
+}
+
+// ── Version Tracking ───────────────────────────────────────────
+
+export async function saveDocumentVersion(documentId, rawText, versionNote = "") {
+  const { data, error } = await supabase
+    .from("ai_document_versions")
+    .insert([{ document_id: documentId, raw_text: rawText, version_note: versionNote }])
+    .select()
+    .single();
+  return { data, error };
+}
+
+export async function getDocumentVersions(documentId) {
+  const { data, error } = await supabase
+    .from("ai_document_versions")
+    .select("id, version_note, created_at, document_id")
+    .eq("document_id", documentId)
+    .order("created_at", { ascending: false });
+  return { data: data || [], error };
+}
+
+// ── Citation Generator ─────────────────────────────────────────
+
+export function buildCitation(doc, chunkIndex) {
+  const date = doc.created_at ? new Date(doc.created_at).toLocaleDateString("ar-SA") : "";
+  return `[${doc.title}${chunkIndex !== undefined ? ` — القطعة ${chunkIndex + 1}` : ""}، ${date}]`;
+}
+
+// ── Seed Visa Collections ──────────────────────────────────────
+// Call once from admin to seed default visa knowledge collections
+
+export async function seedVisaCollections() {
+  const defaults = [
+    { name: "سياسات التأشيرات",      icon: "🛂", color: "#3d6f9f", description: "متطلبات التأشيرة لكل دولة" },
+    { name: "برامج الإقامة",          icon: "🏡", color: "#c9a84c", description: "شروط الإقامة والاستثمار" },
+    { name: "برامج الجنسية",          icon: "🌍", color: "#2d9c5a", description: "التجنيس بالاستثمار والإقامة" },
+    { name: "قوانين الهجرة",          icon: "📜", color: "#7c5cbf", description: "تشريعات وقوانين الهجرة الدولية" },
+    { name: "اتفاقيات الجنسية المزدوجة", icon: "🤝", color: "#c0392b", description: "الدول التي تقبل الجنسية المزدوجة" },
+    { name: "إجراءات الطلب",          icon: "📋", color: "#888",    description: "خطوات وإجراءات تقديم الطلبات" },
+  ];
+
+  const { data: existing } = await getCollections();
+  const existingNames = (existing || []).map(c => c.name);
+
+  const toInsert = defaults.filter(c => !existingNames.includes(c.name));
+  if (!toInsert.length) return { inserted: 0 };
+
+  const { data, error } = await supabase.from("ai_knowledge_collections").insert(toInsert).select();
+  return { inserted: data?.length || 0, error };
+}
+
 // ── Stats ──────────────────────────────────────────────────────
 
 export async function getKnowledgeStats() {

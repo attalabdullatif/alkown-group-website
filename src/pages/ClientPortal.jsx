@@ -311,17 +311,27 @@ function TrackView({ setView, ar }) {
 }
 
 // ── Portal (بعد تسجيل الدخول) ─────────────────────────────────
+// Required document categories for outstanding-requirements checklist
+const REQUIRED_DOC_TYPES = [
+  { key: "passport",   label: "جواز السفر" },
+  { key: "photo",      label: "صورة شخصية" },
+  { key: "bank",       label: "كشف حساب بنكي" },
+  { key: "employment", label: "وثيقة عمل/دخل" },
+];
+
 function PortalView({ user, client, ar, onSignOut }) {
-  const [tab,         setTab]         = useState("requests");
-  const [requests,    setRequests]    = useState([]);
-  const [invoices,    setInvoices]    = useState([]);
-  const [files,       setFiles]       = useState([]);
-  const [messages,    setMessages]    = useState([]);
-  const [notifications, setNotifs]   = useState([]);
-  const [selectedReq, setSelectedReq] = useState(null);
-  const [loading,     setLoading]     = useState(true);
-  const [uploading,   setUploading]   = useState(false);
-  const [clientData,  setClientData]  = useState(client);
+  const [tab,           setTab]         = useState("requests");
+  const [requests,      setRequests]    = useState([]);
+  const [invoices,      setInvoices]    = useState([]);
+  const [files,         setFiles]       = useState([]);
+  const [reqHistory,    setReqHistory]  = useState({});   // { [requestId]: historyRows[] }
+  const [messages,      setMessages]    = useState([]);
+  const [notifications, setNotifs]      = useState([]);
+  const [appointments,  setAppointments] = useState([]);
+  const [selectedReq,   setSelectedReq] = useState(null);
+  const [loading,       setLoading]     = useState(true);
+  const [uploading,     setUploading]   = useState(false);
+  const [clientData,    setClientData]  = useState(client);
 
   const unreadMsgs  = messages.filter(m => !m.is_read && m.sender === "staff").length;
   const unreadNotifs = notifications.filter(n => !n.is_read).length;
@@ -345,11 +355,12 @@ function PortalView({ user, client, ar, onSignOut }) {
 
   async function loadData() {
     setLoading(true);
-    const [reqRes, invRes, msgRes, notifRes] = await Promise.all([
+    const [reqRes, invRes, msgRes, notifRes, apptRes] = await Promise.all([
       supabase.from("requests").select("*, services(name, price, price_min, price_max)").eq("client_id", client.id).order("created_at", { ascending: false }),
       supabase.from("invoices").select("*, requests(request_number, services(name))").order("created_at", { ascending: false }),
       supabase.from("client_messages").select("*").eq("client_id", client.id).order("created_at", { ascending: false }).limit(100),
       supabase.from("client_notifications").select("*").eq("client_id", client.id).order("created_at", { ascending: false }).limit(50),
+      supabase.from("appointments").select("*").eq("client_id", client.id).order("appointment_date", { ascending: false }).limit(20).catch(() => ({ data: [] })),
     ]);
     const allReqs = reqRes.data || [];
     const allInvs = invRes.data || [];
@@ -358,7 +369,18 @@ function PortalView({ user, client, ar, onSignOut }) {
     setInvoices(allInvs.filter(i => reqIds.includes(i.request_id)));
     setMessages(msgRes.data || []);
     setNotifs(notifRes.data || []);
+    setAppointments(apptRes.data || []);
     setLoading(false);
+  }
+
+  async function loadHistory(requestId) {
+    if (reqHistory[requestId]) return; // already loaded
+    const { data } = await supabase
+      .from("request_history")
+      .select("*")
+      .eq("request_id", requestId)
+      .order("created_at", { ascending: true });
+    setReqHistory(prev => ({ ...prev, [requestId]: data || [] }));
   }
 
   async function markNotifsRead() {
@@ -436,15 +458,16 @@ function PortalView({ user, client, ar, onSignOut }) {
       {/* Tabs */}
       <div style={{ borderBottom: `1px solid ${BORDER}`, marginBottom: 24, display: "flex", gap: 0, overflowX: "auto" }}>
         {[
-          ["requests",  `طلباتي (${requests.length})`],
-          ["invoices",  `الفواتير (${invoices.length})`],
-          ["docs",      "المستندات"],
-          ["messages",  null],
-          ["notifs",    null],
-          ["profile",   "الملف الشخصي"],
+          ["requests",     `طلباتي (${requests.length})`],
+          ["invoices",     `الفواتير (${invoices.length})`],
+          ["docs",         "المستندات"],
+          ["appointments", null],
+          ["messages",     null],
+          ["notifs",       null],
+          ["profile",      "الملف الشخصي"],
         ].map(([k, lbl]) => {
           const badge = k === "messages" ? unreadMsgs : k === "notifs" ? unreadNotifs : 0;
-          const label = lbl || (k === "messages" ? "رسائل" : "إشعارات");
+          const label = lbl || (k === "messages" ? "رسائل" : k === "notifs" ? "إشعارات" : k === "appointments" ? "المواعيد" : k);
           return (
             <button key={k} style={{ ...S.tab(tab === k), position: "relative", whiteSpace: "nowrap" }}
               onClick={() => {
@@ -479,7 +502,7 @@ function PortalView({ user, client, ar, onSignOut }) {
                   <div key={req.id} style={{ ...S.card, overflow: "hidden" }}>
                     <div
                       style={{ padding: "18px 20px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}
-                      onClick={() => { setSelectedReq(open ? null : req.id); if (!open) loadFiles(req.id); }}
+                      onClick={() => { setSelectedReq(open ? null : req.id); if (!open) { loadFiles(req.id); loadHistory(req.id); } }}
                     >
                       <div>
                         <div style={{ color: GOLD, fontWeight: 800, fontSize: 15, marginBottom: 4 }}>{req.request_number}</div>
@@ -496,28 +519,89 @@ function PortalView({ user, client, ar, onSignOut }) {
 
                     {open && (
                       <div style={{ borderTop: `1px solid ${BORDER}`, padding: "20px" }}>
-                        {/* Progress */}
+                        {/* ── Enhanced Progress Timeline ── */}
                         {req.status !== "Rejected" && (
-                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
-                            {STATUS_STEPS.map((step, i) => {
-                              const done = i <= stepIdx;
-                              return (
-                                <div key={step} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}>
-                                  {i < STATUS_STEPS.length - 1 && (
-                                    <div style={{ position: "absolute", top: 13, left: "50%", width: "100%", height: 2, background: done && i < stepIdx ? GOLD : BORDER, zIndex: 0 }} />
-                                  )}
-                                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: done ? GOLD : "#1a1a1a", border: `2px solid ${done ? GOLD : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1, fontSize: 12, fontWeight: 700, color: done ? "#000" : MUTED }}>
-                                    {done && i < stepIdx ? "✓" : i + 1}
+                          <div style={{ marginBottom: 24 }}>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: GOLD, marginBottom: 14 }}>📍 مسار الطلب</div>
+                            {/* Horizontal step indicators */}
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, position: "relative" }}>
+                              <div style={{ position: "absolute", top: 14, right: 0, left: 0, height: 2, background: BORDER, zIndex: 0 }} />
+                              {STATUS_STEPS.map((step, i) => {
+                                const done = i <= stepIdx;
+                                const current = i === stepIdx;
+                                const histRow = (reqHistory[req.id] || []).find(h => h.to_stage === step || h.new_status === step);
+                                return (
+                                  <div key={step} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", position: "relative", zIndex: 1 }}>
+                                    {i < STATUS_STEPS.length - 1 && done && i < stepIdx && (
+                                      <div style={{ position: "absolute", top: 14, left: "-50%", right: "50%", height: 2, background: GOLD, zIndex: 0 }} />
+                                    )}
+                                    <div style={{
+                                      width: 30, height: 30, borderRadius: "50%",
+                                      background: done ? GOLD : "#1a1a1a",
+                                      border: `2px solid ${done ? GOLD : BORDER}`,
+                                      display: "flex", alignItems: "center", justifyContent: "center",
+                                      fontSize: 12, fontWeight: 900,
+                                      color: done ? "#000" : MUTED,
+                                      boxShadow: current ? `0 0 0 4px ${GOLD}33` : "none",
+                                      transition: "all .3s",
+                                    }}>
+                                      {i < stepIdx ? "✓" : i + 1}
+                                    </div>
+                                    <div style={{ fontSize: 10, color: done ? GOLD : MUTED, marginTop: 6, textAlign: "center", lineHeight: 1.4 }}>{STATUS_AR[step]}</div>
+                                    {histRow && (
+                                      <div style={{ fontSize: 9, color: MUTED, marginTop: 3, textAlign: "center" }}>
+                                        {new Date(histRow.created_at).toLocaleDateString("ar", { month: "short", day: "numeric" })}
+                                      </div>
+                                    )}
                                   </div>
-                                  <div style={{ fontSize: 10, color: done ? GOLD : MUTED, marginTop: 5, textAlign: "center" }}>{STATUS_AR[step]}</div>
-                                </div>
-                              );
-                            })}
+                                );
+                              })}
+                            </div>
+
+                            {/* Vertical history log */}
+                            {(reqHistory[req.id] || []).length > 0 && (
+                              <div style={{ marginTop: 16, borderRight: `2px solid ${BORDER}`, paddingRight: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+                                {(reqHistory[req.id] || []).slice().reverse().map((h, i) => (
+                                  <div key={h.id || i} style={{ position: "relative" }}>
+                                    <div style={{ position: "absolute", top: 6, right: -19, width: 8, height: 8, borderRadius: "50%", background: GOLD, border: `2px solid #0a0a0a` }} />
+                                    <div style={{ fontSize: 12, color: "#ddd" }}>
+                                      {h.to_stage || h.new_status ? `انتقل إلى: ${STATUS_AR[h.to_stage || h.new_status] || h.to_stage || h.new_status}` : h.note || h.notes || "تحديث"}
+                                    </div>
+                                    <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>
+                                      {new Date(h.created_at).toLocaleString("ar", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                                      {h.changed_by || h.created_by ? ` — ${h.changed_by || h.created_by}` : ""}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* ── Outstanding Requirements Checklist ── */}
+                        {req.status === "Pending Documents" && (
+                          <div style={{ marginBottom: 20, background: "#0d0d0d", borderRadius: 10, padding: 16, border: `1px solid ${GOLD}33` }}>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: "#c28a25", marginBottom: 12 }}>⚠️ المستندات المطلوبة</div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                              {REQUIRED_DOC_TYPES.map(dt => {
+                                const uploaded = files.some(f =>
+                                  (f.file_type || "").toLowerCase().includes(dt.key) ||
+                                  (f.file_name || "").toLowerCase().includes(dt.key)
+                                );
+                                return (
+                                  <div key={dt.key} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                    <span style={{ fontSize: 16 }}>{uploaded ? "✅" : "❌"}</span>
+                                    <span style={{ fontSize: 13, color: uploaded ? "#2f8f5b" : "#e05252", fontWeight: uploaded ? 600 : 700 }}>{dt.label}</span>
+                                    {!uploaded && <span style={{ fontSize: 11, color: MUTED }}>— مطلوب رفعه</span>}
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
                         )}
 
                         <div style={{ display: "grid", gap: 0, marginBottom: 20 }}>
-                          {[["التاريخ", new Date(req.created_at).toLocaleDateString("ar")], ["ملاحظات", req.notes]].filter(([, v]) => v).map(([k, v]) => (
+                          {[["تاريخ الطلب", new Date(req.created_at).toLocaleDateString("ar")], ["ملاحظات", req.notes]].filter(([, v]) => v).map(([k, v]) => (
                             <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: `1px solid ${BORDER}` }}>
                               <span style={{ color: MUTED, fontSize: 13 }}>{k}</span>
                               <span style={{ fontSize: 13, maxWidth: "60%", textAlign: "end" }}>{v}</span>
@@ -607,6 +691,11 @@ function PortalView({ user, client, ar, onSignOut }) {
             لرفع المستندات، اذهب إلى تبويب <span style={{ color: GOLD, cursor: "pointer" }} onClick={() => setTab("requests")}>"طلباتي"</span> واختر الطلب المطلوب.
           </p>
         </div>
+      )}
+
+      {/* Appointments Tab */}
+      {!loading && tab === "appointments" && (
+        <AppointmentsTab appointments={appointments} />
       )}
 
       {/* Messages Tab */}
@@ -740,6 +829,79 @@ const NOTIF_ICON = {
   document_request: "📄", approval: "✅", rejection: "❌", general: "🔔",
 };
 
+// ── Appointments Tab ──────────────────────────────────────────
+const APPT_STATUS_AR = { scheduled: "مجدول", completed: "مكتمل", cancelled: "ملغي", pending: "بانتظار التأكيد" };
+const APPT_STATUS_COLOR = { scheduled: "#3d6f9f", completed: "#2f8f5b", cancelled: "#e05252", pending: "#c28a25" };
+
+function AppointmentsTab({ appointments }) {
+  if (!appointments || appointments.length === 0) {
+    return (
+      <div>
+        <EmptyState icon="📅" text="لا توجد مواعيد مسجّلة" />
+        <div style={{ textAlign: "center", marginTop: 20 }}>
+          <a href="https://wa.me/971544909522?text=أود حجز موعد" target="_blank" rel="noreferrer"
+            style={{ display: "inline-block", background: "#25d366", color: "#fff", padding: "12px 28px", borderRadius: 10, fontWeight: 700, textDecoration: "none", fontSize: 14 }}>
+            💬 حجز موعد عبر واتساب
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  const upcoming = appointments.filter(a => a.status === "scheduled" && new Date(a.appointment_date) >= new Date());
+  const past = appointments.filter(a => a.status !== "scheduled" || new Date(a.appointment_date) < new Date());
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      {upcoming.length > 0 && (
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: GOLD, marginBottom: 10 }}>📅 المواعيد القادمة</div>
+          {upcoming.map(appt => (
+            <AppointmentCard key={appt.id} appt={appt} />
+          ))}
+        </div>
+      )}
+      {past.length > 0 && (
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: MUTED, marginBottom: 10 }}>📜 سجل المواعيد</div>
+          {past.map(appt => (
+            <AppointmentCard key={appt.id} appt={appt} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AppointmentCard({ appt }) {
+  const status = appt.status || "pending";
+  const color = APPT_STATUS_COLOR[status] || MUTED;
+  const apptDate = appt.appointment_date ? new Date(appt.appointment_date) : null;
+  return (
+    <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "16px 20px", marginBottom: 10, borderRight: `3px solid ${color}` }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
+            {appt.title || appt.service_type || "موعد استشاري"}
+          </div>
+          {apptDate && (
+            <div style={{ color: MUTED, fontSize: 13 }}>
+              📅 {apptDate.toLocaleDateString("ar", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+              {appt.appointment_time ? ` — ⏰ ${appt.appointment_time}` : ""}
+            </div>
+          )}
+          {appt.location && <div style={{ color: MUTED, fontSize: 13, marginTop: 2 }}>📍 {appt.location}</div>}
+          {appt.notes && <div style={{ color: "#aaa", fontSize: 12, marginTop: 6, fontStyle: "italic" }}>{appt.notes}</div>}
+        </div>
+        <span style={{ background: `${color}22`, color, padding: "4px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" }}>
+          {APPT_STATUS_AR[status] || status}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ── Notifications Tab ─────────────────────────────────────────
 function NotificationsTab({ notifications }) {
   if (notifications.length === 0) return <EmptyState icon="🔔" text="لا توجد إشعارات بعد" />;
   return (

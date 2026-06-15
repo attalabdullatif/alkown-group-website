@@ -13,6 +13,10 @@ export const ROLES = {
   SUPER_ADMIN:   'super_admin',
   COMPANY_ADMIN: 'company_admin',
   MANAGER:       'manager',
+  SALES:         'sales',
+  VISA_OFFICER:  'visa_officer',
+  ACCOUNTANT:    'accountant',
+  SUPPORT_AGENT: 'support_agent',
   STAFF:         'staff',
   CLIENT:        'client',
 };
@@ -22,6 +26,10 @@ export const ROLE_LEVEL = {
   super_admin:   100,
   company_admin:  80,
   manager:        60,
+  sales:          45,
+  visa_officer:   45,
+  accountant:     45,
+  support_agent:  40,
   staff:          40,
   client:         10,
 };
@@ -29,12 +37,20 @@ export const ROLE_LEVEL = {
 // ─── Legacy role normalization ────────────────────────────────────────────────
 // Maps existing user_roles values → canonical role names
 const LEGACY_MAP = {
-  admin:   'company_admin',
-  Admin:   'company_admin',
-  manager: 'manager',
-  Manager: 'manager',
-  staff:   'staff',
-  Staff:   'staff',
+  admin:         'company_admin',
+  Admin:         'company_admin',
+  manager:       'manager',
+  Manager:       'manager',
+  sales:         'sales',
+  Sales:         'sales',
+  visa_officer:  'visa_officer',
+  'Visa Officer':'visa_officer',
+  accountant:    'accountant',
+  Accountant:    'accountant',
+  support_agent: 'support_agent',
+  'Support Agent':'support_agent',
+  staff:         'staff',
+  Staff:         'staff',
 };
 
 export function normalizeRole(rawRole) {
@@ -76,6 +92,62 @@ const PERMISSION_MATRIX = {
     documents:        ['read','upload','delete'],
   },
 
+  // ── Sales: CRM & client acquisition focus ───────────────
+  sales: {
+    clients:          ['read','create','update'],
+    requests:         ['read','create','update','change_status'],
+    invoices:         ['read'],
+    payments:         ['read'],
+    services:         ['read'],
+    reports:          ['read'],
+    users:            ['read'],
+    visa_applications:['read'],
+    documents:        ['read','upload'],
+    pipeline:         ['read','update'],
+  },
+
+  // ── Visa Officer: visa processing & document review ─────
+  visa_officer: {
+    clients:          ['read','update'],
+    requests:         ['read','update','change_status'],
+    invoices:         ['read'],
+    payments:         ['read'],
+    services:         ['read'],
+    reports:          ['read'],
+    visa_applications:['read','update','assign'],
+    documents:        ['read','upload','delete'],
+    pipeline:         ['read','update'],
+    visa_database:    ['read','update'],
+  },
+
+  // ── Accountant: financial operations only ───────────────
+  accountant: {
+    clients:   ['read'],
+    requests:  ['read'],
+    invoices:  ['read','create','update','delete'],
+    payments:  ['read','create','delete'],
+    expenses:  ['read','create','delete'],
+    services:  ['read'],
+    reports:   ['read','export'],
+    users:     ['read'],
+    documents: ['read'],
+  },
+
+  // ── Support Agent: client-facing support ─────────────────
+  support_agent: {
+    clients:          ['read','update'],
+    requests:         ['read','update'],
+    invoices:         ['read'],
+    payments:         ['read'],
+    services:         ['read'],
+    reports:          ['read'],
+    users:            ['read'],
+    visa_applications:['read'],
+    documents:        ['read','upload'],
+    messages:         ['read','create'],
+    notifications:    ['read','create'],
+  },
+
   staff: {
     clients:          ['read','create','update'],
     requests:         ['read','create','update','change_status'],
@@ -93,6 +165,7 @@ const PERMISSION_MATRIX = {
     requests:  ['read'],
     invoices:  ['read'],
     documents: ['read','upload'],
+    messages:  ['read','create'],
   },
 };
 
@@ -157,11 +230,15 @@ export function filterNavByRole(navItems, role) {
 
 // ─── Role Labels ─────────────────────────────────────────────────────────────
 export const ROLE_LABELS = {
-  super_admin:   { ar: 'مدير النظام',  en: 'Super Admin'   },
-  company_admin: { ar: 'مدير الشركة',  en: 'Company Admin' },
-  manager:       { ar: 'مدير',         en: 'Manager'       },
-  staff:         { ar: 'موظف',         en: 'Staff'         },
-  client:        { ar: 'عميل',         en: 'Client'        },
+  super_admin:   { ar: 'مدير النظام',        en: 'Super Admin'   },
+  company_admin: { ar: 'مدير الشركة',        en: 'Company Admin' },
+  manager:       { ar: 'مدير',              en: 'Manager'       },
+  sales:         { ar: 'مسؤول مبيعات',      en: 'Sales'         },
+  visa_officer:  { ar: 'مسؤول تأشيرات',     en: 'Visa Officer'  },
+  accountant:    { ar: 'محاسب',             en: 'Accountant'    },
+  support_agent: { ar: 'وكيل دعم',          en: 'Support Agent' },
+  staff:         { ar: 'موظف',              en: 'Staff'         },
+  client:        { ar: 'عميل',             en: 'Client'        },
 };
 
 export function getRoleLabel(role, lang = 'ar') {

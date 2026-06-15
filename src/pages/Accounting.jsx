@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { printInvoicePDF } from "../lib/invoicePdf";
 import {
   CRM_COLORS, buttonStyle, cardStyle, formatDate,
   inputStyle, outlineButtonStyle, pageStyle,
@@ -481,6 +482,9 @@ function InvoicesTab({ invoices, clients, requests, reload, setError }) {
   }
 
   function handlePrint(inv) {
+    // Delegate to the enhanced PDF utility (QR code + professional layout)
+    return printInvoicePDF(inv, inv.clients, inv.requests);
+    // eslint-disable-next-line no-unreachable
     const clientName  = inv.clients?.full_name || "—";
     const clientPhone = inv.clients?.phone     || "—";
     const clientEmail = inv.clients?.email     || "—";
