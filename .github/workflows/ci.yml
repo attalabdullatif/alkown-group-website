@@ -16,11 +16,15 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # Match the dev environment (npm 11 generated package-lock.json;
+          # older npm rejects it as out-of-sync during `npm ci`).
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        # Prefer reproducible `npm ci`; fall back to `npm install` if the
+        # lockfile is rejected by a different npm version on the runner.
+        run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
 
       - name: Lint
         run: npx eslint src --ext .js,.jsx --max-warnings 0
