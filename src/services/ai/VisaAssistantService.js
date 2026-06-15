@@ -1,31 +1,15 @@
 // ═══════════════════════════════════════════════════════════════
 // ALKOWN GLOBAL — AI Visa Assistant Service
-// AI-Ready Interface — plug OpenAI/Claude without refactoring
+// Answers from the local visa-rules DB first; for anything else it
+// delegates to the live /api/ai-rag backend (Claude). Falls back to
+// a static guidance message if the AI backend is unavailable.
 // ═══════════════════════════════════════════════════════════════
 
 import { lookupVisa } from "../../data/visaRules";
+import { ragQuery } from "./ragService";
 
-// ── System Prompt Template ────────────────────────────────────
-// eslint-disable-next-line no-unused-vars
-const SYSTEM_PROMPT = `You are ALKOWN Global's expert Visa AI Assistant — a knowledgeable, professional, and multilingual consultant.
-
-You specialize in:
-- Visa requirements and procedures
-- Residency and citizenship programs
-- Travel documentation
-- Embassy application processes
-
-Personality:
-- Professional yet warm and approachable
-- Clear and concise — avoid overwhelming clients with information
-- Always recommend consulting an ALKOWN specialist for complex cases
-- Respond in the same language as the client (Arabic/English)
-
-Rules:
-- Never provide legal advice — only informational guidance
-- Always verify information is current before presenting it
-- Mention that requirements may change and official embassy verification is required
-- Suggest booking a consultation for complex situations`;
+// Note: the AI system prompt now lives in the backend (api/ai-rag.js,
+// agentType "visa") so it stays in one place.
 
 // ── Intent Parser ─────────────────────────────────────────────
 export function parseVisaIntent(message) {
@@ -91,9 +75,16 @@ export async function queryVisaAssistant({ message, lang = "ar", history = [] })
     }
   }
 
-  // Step 3: FUTURE — OpenAI Integration
-  // const aiResponse = await callOpenAI({ message, systemPrompt: SYSTEM_PROMPT, history, lang });
-  // return { type: "ai", content: aiResponse, source: "openai" };
+  // Step 3: Delegate to the live RAG backend (Claude) for free-form
+  // questions the local rules DB can't answer.
+  try {
+    const { answer } = await ragQuery({ query: message, lang, agentType: "visa" });
+    if (answer?.trim()) {
+      return { type: "ai", intent, message: answer, source: "ai_rag" };
+    }
+  } catch {
+    // Backend unavailable / not configured — fall through to static guidance.
+  }
 
   // Step 4: Fallback response
   return buildFallbackResponse(message, lang, intent);
@@ -145,24 +136,3 @@ function buildFallbackResponse(message, lang, intent) {
   };
 }
 
-// ── Future OpenAI Integration Interface ───────────────────────
-// eslint-disable-next-line no-unused-vars
-async function callOpenAI({ message, systemPrompt, history, lang }) {
-  // READY FOR INTEGRATION:
-  // const response = await fetch("/api/ai/visa-assistant", {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify({
-  //     model: "gpt-4o",
-  //     messages: [
-  //       { role: "system", content: systemPrompt },
-  //       ...history,
-  //       { role: "user", content: message }
-  //     ],
-  //     max_tokens: 500,
-  //     temperature: 0.7,
-  //   })
-  // });
-  // const data = await response.json();
-  // return data.choices[0].message.content;
-}

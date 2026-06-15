@@ -1,7 +1,10 @@
 // ═══════════════════════════════════════════════════════════════
 // ALKOWN GLOBAL — Residency Advisor AI Service
-// Future AI integration interface
+// Static program data + recommendResidency(); free-form questions
+// delegate to the live /api/ai-rag backend (Claude).
 // ═══════════════════════════════════════════════════════════════
+
+import { ragQuery } from "./ragService";
 
 export const RESIDENCY_PROGRAMS = [
   { id: "pt-golden", country: "Portugal", nameAr: "البرتغال", type: "Golden Visa", minInvestment: 250000, currency: "EUR", processingMonths: "6-8", passportRank: 4, schengen: true },
@@ -20,10 +23,14 @@ export function recommendResidency({ budget, currency = "USD", needsSchengen, pr
   return filtered.sort((a, b) => a.minInvestment - b.minInvestment).slice(0, 3);
 }
 
-// Future AI interface
 export async function queryResidencyAdvisor({ message, lang = "ar" }) {
-  // FUTURE: OpenAI integration
-  // Parse intent → match programs → return recommendations
+  try {
+    const { answer } = await ragQuery({ query: message, lang, agentType: "residency" });
+    if (answer?.trim()) return { type: "ai", message: answer, source: "ai_rag" };
+  } catch {
+    // Backend unavailable — fall through to static guidance.
+  }
+
   return {
     type: "fallback",
     message: lang === "ar"

@@ -6,6 +6,7 @@
 import { lookupVisa, VISA_RULES } from "../data/visaRules";
 import { getCountryByCode, toSlug, COUNTRIES } from "../data/countries";
 import { supabase } from "../lib/supabase";
+import { ragQuery } from "./ai/ragService";
 
 // ── VISA CHECKER ───────────────────────────────────────────────
 export async function checkVisaRequirements({ nationality, residence, destination }) {
@@ -46,25 +47,24 @@ function enrichResult(rule, nationality, residence, destination) {
 // Ready for OpenAI/Claude integration
 
 export async function queryAIVisaAssistant({ prompt, nationality, residence, destination }) {
-  // FUTURE IMPLEMENTATION:
-  // const response = await fetch("/api/ai-visa-assistant", {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify({
-  //     model: "claude-opus-4-8",
-  //     system: buildVisaSystemPrompt(),
-  //     messages: [{ role: "user", content: prompt }],
-  //     context: { nationality, residence, destination },
-  //   }),
-  // });
-  // return response.json();
+  // Enrich the prompt with the route context, then hit the live RAG
+  // backend (Claude). Returns a graceful message if it's unavailable.
+  const context = [nationality && `Nationality: ${nationality}`,
+                   residence && `Residence: ${residence}`,
+                   destination && `Destination: ${destination}`]
+    .filter(Boolean).join(", ");
+  const query = context ? `${prompt}\n\n(${context})` : prompt;
 
-  // Mock response for now
-  return {
-    answer: "AI assistant coming soon. Please use the visa checker above.",
-    answerAr: "مساعد الذكاء الاصطناعي قريباً. يرجى استخدام فاحص التأشيرة أعلاه.",
-    suggestions: [],
-  };
+  try {
+    const { answer } = await ragQuery({ query, lang: "ar", agentType: "visa" });
+    return { answer, answerAr: answer, suggestions: [] };
+  } catch {
+    return {
+      answer: "The AI assistant is temporarily unavailable. Please use the visa checker above.",
+      answerAr: "مساعد الذكاء الاصطناعي غير متاح مؤقتاً. يرجى استخدام فاحص التأشيرة أعلاه.",
+      suggestions: [],
+    };
+  }
 }
 
 // System prompt template (ready for AI)

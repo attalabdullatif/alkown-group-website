@@ -1,7 +1,10 @@
 // ═══════════════════════════════════════════════════════════════
 // ALKOWN GLOBAL — Travel Advisor AI Service
-// Future AI integration interface for travel recommendations
+// Static destination data + recommendDestinations(); free-form
+// questions delegate to the live /api/ai-rag backend (Claude).
 // ═══════════════════════════════════════════════════════════════
+
+import { ragQuery } from "./ragService";
 
 export const POPULAR_DESTINATIONS = [
   { code: "TR", nameAr: "تركيا", nameEn: "Turkey", flag: "🇹🇷", season: "Apr-Oct", avgCost: "800-1500 USD", highlight: "Istanbul, Cappadocia, Antalya", type: ["tourism", "medical", "residency"] },
@@ -26,10 +29,14 @@ export function recommendDestinations({ intent, nationality, budget }) {
   return filtered.slice(0, 4);
 }
 
-// Future AI interface — ready for OpenAI/Claude integration
 export async function queryTravelAdvisor({ message, lang = "ar" }) {
-  // FUTURE: Parse intent → match destinations → build itinerary
-  // const aiResponse = await callOpenAI({ message, systemPrompt: TRAVEL_SYSTEM_PROMPT });
+  try {
+    const { answer } = await ragQuery({ query: message, lang, agentType: "general" });
+    if (answer?.trim()) return { type: "ai", message: answer, source: "ai_rag" };
+  } catch {
+    // Backend unavailable — fall through to static guidance.
+  }
+
   return {
     type: "fallback",
     message: lang === "ar"
@@ -38,9 +45,3 @@ export async function queryTravelAdvisor({ message, lang = "ar" }) {
     source: "fallback"
   };
 }
-
-// eslint-disable-next-line no-unused-vars
-const TRAVEL_SYSTEM_PROMPT = `You are ALKOWN Global's Travel Advisor AI.
-You help clients plan premium travel experiences while handling visa requirements.
-You are knowledgeable about destinations, seasons, costs, and documentation.
-Always suggest booking through ALKOWN Global for visa assistance.`;
