@@ -74,6 +74,7 @@ export default function TrackRequest() {
       setRequest({
         request_number: reqData.request_number,
         status: reqData.status,
+        notes: reqData.notes,
         clients: { full_name: reqData.client_name },
         services: { name: reqData.service_name },
         created_at: reqData.created_at,

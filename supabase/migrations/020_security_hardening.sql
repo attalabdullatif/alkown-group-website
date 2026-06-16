@@ -48,11 +48,14 @@ CREATE POLICY "visa_apps_update_staff"
   USING (public.is_staff());
 
 -- Secure public tracking: requires the application id + the email used
--- to submit. Returns safe columns only (never internal_notes).
-CREATE OR REPLACE FUNCTION public.track_visa_application(p_id bigint, p_email text)
+-- to submit. Returns safe columns only (never internal_notes). The email
+-- is echoed back (the caller already supplied it) so the UI can show it.
+DROP FUNCTION IF EXISTS public.track_visa_application(bigint, text);
+CREATE FUNCTION public.track_visa_application(p_id bigint, p_email text)
 RETURNS TABLE (
   id           bigint,
   full_name    text,
+  email        text,
   status       text,
   nationality  text,
   destination  text,
@@ -64,7 +67,7 @@ STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT id, full_name, status, nationality, destination, travel_date, created_at
+  SELECT id, full_name, email, status, nationality, destination, travel_date, created_at
   FROM public.visa_applications
   WHERE id = p_id
     AND lower(email) = lower(trim(p_email));
@@ -78,10 +81,12 @@ GRANT EXECUTE ON FUNCTION public.track_visa_application(bigint, text) TO anon, a
 -- requests SELECT is already authenticated-only (migration 014). The
 -- public "track by number" feature now goes through this function so it
 -- never needs anonymous table reads. The request number acts as the secret.
-CREATE OR REPLACE FUNCTION public.track_request(p_number text)
+DROP FUNCTION IF EXISTS public.track_request(text);
+CREATE FUNCTION public.track_request(p_number text)
 RETURNS TABLE (
   request_number text,
   status         text,
+  notes          text,
   service_name   text,
   client_name    text,
   created_at     timestamptz,
@@ -92,11 +97,13 @@ STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT r.request_number, r.status, s.name, c.full_name, r.created_at, r.updated_at
+  SELECT r.request_number, r.status, r.notes, s.name, c.full_name, r.created_at, r.updated_at
   FROM public.requests r
   LEFT JOIN public.services s ON s.id = r.service_id
   LEFT JOIN public.clients  c ON c.id = r.client_id
-  WHERE upper(r.request_number) = upper(trim(p_number));
+  WHERE upper(r.request_number) = upper(trim(p_number))
+  ORDER BY r.created_at DESC
+  LIMIT 1;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.track_request(text) TO anon, authenticated;
