@@ -5,12 +5,17 @@
 // ═══════════════════════════════════════════════════════════════
 
 const { applyCors } = require("./_cors");
+const { requireStaff } = require("./_auth");
 
 module.exports = async (req, res) => {
   applyCors(req, res);
 
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST")   return res.status(405).json({ error: "Method not allowed" });
+
+  // Admin-only endpoint — require an authenticated staff member.
+  const auth = await requireStaff(req);
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
 
   const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
   if (!ANTHROPIC_KEY) return res.status(500).json({ error: "ANTHROPIC_API_KEY not configured" });

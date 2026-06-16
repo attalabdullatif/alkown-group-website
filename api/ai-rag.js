@@ -6,12 +6,17 @@
 
 const { createClient } = require("@supabase/supabase-js");
 const { applyCors } = require("./_cors");
+const { checkRateLimit } = require("./_rateLimit");
 
 module.exports = async (req, res) => {
   applyCors(req, res);
 
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST")   return res.status(405).json({ error: "Method not allowed" });
+
+  // Throttle abuse: 20 requests / minute per IP.
+  const allowed = await checkRateLimit(req, { bucket: "ai-rag", max: 20, windowSeconds: 60 });
+  if (!allowed) return res.status(429).json({ error: "Too many requests. Please slow down." });
 
   const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
   const OPENAI_KEY    = process.env.OPENAI_API_KEY;

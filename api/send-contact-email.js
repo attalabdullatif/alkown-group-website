@@ -6,12 +6,17 @@
 // ═══════════════════════════════════════════════════════════════
 
 const { applyCors } = require("./_cors");
+const { checkRateLimit } = require("./_rateLimit");
 
 module.exports = async (req, res) => {
   applyCors(req, res);
 
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST")   return res.status(405).json({ error: "Method not allowed" });
+
+  // Throttle abuse: 8 notifications / minute per IP (public booking form).
+  const allowed = await checkRateLimit(req, { bucket: "contact", max: 8, windowSeconds: 60 });
+  if (!allowed) return res.status(429).json({ error: "Too many requests. Please slow down." });
 
   const RESEND_KEY  = process.env.RESEND_API_KEY;
   const ADMIN_EMAIL = process.env.CONTACT_NOTIFY_TO   || "info@alkownglobal.com";
