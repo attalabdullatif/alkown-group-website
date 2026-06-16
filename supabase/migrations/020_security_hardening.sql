@@ -42,6 +42,7 @@ CREATE POLICY "visa_apps_select_staff"
 
 -- Restrict updates to staff only (was: any authenticated user).
 DROP POLICY IF EXISTS "Admins can update applications" ON public.visa_applications;
+DROP POLICY IF EXISTS "visa_apps_update_staff" ON public.visa_applications;
 CREATE POLICY "visa_apps_update_staff"
   ON public.visa_applications FOR UPDATE
   TO authenticated
