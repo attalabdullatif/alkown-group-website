@@ -244,14 +244,18 @@ function TrackView({ setView, ar }) {
   async function search(e) {
     e.preventDefault();
     setError(""); setRequest(null); setLoading(true);
-    const { data, error: err } = await supabase
-      .from("requests")
-      .select("*, services(name), clients(full_name)")
-      .eq("request_number", reqNum.trim().toUpperCase())
-      .maybeSingle();
+    const { data, error: err } = await supabase.rpc("track_request", { p_number: reqNum.trim() });
+    const row = data?.[0];
     setLoading(false);
-    if (err || !data) { setError("لم يُعثر على طلب بهذا الرقم."); return; }
-    setRequest(data);
+    if (err || !row) { setError("لم يُعثر على طلب بهذا الرقم."); return; }
+    setRequest({
+      request_number: row.request_number,
+      status: row.status,
+      services: { name: row.service_name },
+      clients: { full_name: row.client_name },
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+    });
   }
 
   const stepIdx = request ? STATUS_STEPS.indexOf(request.status) : -1;

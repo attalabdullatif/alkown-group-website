@@ -15,6 +15,7 @@ const STATUS_STEP = ["New", "In Progress", "Pending Documents", "Approved", "Com
 
 export default function TrackRequest() {
   const [requestNumber, setRequestNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [request, setRequest] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -25,9 +26,11 @@ export default function TrackRequest() {
       title: "تتبّع طلبك",
       sub: "أدخل رقم الطلب للاطلاع على آخر تحديث",
       placeholder: "REQ-...",
+      emailPlaceholder: "البريد الإلكتروني (لطلبات التأشيرة)",
       btn: "بحث",
       loading: "جارٍ البحث...",
       notFound: "لم يُعثر على طلب بهذا الرقم.",
+      needEmail: "لتتبّع طلب تأشيرة، أدخل بريدك الإلكتروني المستخدم في التقديم.",
       reqNum: "رقم الطلب",
       status: "الحالة",
       service: "الخدمة",
@@ -40,9 +43,11 @@ export default function TrackRequest() {
       title: "Track Your Request",
       sub: "Enter your request number to check the latest status",
       placeholder: "REQ-...",
+      emailPlaceholder: "Email (for visa applications)",
       btn: "Search",
       loading: "Searching...",
       notFound: "No request found with this number.",
+      needEmail: "To track a visa application, enter the email used to apply.",
       reqNum: "Request Number",
       status: "Status",
       service: "Service",
@@ -55,32 +60,46 @@ export default function TrackRequest() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const term = requestNumber.trim().toUpperCase();
+    const term = requestNumber.trim();
     if (!term) return;
     setLoading(true);
     setError("");
     setRequest(null);
 
-    // Search in requests table first
-    const { data: reqData } = await supabase
-      .from("requests")
-      .select("request_number, status, notes, created_at, updated_at, clients(full_name), services(name)")
-      .eq("request_number", term)
-      .maybeSingle();
+    // 1) Requests — secure tracking by request number (RPC, no anon table read)
+    const { data: reqRows } = await supabase.rpc("track_request", { p_number: term });
+    const reqData = reqRows?.[0];
+    if (reqData) {
+      setLoading(false);
+      setRequest({
+        request_number: reqData.request_number,
+        status: reqData.status,
+        clients: { full_name: reqData.client_name },
+        services: { name: reqData.service_name },
+        created_at: reqData.created_at,
+        updated_at: reqData.updated_at,
+        _type: "request",
+      });
+      return;
+    }
 
-    if (reqData) { setLoading(false); setRequest({ ...reqData, _type: "request" }); return; }
-
-    // Search in visa_applications by id prefix or full_name
-    const { data: visaData } = await supabase
-      .from("visa_applications")
-      .select("id, full_name, status, nationality, destination, travel_date, created_at")
-      .or(`full_name.ilike.%${requestNumber.trim()}%,id.eq.${isNaN(requestNumber.trim()) ? 0 : Number(requestNumber.trim())}`)
-      .limit(1)
-      .maybeSingle();
+    // 2) Visa applications — require id + email (digits parsed from e.g. "VISA-123")
+    const visaId = Number((term.match(/\d+/) || [])[0]);
+    if (visaId && email.trim()) {
+      const { data: visaRows } = await supabase.rpc("track_visa_application", {
+        p_id: visaId,
+        p_email: email.trim(),
+      });
+      const visaData = visaRows?.[0];
+      if (visaData) {
+        setLoading(false);
+        setRequest({ ...visaData, _type: "visa", request_number: `VISA-${visaData.id}` });
+        return;
+      }
+    }
 
     setLoading(false);
-    if (visaData) { setRequest({ ...visaData, _type: "visa", request_number: `VISA-${visaData.id}` }); return; }
-    setError(T.notFound);
+    setError(visaId && !email.trim() ? T.needEmail : T.notFound);
   }
 
   const stepIndex = request ? STATUS_STEP.indexOf(request.status) : -1;
@@ -110,13 +129,24 @@ export default function TrackRequest() {
           <h1 style={{ margin: "0 0 6px", color: "#fff", fontSize: 24 }}>{T.title}</h1>
           <p style={{ color: "#666", margin: "0 0 24px", fontSize: 14 }}>{T.sub}</p>
 
-          <form onSubmit={handleSubmit} style={{ display: "flex", gap: 10 }}>
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <input
               value={requestNumber}
               onChange={e => setRequestNumber(e.target.value)}
               placeholder={T.placeholder}
               style={{
-                flex: 1, padding: "12px 16px", background: "#1a1a1a",
+                padding: "12px 16px", background: "#1a1a1a",
+                border: "1px solid #2a2a2a", borderRadius: 10, color: "#fff",
+                fontSize: 15, outline: "none"
+              }}
+            />
+            <input
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              type="email"
+              placeholder={T.emailPlaceholder}
+              style={{
+                padding: "12px 16px", background: "#1a1a1a",
                 border: "1px solid #2a2a2a", borderRadius: 10, color: "#fff",
                 fontSize: 15, outline: "none"
               }}

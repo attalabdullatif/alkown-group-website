@@ -39,8 +39,9 @@ export default function VisaTrackPage({ lang, ff, setPage }) {
   const [searched, setSearched] = useState(false);
 
   const handleSearch = async () => {
-    if (!query.trim() && !email.trim()) {
-      setError(ar ? "أدخل رقم الطلب أو البريد الإلكتروني" : "Enter application ID or email");
+    const visaId = Number((query.match(/\d+/) || [])[0]);
+    if (!visaId || !email.trim()) {
+      setError(ar ? "أدخل رقم الطلب والبريد الإلكتروني معاً" : "Enter both application ID and email");
       return;
     }
     setLoading(true);
@@ -48,20 +49,17 @@ export default function VisaTrackPage({ lang, ff, setPage }) {
     setResult(null);
 
     try {
-      let queryBuilder = supabase.from("visa_applications").select("*");
+      // Secure tracking: id + email must match (RPC, no anonymous table read)
+      const { data, error: dbError } = await supabase.rpc("track_visa_application", {
+        p_id: visaId,
+        p_email: email.trim(),
+      });
+      const row = data?.[0];
 
-      if (query.trim()) {
-        queryBuilder = queryBuilder.or(`id.eq.${query.trim()}`);
-      } else if (email.trim()) {
-        queryBuilder = queryBuilder.eq("email", email.trim().toLowerCase());
-      }
-
-      const { data, error: dbError } = await queryBuilder.limit(1).single();
-
-      if (dbError || !data) {
+      if (dbError || !row) {
         setError(ar ? "لم يتم العثور على طلب بهذه البيانات" : "No application found with these details");
       } else {
-        setResult(data);
+        setResult(row);
       }
     } catch {
       setError(ar ? "حدث خطأ، حاول مجدداً" : "Something went wrong, please try again");
@@ -107,7 +105,7 @@ export default function VisaTrackPage({ lang, ff, setPage }) {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
             <div style={{ flex: 1, height: 1, background: "rgba(201,168,76,.15)" }} />
-            <span style={{ color: C.g400, fontSize: ".8rem" }}>{ar ? "أو" : "OR"}</span>
+            <span style={{ color: C.g400, fontSize: ".8rem" }}>{ar ? "و" : "AND"}</span>
             <div style={{ flex: 1, height: 1, background: "rgba(201,168,76,.15)" }} />
           </div>
           <div style={{ marginBottom: 20 }}>
