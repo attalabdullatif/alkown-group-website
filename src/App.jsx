@@ -226,13 +226,25 @@ function PageLayout({ children }) {
       {/* Navigation — لا تتأثر بالـ invert */}
       <Navigation />
       {/* المحتوى — يتأثر بالوضع الليلي */}
-      <div style={dark ? {
-        filter: "invert(0.88) hue-rotate(180deg) brightness(0.96)",
+      <div className={dark ? "crm-dark" : ""} style={dark ? {
+        filter: "invert(1) hue-rotate(180deg)",
       } : {}}>
         <div style={{ padding: "20px" }}>
           {children}
         </div>
       </div>
+      {dark && (
+        // Counter-invert media so photos, logos, and anything tagged
+        // data-keep-color render with their true colors instead of flipped.
+        <style>{`
+          .crm-dark img,
+          .crm-dark video,
+          .crm-dark canvas,
+          .crm-dark [data-keep-color] {
+            filter: invert(1) hue-rotate(180deg);
+          }
+        `}</style>
+      )}
     </div>
   );
 }
