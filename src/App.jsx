@@ -69,7 +69,6 @@ const NAV_LINKS = [
   { to: "/dash/sales",      label: "📈 المبيعات",         roles: ["admin","manager"] },
   { to: "/dash/finance",    label: "💹 المالية",          roles: ["admin","manager"] },
   { to: "/visa-admin",       label: "🛂 إدارة التأشيرات",   roles: ["admin","manager"] },
-  { to: "/visa-database",    label: "🗃️ قاعدة التأشيرات",   roles: ["admin","manager"] },
   { to: "/ai",             label: "🤖 الذكاء الاصطناعي",  roles: ["admin","manager"] },
   { to: "/track-request",label: "🔍 تتبع الطلب",        roles: null },
   { to: "/portal",       label: "🚪 بوابة العملاء",     roles: null },
