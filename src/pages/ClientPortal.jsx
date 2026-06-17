@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react"; // eslint-disable-line no-unused-vars
 import { supabase } from "../lib/supabase";
+import { trackRequest } from "../services/trackingService";
 
 /* ═══════════════════════════════════════════════════════════════
    ALKOWN GLOBAL — Client Portal
@@ -244,18 +245,10 @@ function TrackView({ setView, ar }) {
   async function search(e) {
     e.preventDefault();
     setError(""); setRequest(null); setLoading(true);
-    const { data, error: err } = await supabase.rpc("track_request", { p_number: reqNum.trim() });
-    const row = data?.[0];
+    const row = await trackRequest(reqNum);
     setLoading(false);
-    if (err || !row) { setError("لم يُعثر على طلب بهذا الرقم."); return; }
-    setRequest({
-      request_number: row.request_number,
-      status: row.status,
-      services: { name: row.service_name },
-      clients: { full_name: row.client_name },
-      created_at: row.created_at,
-      updated_at: row.updated_at,
-    });
+    if (!row) { setError("لم يُعثر على طلب بهذا الرقم."); return; }
+    setRequest(row);
   }
 
   const stepIdx = request ? STATUS_STEPS.indexOf(request.status) : -1;

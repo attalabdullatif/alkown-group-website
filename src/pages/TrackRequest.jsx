@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "../lib/supabase";
+import { trackRequest, trackVisaApplication, parseVisaId } from "../services/trackingService";
 import { statusColors } from "../components/crmUi";
 
 const STATUS_AR = {
@@ -66,32 +66,18 @@ export default function TrackRequest() {
     setError("");
     setRequest(null);
 
-    // 1) Requests — secure tracking by request number (RPC, no anon table read)
-    const { data: reqRows } = await supabase.rpc("track_request", { p_number: term });
-    const reqData = reqRows?.[0];
+    // 1) Requests — secure tracking by request number
+    const reqData = await trackRequest(term);
     if (reqData) {
       setLoading(false);
-      setRequest({
-        request_number: reqData.request_number,
-        status: reqData.status,
-        notes: reqData.notes,
-        clients: { full_name: reqData.client_name },
-        services: { name: reqData.service_name },
-        created_at: reqData.created_at,
-        updated_at: reqData.updated_at,
-        _type: "request",
-      });
+      setRequest({ ...reqData, _type: "request" });
       return;
     }
 
     // 2) Visa applications — require id + email (digits parsed from e.g. "VISA-123")
-    const visaId = Number((term.match(/\d+/) || [])[0]);
+    const visaId = parseVisaId(term);
     if (visaId && email.trim()) {
-      const { data: visaRows } = await supabase.rpc("track_visa_application", {
-        p_id: visaId,
-        p_email: email.trim(),
-      });
-      const visaData = visaRows?.[0];
+      const visaData = await trackVisaApplication(term, email);
       if (visaData) {
         setLoading(false);
         setRequest({ ...visaData, _type: "visa", request_number: `VISA-${visaData.id}` });

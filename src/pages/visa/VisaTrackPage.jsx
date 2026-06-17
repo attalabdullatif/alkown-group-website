@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { useState } from "react";
-import { supabase } from "../../lib/supabase";
+import { trackVisaApplication, parseVisaId } from "../../services/trackingService";
 import { COUNTRIES } from "../../data/countries";
 
 const C = {
@@ -39,8 +39,7 @@ export default function VisaTrackPage({ lang, ff, setPage }) {
   const [searched, setSearched] = useState(false);
 
   const handleSearch = async () => {
-    const visaId = Number((query.match(/\d+/) || [])[0]);
-    if (!visaId || !email.trim()) {
+    if (!parseVisaId(query) || !email.trim()) {
       setError(ar ? "أدخل رقم الطلب والبريد الإلكتروني معاً" : "Enter both application ID and email");
       return;
     }
@@ -50,13 +49,8 @@ export default function VisaTrackPage({ lang, ff, setPage }) {
 
     try {
       // Secure tracking: id + email must match (RPC, no anonymous table read)
-      const { data, error: dbError } = await supabase.rpc("track_visa_application", {
-        p_id: visaId,
-        p_email: email.trim(),
-      });
-      const row = data?.[0];
-
-      if (dbError || !row) {
+      const row = await trackVisaApplication(query, email);
+      if (!row) {
         setError(ar ? "لم يتم العثور على طلب بهذه البيانات" : "No application found with these details");
       } else {
         setResult(row);
