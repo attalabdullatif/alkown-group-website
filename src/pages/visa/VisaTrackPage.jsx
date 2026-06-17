@@ -172,9 +172,6 @@ export default function VisaTrackPage({ lang, ff, setPage }) {
                       <div style={{ fontSize: ".68rem", color: i <= currentStepIndex ? C.gold : C.g400, fontWeight: i === currentStepIndex ? 700 : 400 }}>
                         {ar ? step.ar : step.en}
                       </div>
-                      {i < STATUS_STEPS.length - 1 && (
-                        <div style={{ position: "absolute", display: "none" }} />
-                      )}
                     </div>
                   ))}
                 </div>
