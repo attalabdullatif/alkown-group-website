@@ -35,7 +35,6 @@ const NotificationCenter   = lazy(() => import("./pages/notifications/Notificati
 const ManagementDashboard  = lazy(() => import("./pages/dashboards/ManagementDashboard"));
 const SalesDashboard       = lazy(() => import("./pages/dashboards/SalesDashboard"));
 const FinanceDashboard     = lazy(() => import("./pages/dashboards/FinanceDashboard"));
-const VisaDatabase         = lazy(() => import("./pages/visa/VisaDatabase"));
 
 // ── AI Knowledge Engine — lazy chunks ─────────────────────────
 const AICommandCenter = lazy(() => import("./pages/ai/AICommandCenter"));
@@ -334,12 +333,6 @@ export default function App() {
         <Route path="/pipeline" element={
           <ProtectedRoute allowed={["admin", "manager", "staff"]}>
             <PageLayout><VisaPipeline /></PageLayout>
-          </ProtectedRoute>
-        } />
-
-        <Route path="/visa-database" element={
-          <ProtectedRoute allowed={["admin", "manager"]}>
-            <PageLayout><VisaDatabase /></PageLayout>
           </ProtectedRoute>
         } />
 
