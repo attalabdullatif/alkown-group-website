@@ -1,0 +1,99 @@
+{
+  "countries": {
+    "syria": {
+      "nameAr": "سوريا",
+      "nameEn": "Syria",
+      "flag": "🇸🇾",
+      "center": [34.8, 38.9],
+      "zoom": 6,
+      "locations": [
+        {
+          "id": "umayyad-mosque",
+          "nameAr": "الجامع الأموي",
+          "nameEn": "Umayyad Mosque",
+          "coords": [33.5117, 36.3066],
+          "categoryAr": "ديني وتاريخي",
+          "categoryEn": "Religious & Historic",
+          "image": "https://picsum.photos/seed/umayyad/800/500",
+          "descAr": "أحد أقدم وأعظم المساجد في العالم، يقع في قلب دمشق القديمة ويعود تاريخه للقرن الثامن الميلادي.",
+          "descEn": "One of the oldest and grandest mosques in the world, in the heart of Old Damascus, dating back to the 8th century."
+        },
+        {
+          "id": "palmyra",
+          "nameAr": "تدمر",
+          "nameEn": "Palmyra",
+          "coords": [34.5520, 38.2660],
+          "categoryAr": "موقع أثري",
+          "categoryEn": "Archaeological Site",
+          "image": "https://picsum.photos/seed/palmyra/800/500",
+          "descAr": "مدينة أثرية في الصحراء السورية، من مواقع التراث العالمي، تشتهر بأعمدتها ومعابدها الرومانية.",
+          "descEn": "An ancient desert city and UNESCO World Heritage Site, famous for its Roman colonnades and temples."
+        }
+      ]
+    },
+
+    "turkey": {
+      "nameAr": "تركيا",
+      "nameEn": "Turkey",
+      "flag": "🇹🇷",
+      "center": [38.9, 35.2],
+      "zoom": 5,
+      "locations": [
+        {
+          "id": "hagia-sophia",
+          "nameAr": "آيا صوفيا",
+          "nameEn": "Hagia Sophia",
+          "coords": [41.0086, 28.9802],
+          "categoryAr": "ديني وتاريخي",
+          "categoryEn": "Religious & Historic",
+          "image": "https://picsum.photos/seed/hagiasophia/800/500",
+          "descAr": "تحفة معمارية بيزنطية وعثمانية في إسطنبول، من أشهر معالم العالم وأكثرها زيارة.",
+          "descEn": "A Byzantine and Ottoman architectural masterpiece in Istanbul, one of the world's most visited landmarks."
+        },
+        {
+          "id": "cappadocia",
+          "nameAr": "كابادوكيا",
+          "nameEn": "Cappadocia",
+          "coords": [38.6431, 34.8289],
+          "categoryAr": "طبيعة ومغامرة",
+          "categoryEn": "Nature & Adventure",
+          "image": "https://picsum.photos/seed/cappadocia/800/500",
+          "descAr": "منطقة ساحرة بتكويناتها الصخرية الفريدة ورحلات المناطيد الهوائية عند الشروق.",
+          "descEn": "A magical region known for its unique rock formations and sunrise hot-air balloon rides."
+        }
+      ]
+    },
+
+    "uae": {
+      "nameAr": "الإمارات",
+      "nameEn": "UAE",
+      "flag": "🇦🇪",
+      "center": [23.4, 53.8],
+      "zoom": 6,
+      "locations": [
+        {
+          "id": "burj-khalifa",
+          "nameAr": "برج خليفة",
+          "nameEn": "Burj Khalifa",
+          "coords": [25.1972, 55.2744],
+          "categoryAr": "معلم حديث",
+          "categoryEn": "Modern Landmark",
+          "image": "https://picsum.photos/seed/burjkhalifa/800/500",
+          "descAr": "أطول مبنى في العالم في قلب دبي، يضمّ منصات مشاهدة بإطلالات بانورامية على المدينة.",
+          "descEn": "The tallest building in the world in the heart of Dubai, with observation decks offering panoramic city views."
+        },
+        {
+          "id": "sheikh-zayed-mosque",
+          "nameAr": "جامع الشيخ زايد الكبير",
+          "nameEn": "Sheikh Zayed Grand Mosque",
+          "coords": [24.4128, 54.4748],
+          "categoryAr": "ديني وثقافي",
+          "categoryEn": "Religious & Cultural",
+          "image": "https://picsum.photos/seed/sheikhzayed/800/500",
+          "descAr": "أحد أجمل المساجد في العالم في أبوظبي، يتميّز برخامه الأبيض وثرياته الفخمة.",
+          "descEn": "One of the world's most beautiful mosques in Abu Dhabi, renowned for its white marble and grand chandeliers."
+        }
+      ]
+    }
+  }
+}

@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["start"],
       "port": 3000
+    },
+    {
+      "name": "tourism-map",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["-y", "serve", "public/tourism-map", "-l", "5055"],
+      "port": 5055
     }
   ]
 }
