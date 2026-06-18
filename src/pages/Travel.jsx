@@ -493,6 +493,30 @@ export default function Travel({ lang = "ar", ff, setPage }) {
         </div>
       </section>
 
+      {/* ══ INTERACTIVE TOURISM MAP ════════════════════════════ */}
+      <section style={{ padding: "80px clamp(20px,6vw,72px)", background: "var(--bgWarm,#faf7f2)" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 36 }}>
+            <SectionLabel text={ar ? "استكشف الوجهات" : "Explore Destinations"} />
+            <h2 style={{ fontSize: "clamp(1.6rem,3.5vw,2.4rem)", fontWeight: 800, color: "var(--g800,#1e1508)", marginTop: 8 }}>
+              {ar ? "الخريطة السياحية التفاعلية" : "Interactive Tourism Map"}
+            </h2>
+            <div className="gl" style={{ margin: "16px auto 0" }} />
+            <p style={{ color: "var(--g400,#7a6b50)", fontSize: ".9rem", lineHeight: 1.7, marginTop: 14, maxWidth: 560, marginInline: "auto" }}>
+              {ar
+                ? "اختر دولة واستكشف أبرز المعالم السياحية على الخريطة مباشرة."
+                : "Pick a country and explore its top tourist landmarks right on the map."}
+            </p>
+          </div>
+          <iframe
+            src="/tourism-map/index.html"
+            title={ar ? "الخريطة السياحية التفاعلية" : "Interactive Tourism Map"}
+            loading="lazy"
+            style={{ width: "100%", height: 620, border: "1px solid rgba(201,168,76,.2)", borderRadius: 8, boxShadow: "0 10px 40px rgba(0,0,0,.08)" }}
+          />
+        </div>
+      </section>
+
       {/* ══ CTA ════════════════════════════════════════════════ */}
       <section style={{
         padding: "80px clamp(20px,6vw,72px)",
