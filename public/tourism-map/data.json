@@ -14,9 +14,9 @@
           "coords": [33.5117, 36.3066],
           "categoryAr": "ديني وتاريخي",
           "categoryEn": "Religious & Historic",
-          "image": "https://picsum.photos/seed/umayyad/800/500",
-          "descAr": "أحد أقدم وأعظم المساجد في العالم، يقع في قلب دمشق القديمة ويعود تاريخه للقرن الثامن الميلادي.",
-          "descEn": "One of the oldest and grandest mosques in the world, in the heart of Old Damascus, dating back to the 8th century."
+          "image": "https://picsum.photos/seed/umayyad-mosque/800/500",
+          "descAr": "أحد أقدم وأعظم المساجد في العالم، في قلب دمشق القديمة، يعود تاريخه للقرن الثامن الميلادي.",
+          "descEn": "One of the oldest and grandest mosques in the world, in the heart of Old Damascus, dating to the 8th century."
         },
         {
           "id": "palmyra",
@@ -26,8 +26,96 @@
           "categoryAr": "موقع أثري",
           "categoryEn": "Archaeological Site",
           "image": "https://picsum.photos/seed/palmyra/800/500",
-          "descAr": "مدينة أثرية في الصحراء السورية، من مواقع التراث العالمي، تشتهر بأعمدتها ومعابدها الرومانية.",
+          "descAr": "مدينة أثرية في الصحراء السورية ومن مواقع التراث العالمي، تشتهر بأعمدتها ومعابدها الرومانية.",
           "descEn": "An ancient desert city and UNESCO World Heritage Site, famous for its Roman colonnades and temples."
+        },
+        {
+          "id": "aleppo-citadel",
+          "nameAr": "قلعة حلب",
+          "nameEn": "Citadel of Aleppo",
+          "coords": [36.1996, 37.1624],
+          "categoryAr": "قلعة تاريخية",
+          "categoryEn": "Historic Castle",
+          "image": "https://picsum.photos/seed/aleppo-citadel/800/500",
+          "descAr": "قلعة ضخمة من العصور الوسطى تتوسّط مدينة حلب القديمة، من أقدم القلاع المأهولة في العالم.",
+          "descEn": "A massive medieval fortress crowning Old Aleppo, among the oldest inhabited castles in the world."
+        },
+        {
+          "id": "krak-des-chevaliers",
+          "nameAr": "قلعة الحصن",
+          "nameEn": "Krak des Chevaliers",
+          "coords": [34.7569, 36.2944],
+          "categoryAr": "قلعة تاريخية",
+          "categoryEn": "Historic Castle",
+          "image": "https://picsum.photos/seed/krak-des-chevaliers/800/500",
+          "descAr": "من أفضل القلاع الصليبية حفظًا في العالم، تقع على تلّ قرب حمص ومدرجة في التراث العالمي.",
+          "descEn": "One of the world's best-preserved Crusader castles, perched on a hill near Homs and a World Heritage Site."
+        },
+        {
+          "id": "hamidiyah-souq",
+          "nameAr": "سوق الحميدية",
+          "nameEn": "Al-Hamidiyah Souq",
+          "coords": [33.5106, 36.3064],
+          "categoryAr": "سوق تقليدي",
+          "categoryEn": "Traditional Market",
+          "image": "https://picsum.photos/seed/hamidiyah-souq/800/500",
+          "descAr": "أكبر وأشهر أسواق دمشق المسقوفة، يضجّ بالحرف اليدوية والحلويات والعطور التقليدية.",
+          "descEn": "The largest and most famous covered market in Damascus, bustling with crafts, sweets and traditional perfumes."
+        },
+        {
+          "id": "bosra",
+          "nameAr": "مدينة بصرى",
+          "nameEn": "Bosra",
+          "coords": [32.5181, 36.4817],
+          "categoryAr": "موقع أثري",
+          "categoryEn": "Archaeological Site",
+          "image": "https://picsum.photos/seed/bosra/800/500",
+          "descAr": "مدينة أثرية في الجنوب تشتهر بمدرّجها الروماني الأسود المبني من البازلت والمحفوظ بدقّة.",
+          "descEn": "A southern ancient city famed for its remarkably preserved black basalt Roman theatre."
+        },
+        {
+          "id": "maaloula",
+          "nameAr": "معلولا",
+          "nameEn": "Maaloula",
+          "coords": [33.8463, 36.5447],
+          "categoryAr": "ديني وتاريخي",
+          "categoryEn": "Religious & Historic",
+          "image": "https://picsum.photos/seed/maaloula/800/500",
+          "descAr": "بلدة جبلية خلّابة تُعدّ من آخر الأماكن التي ما زالت تتحدث الآرامية، وتضمّ أديرة قديمة.",
+          "descEn": "A breathtaking mountain town, one of the last places still speaking Aramaic, home to ancient monasteries."
+        },
+        {
+          "id": "hama-norias",
+          "nameAr": "نواعير حماة",
+          "nameEn": "Norias of Hama",
+          "coords": [35.1320, 36.7530],
+          "categoryAr": "معلم تاريخي",
+          "categoryEn": "Historic Landmark",
+          "image": "https://picsum.photos/seed/hama-norias/800/500",
+          "descAr": "نواعير مائية خشبية عملاقة على نهر العاصي، رمز مدينة حماة منذ مئات السنين.",
+          "descEn": "Giant wooden water wheels on the Orontes River, the centuries-old symbol of the city of Hama."
+        },
+        {
+          "id": "ugarit",
+          "nameAr": "أوغاريت",
+          "nameEn": "Ugarit",
+          "coords": [35.6020, 35.7820],
+          "categoryAr": "موقع أثري",
+          "categoryEn": "Archaeological Site",
+          "image": "https://picsum.photos/seed/ugarit/800/500",
+          "descAr": "موقع أثري قرب اللاذقية، يُنسب إليه أقدم أبجدية في التاريخ، شاهد على حضارة عريقة.",
+          "descEn": "An archaeological site near Latakia credited with the world's earliest alphabet — a witness to an ancient civilization."
+        },
+        {
+          "id": "saladin-citadel",
+          "nameAr": "قلعة صلاح الدين",
+          "nameEn": "Citadel of Salah Ed-Din",
+          "coords": [35.5953, 36.0560],
+          "categoryAr": "قلعة تاريخية",
+          "categoryEn": "Historic Castle",
+          "image": "https://picsum.photos/seed/saladin-citadel/800/500",
+          "descAr": "قلعة محصّنة وسط الغابات قرب اللاذقية، من مواقع التراث العالمي بإطلالات جبلية ساحرة.",
+          "descEn": "A forest-clad fortress near Latakia, a World Heritage Site with stunning mountain views."
         }
       ]
     },
@@ -46,7 +134,7 @@
           "coords": [41.0086, 28.9802],
           "categoryAr": "ديني وتاريخي",
           "categoryEn": "Religious & Historic",
-          "image": "https://picsum.photos/seed/hagiasophia/800/500",
+          "image": "https://picsum.photos/seed/hagia-sophia/800/500",
           "descAr": "تحفة معمارية بيزنطية وعثمانية في إسطنبول، من أشهر معالم العالم وأكثرها زيارة.",
           "descEn": "A Byzantine and Ottoman architectural masterpiece in Istanbul, one of the world's most visited landmarks."
         },
@@ -60,6 +148,94 @@
           "image": "https://picsum.photos/seed/cappadocia/800/500",
           "descAr": "منطقة ساحرة بتكويناتها الصخرية الفريدة ورحلات المناطيد الهوائية عند الشروق.",
           "descEn": "A magical region known for its unique rock formations and sunrise hot-air balloon rides."
+        },
+        {
+          "id": "pamukkale",
+          "nameAr": "باموكالي",
+          "nameEn": "Pamukkale",
+          "coords": [37.9203, 29.1206],
+          "categoryAr": "طبيعة",
+          "categoryEn": "Nature",
+          "image": "https://picsum.photos/seed/pamukkale/800/500",
+          "descAr": "مدرّجات بيضاء من الترافرتين وبرك مياه حرارية تشبه القطن، إلى جوار مدينة هيرابوليس الأثرية.",
+          "descEn": "Dazzling white travertine terraces and thermal pools beside the ancient city of Hierapolis."
+        },
+        {
+          "id": "blue-mosque",
+          "nameAr": "المسجد الأزرق",
+          "nameEn": "Blue Mosque",
+          "coords": [41.0054, 28.9768],
+          "categoryAr": "ديني وتاريخي",
+          "categoryEn": "Religious & Historic",
+          "image": "https://picsum.photos/seed/blue-mosque/800/500",
+          "descAr": "مسجد السلطان أحمد الشهير بقبابه الستّ ومآذنه وزخارفه الزرقاء الخلّابة في قلب إسطنبول.",
+          "descEn": "The famed Sultan Ahmed Mosque with six minarets and stunning blue tilework in the heart of Istanbul."
+        },
+        {
+          "id": "topkapi-palace",
+          "nameAr": "قصر طوب قابي",
+          "nameEn": "Topkapi Palace",
+          "coords": [41.0115, 28.9833],
+          "categoryAr": "ثقافي وتاريخي",
+          "categoryEn": "Cultural & Historic",
+          "image": "https://picsum.photos/seed/topkapi-palace/800/500",
+          "descAr": "مقرّ سلاطين الدولة العثمانية لقرون، يضمّ كنوزًا ومجوهرات وإطلالة على مضيق البوسفور.",
+          "descEn": "The seat of Ottoman sultans for centuries, holding treasures and jewels with views over the Bosphorus."
+        },
+        {
+          "id": "ephesus",
+          "nameAr": "أفسس",
+          "nameEn": "Ephesus",
+          "coords": [37.9398, 27.3409],
+          "categoryAr": "موقع أثري",
+          "categoryEn": "Archaeological Site",
+          "image": "https://picsum.photos/seed/ephesus/800/500",
+          "descAr": "من أعظم المدن الرومانية المحفوظة، تشتهر بمكتبة سيلسيوس ومسرحها الضخم قرب إزمير.",
+          "descEn": "One of the greatest preserved Roman cities, famed for the Library of Celsus and grand theatre near Izmir."
+        },
+        {
+          "id": "galata-tower",
+          "nameAr": "برج غلطة",
+          "nameEn": "Galata Tower",
+          "coords": [41.0256, 28.9744],
+          "categoryAr": "معلم تاريخي",
+          "categoryEn": "Historic Landmark",
+          "image": "https://picsum.photos/seed/galata-tower/800/500",
+          "descAr": "برج حجري من العصور الوسطى يقدّم إطلالة بانورامية ساحرة على إسطنبول والقرن الذهبي.",
+          "descEn": "A medieval stone tower offering a sweeping panoramic view over Istanbul and the Golden Horn."
+        },
+        {
+          "id": "antalya-kaleici",
+          "nameAr": "أنطاليا (كاليتشي)",
+          "nameEn": "Antalya Old Town",
+          "coords": [36.8841, 30.7056],
+          "categoryAr": "مدينة تاريخية",
+          "categoryEn": "Historic Town",
+          "image": "https://picsum.photos/seed/antalya-kaleici/800/500",
+          "descAr": "البلدة القديمة الساحرة لأنطاليا بأزقّتها العثمانية ومينائها على البحر المتوسط.",
+          "descEn": "Antalya's charming old quarter with Ottoman lanes and a marina on the Mediterranean coast."
+        },
+        {
+          "id": "mount-nemrut",
+          "nameAr": "جبل نمرود",
+          "nameEn": "Mount Nemrut",
+          "coords": [37.9803, 38.7411],
+          "categoryAr": "موقع أثري",
+          "categoryEn": "Archaeological Site",
+          "image": "https://picsum.photos/seed/mount-nemrut/800/500",
+          "descAr": "تماثيل حجرية ضخمة على قمة جبل تعود لمملكة كوماجين، مشهد لا يُنسى عند الغروب.",
+          "descEn": "Colossal stone statues atop a mountain from the Kingdom of Commagene — an unforgettable sunset sight."
+        },
+        {
+          "id": "sumela-monastery",
+          "nameAr": "دير سوميلا",
+          "nameEn": "Sumela Monastery",
+          "coords": [40.6903, 39.6586],
+          "categoryAr": "ديني وتاريخي",
+          "categoryEn": "Religious & Historic",
+          "image": "https://picsum.photos/seed/sumela-monastery/800/500",
+          "descAr": "دير معلّق على منحدر صخري وسط غابات طرابزون الخضراء، تحفة معمارية مذهلة.",
+          "descEn": "A monastery clinging to a sheer cliff amid the green forests of Trabzon — a stunning architectural feat."
         }
       ]
     },
@@ -78,9 +254,9 @@
           "coords": [25.1972, 55.2744],
           "categoryAr": "معلم حديث",
           "categoryEn": "Modern Landmark",
-          "image": "https://picsum.photos/seed/burjkhalifa/800/500",
+          "image": "https://picsum.photos/seed/burj-khalifa/800/500",
           "descAr": "أطول مبنى في العالم في قلب دبي، يضمّ منصات مشاهدة بإطلالات بانورامية على المدينة.",
-          "descEn": "The tallest building in the world in the heart of Dubai, with observation decks offering panoramic city views."
+          "descEn": "The tallest building in the world in the heart of Dubai, with observation decks offering panoramic views."
         },
         {
           "id": "sheikh-zayed-mosque",
@@ -89,9 +265,97 @@
           "coords": [24.4128, 54.4748],
           "categoryAr": "ديني وثقافي",
           "categoryEn": "Religious & Cultural",
-          "image": "https://picsum.photos/seed/sheikhzayed/800/500",
+          "image": "https://picsum.photos/seed/sheikh-zayed-mosque/800/500",
           "descAr": "أحد أجمل المساجد في العالم في أبوظبي، يتميّز برخامه الأبيض وثرياته الفخمة.",
           "descEn": "One of the world's most beautiful mosques in Abu Dhabi, renowned for its white marble and grand chandeliers."
+        },
+        {
+          "id": "palm-jumeirah",
+          "nameAr": "نخلة جميرا",
+          "nameEn": "Palm Jumeirah",
+          "coords": [25.1124, 55.1390],
+          "categoryAr": "معلم حديث",
+          "categoryEn": "Modern Landmark",
+          "image": "https://picsum.photos/seed/palm-jumeirah/800/500",
+          "descAr": "جزيرة اصطناعية على شكل نخلة تضمّ منتجعات فاخرة وفنادق ومطاعم عالمية في دبي.",
+          "descEn": "A palm-shaped artificial island in Dubai home to luxury resorts, hotels and world-class dining."
+        },
+        {
+          "id": "burj-al-arab",
+          "nameAr": "برج العرب",
+          "nameEn": "Burj Al Arab",
+          "coords": [25.1412, 55.1853],
+          "categoryAr": "معلم حديث",
+          "categoryEn": "Modern Landmark",
+          "image": "https://picsum.photos/seed/burj-al-arab/800/500",
+          "descAr": "فندق فاخر على شكل شراع، أيقونة دبي ومن أرقى الفنادق في العالم.",
+          "descEn": "A sail-shaped luxury hotel, an icon of Dubai and one of the most lavish hotels in the world."
+        },
+        {
+          "id": "louvre-abu-dhabi",
+          "nameAr": "متحف اللوفر أبوظبي",
+          "nameEn": "Louvre Abu Dhabi",
+          "coords": [24.5339, 54.3981],
+          "categoryAr": "ثقافي",
+          "categoryEn": "Cultural",
+          "image": "https://picsum.photos/seed/louvre-abu-dhabi/800/500",
+          "descAr": "متحف عالمي بقبّة معمارية فريدة تتسرّب منها أشعة الشمس، يجمع فنون الحضارات على جزيرة السعديات.",
+          "descEn": "A world-class museum with a unique light-filtering dome, uniting art across civilizations on Saadiyat Island."
+        },
+        {
+          "id": "dubai-mall",
+          "nameAr": "دبي مول",
+          "nameEn": "The Dubai Mall",
+          "coords": [25.1985, 55.2796],
+          "categoryAr": "تسوّق وترفيه",
+          "categoryEn": "Shopping & Entertainment",
+          "image": "https://picsum.photos/seed/dubai-mall/800/500",
+          "descAr": "من أكبر مراكز التسوّق في العالم، يضمّ أكواريوم ضخمًا ونافورة دبي الشهيرة.",
+          "descEn": "One of the world's largest malls, featuring a giant aquarium and the famous Dubai Fountain."
+        },
+        {
+          "id": "qasr-al-watan",
+          "nameAr": "قصر الوطن",
+          "nameEn": "Qasr Al Watan",
+          "coords": [24.4610, 54.3050],
+          "categoryAr": "ثقافي",
+          "categoryEn": "Cultural",
+          "image": "https://picsum.photos/seed/qasr-al-watan/800/500",
+          "descAr": "قصر رئاسي مهيب في أبوظبي مفتوح للزوار، يعكس فنون العمارة العربية والتراث.",
+          "descEn": "A majestic presidential palace in Abu Dhabi open to visitors, showcasing Arabian architecture and heritage."
+        },
+        {
+          "id": "al-jahili-fort",
+          "nameAr": "حصن الجاهلي",
+          "nameEn": "Al Jahili Fort",
+          "coords": [24.2156, 55.7560],
+          "categoryAr": "قلعة تاريخية",
+          "categoryEn": "Historic Castle",
+          "image": "https://picsum.photos/seed/al-jahili-fort/800/500",
+          "descAr": "حصن طيني تاريخي في مدينة العين، من أبرز معالم التراث الإماراتي وأكبر القلاع في البلاد.",
+          "descEn": "A historic mud-brick fort in Al Ain, a landmark of Emirati heritage and one of the country's largest forts."
+        },
+        {
+          "id": "ferrari-world",
+          "nameAr": "عالم فيراري",
+          "nameEn": "Ferrari World",
+          "coords": [24.4836, 54.6072],
+          "categoryAr": "ترفيهي",
+          "categoryEn": "Entertainment",
+          "image": "https://picsum.photos/seed/ferrari-world/800/500",
+          "descAr": "مدينة ملاهٍ داخلية في جزيرة ياس بأبوظبي، تضمّ أسرع أفعوانية في العالم.",
+          "descEn": "An indoor theme park on Yas Island, Abu Dhabi, home to the fastest roller coaster in the world."
+        },
+        {
+          "id": "jebel-jais",
+          "nameAr": "جبل جيس",
+          "nameEn": "Jebel Jais",
+          "coords": [25.9460, 56.1370],
+          "categoryAr": "طبيعة ومغامرة",
+          "categoryEn": "Nature & Adventure",
+          "image": "https://picsum.photos/seed/jebel-jais/800/500",
+          "descAr": "أعلى قمة في الإمارات برأس الخيمة، وجهة للمغامرات وأطول مسار انزلاق هوائي في العالم.",
+          "descEn": "The UAE's highest peak in Ras Al Khaimah, an adventure destination with the world's longest zipline."
         }
       ]
     }
