@@ -1,0 +1,3 @@
+passport_country,destination_country,residence,visa_required,visa_type,stay_days,processing_time,passport_validity_months,entry_type,government_fee,documents_required,official_website,notes,last_updated,source_type,source_url,source_name,confidence_level,status
+SY,TR,,,,,,,unknown,,[],,"EXAMPLE — verify from official source before VERIFIED",2026-06-23,,,,LOW,REQUIRES_MANUAL_REVIEW
+AE,GE,,false,visa_free,90,0,6,multiple,0,"[""passport""]",https://OFFICIAL-SOURCE-URL,"placeholder — set real source then VERIFIED",2026-06-23,government,https://OFFICIAL-SOURCE-URL,<official authority>,HIGH,REQUIRES_MANUAL_REVIEW
