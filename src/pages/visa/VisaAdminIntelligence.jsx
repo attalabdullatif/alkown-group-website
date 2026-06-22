@@ -11,14 +11,32 @@ import {
   outlineButtonStyle, pageStyle,
 } from "../../components/crmUi";
 
-const VISA_TYPES = ["visa_free","visa_on_arrival","evisa","eta","embassy_visa"];
+const VISA_TYPES = ["visa_free","visa_on_arrival","evisa","eta","embassy_visa",
+  "electronic_authorization","restricted","special_permission"];
 const REGIONS    = ["Middle East","Europe","Europe/Asia","Asia","Americas","Africa","Oceania"];
+
+// AR labels for the engine's extended visa types (falls back to REQUIREMENT_AR).
+const EXTRA_REQ_AR = { electronic_authorization:"تصريح إلكتروني", restricted:"مقيّد", special_permission:"تصريح خاص" };
+const reqLabel = (t) => REQUIREMENT_AR[t] || EXTRA_REQ_AR[t] || t;
+
+// Engine accuracy fields (migration 023).
+const ENTRY_TYPES   = ["unknown","single","multiple","single_or_multiple"];
+const ENTRY_AR      = { unknown:"نوع الدخول: غير معروف", single:"دخول واحد", multiple:"دخول متعدد", single_or_multiple:"واحد أو متعدد" };
+const SOURCE_TYPES  = ["","government","mfa","embassy","evisa_portal","border_control","secondary"];
+const SOURCE_AR     = { "":"— نوع المصدر —", government:"حكومي رسمي", mfa:"وزارة خارجية", embassy:"سفارة", evisa_portal:"بوابة eVisa", border_control:"جوازات/حدود", secondary:"ثانوي (مراجعة)" };
+const CONFIDENCE    = ["LOW","MEDIUM","HIGH"];
+const CONFIDENCE_AR = { LOW:"ثقة: منخفضة", MEDIUM:"ثقة: متوسطة", HIGH:"ثقة: عالية" };
+const REVIEW_STATUSES = ["REQUIRES_MANUAL_REVIEW","VERIFIED","CONFLICT"];
+const REVIEW_AR     = { REQUIRES_MANUAL_REVIEW:"الحالة: بحاجة لمراجعة", VERIFIED:"الحالة: موثّقة ✅", CONFLICT:"الحالة: تعارض" };
 
 const emptyRule = {
   nationality_code:"", destination_code:"", residence_code:"",
   visa_requirement:"embassy_visa",
   stay_days:"", processing_min:"", processing_max:"", fee_usd:"",
+  passport_validity_months:"", entry_type:"unknown",
   notes_ar:"", notes_en:"", is_popular:false,
+  official_website:"", source_type:"", source_url:"", source_name:"",
+  confidence_level:"LOW", review_status:"REQUIRES_MANUAL_REVIEW",
 };
 
 const emptyCountry = { code:"", name_en:"", name_ar:"", flag:"", region:"Middle East", is_active:true };
@@ -184,8 +202,14 @@ function VisaRulesTab({ countries }) {
       residence_code: r.residence_code || "", visa_requirement: r.visa_requirement,
       stay_days: r.stay_days ?? "", processing_min: r.processing_min ?? "",
       processing_max: r.processing_max ?? "", fee_usd: r.fee_usd ?? "",
+      passport_validity_months: r.passport_validity_months ?? "",
+      entry_type: r.entry_type || "unknown",
       notes_ar: r.notes_ar || "", notes_en: r.notes_en || "",
       is_popular: r.is_popular || false,
+      official_website: r.official_website || "",
+      source_type: r.source_type || "", source_url: r.source_url || "", source_name: r.source_name || "",
+      confidence_level: r.confidence_level || "LOW",
+      review_status: r.review_status || "REQUIRES_MANUAL_REVIEW",
     });
   }
   function reset() { setEditing(null); setForm(emptyRule); }
@@ -209,10 +233,19 @@ function VisaRulesTab({ countries }) {
         processing_min:   form.processing_min !== "" ? parseInt(form.processing_min) : null,
         processing_max:   form.processing_max !== "" ? parseInt(form.processing_max) : null,
         fee_usd:          form.fee_usd !== "" ? parseFloat(form.fee_usd) : null,
+        passport_validity_months: form.passport_validity_months !== "" ? parseInt(form.passport_validity_months) : null,
+        entry_type:       form.entry_type || "unknown",
         notes_ar:         form.notes_ar || null,
         notes_en:         form.notes_en || null,
         is_popular:       !!form.is_popular,
         is_active:        true,
+        official_website: form.official_website || null,
+        source_type:      form.source_type || null,
+        source_url:       form.source_url || null,
+        source_name:      form.source_name || null,
+        confidence_level: form.confidence_level || "LOW",
+        review_status:    form.review_status || "REQUIRES_MANUAL_REVIEW",
+        last_verified:    form.review_status === "VERIFIED" ? new Date().toISOString().slice(0,10) : undefined,
       };
 
       if (editing) {
@@ -269,7 +302,7 @@ function VisaRulesTab({ countries }) {
           </select>
           <select value={filter.req} onChange={e => setFilter(f=>({...f,req:e.target.value}))} style={{ ...inputStyle, flex:1, minWidth:120 }}>
             <option value="all">كل الأنواع</option>
-            {VISA_TYPES.map(t => <option key={t} value={t}>{REQUIREMENT_AR[t]}</option>)}
+            {VISA_TYPES.map(t => <option key={t} value={t}>{reqLabel(t)}</option>)}
           </select>
         </div>
         <div style={{ color: CRM_COLORS.textMuted, fontSize:".78rem", marginBottom:10 }}>{filtered.length} قاعدة</div>
@@ -291,7 +324,14 @@ function VisaRulesTab({ countries }) {
                   <td style={{ padding:"7px 8px", color: CRM_COLORS.textMuted, fontSize:".72rem" }}>
                     {r.residence_code ? `${codeToFlag(r.residence_code)} ${r.residence_code}` : "—"}
                   </td>
-                  <td style={{ padding:"7px 8px" }}><StatusBadge req={r.visa_requirement} /></td>
+                  <td style={{ padding:"7px 8px", whiteSpace:"nowrap" }}>
+                    <StatusBadge req={r.visa_requirement} />
+                    {r.review_status === "VERIFIED"
+                      ? <span title="موثّقة" style={{ marginInlineStart:5 }}>✅</span>
+                      : r.review_status === "CONFLICT"
+                        ? <span title="تعارض بين المصادر" style={{ marginInlineStart:5 }}>⚠️</span>
+                        : <span title="بحاجة لمراجعة" style={{ marginInlineStart:5, opacity:.7 }}>🔍</span>}
+                  </td>
                   <td style={{ padding:"7px 8px", color: CRM_COLORS.textMuted }}>{r.stay_days ? `${r.stay_days}y` : "—"}</td>
                   <td style={{ padding:"7px 8px", color: CRM_COLORS.textMuted, fontSize:".72rem" }}>
                     {r.processing_min === 0 && r.processing_max === 0 ? "فوري" : r.processing_max ? `${r.processing_min}-${r.processing_max}y` : "—"}
@@ -336,20 +376,48 @@ function VisaRulesTab({ countries }) {
             {countries.map(c => <option key={c.code} value={c.code}>{codeToFlag(c.code)} {c.name_ar}</option>)}
           </select>
           <select required value={form.visa_requirement} onChange={e => setForm(f=>({...f,visa_requirement:e.target.value}))} style={inputStyle}>
-            {VISA_TYPES.map(t => <option key={t} value={t}>{REQUIREMENT_AR[t]}</option>)}
+            {VISA_TYPES.map(t => <option key={t} value={t}>{reqLabel(t)}</option>)}
           </select>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
             <input type="number" placeholder="مدة (أيام)" value={form.stay_days} onChange={e => setForm(f=>({...f,stay_days:e.target.value}))} style={inputStyle} />
             <input type="number" placeholder="معالجة من" value={form.processing_min} onChange={e => setForm(f=>({...f,processing_min:e.target.value}))} style={inputStyle} />
             <input type="number" placeholder="معالجة حتى" value={form.processing_max} onChange={e => setForm(f=>({...f,processing_max:e.target.value}))} style={inputStyle} />
           </div>
-          <input type="number" step="0.01" placeholder="الرسوم بالدولار (0 = مجاني)" value={form.fee_usd} onChange={e => setForm(f=>({...f,fee_usd:e.target.value}))} style={inputStyle} />
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+            <input type="number" step="0.01" placeholder="الرسوم بالدولار (0 = مجاني)" value={form.fee_usd} onChange={e => setForm(f=>({...f,fee_usd:e.target.value}))} style={inputStyle} />
+            <input type="number" placeholder="صلاحية الجواز (أشهر)" value={form.passport_validity_months} onChange={e => setForm(f=>({...f,passport_validity_months:e.target.value}))} style={inputStyle} />
+          </div>
+          <select value={form.entry_type} onChange={e => setForm(f=>({...f,entry_type:e.target.value}))} style={inputStyle}>
+            {ENTRY_TYPES.map(t => <option key={t} value={t}>{ENTRY_AR[t]}</option>)}
+          </select>
           <textarea placeholder="ملاحظات عربية" value={form.notes_ar} onChange={e => setForm(f=>({...f,notes_ar:e.target.value}))} style={{ ...inputStyle, minHeight:60, resize:"vertical" }} />
           <textarea placeholder="Notes (English)" value={form.notes_en} onChange={e => setForm(f=>({...f,notes_en:e.target.value}))} style={{ ...inputStyle, minHeight:50, resize:"vertical" }} />
           <label style={{ display:"flex", alignItems:"center", gap:8, fontSize:".83rem", cursor:"pointer" }}>
             <input type="checkbox" checked={form.is_popular} onChange={e => setForm(f=>({...f,is_popular:e.target.checked}))} />
             ⭐ وجهة شائعة
           </label>
+
+          {/* ── Verification & source (engine accuracy fields) ── */}
+          <div style={{ borderTop:`1px solid ${CRM_COLORS.gold}33`, marginTop:6, paddingTop:10, display:"flex", flexDirection:"column", gap:8 }}>
+            <div style={{ color: CRM_COLORS.gold, fontSize:".76rem", fontWeight:700 }}>🔐 التحقّق والمصدر</div>
+            <input placeholder="الموقع الرسمي (official_website)" value={form.official_website} onChange={e => setForm(f=>({...f,official_website:e.target.value}))} style={inputStyle} />
+            <input placeholder="رابط المصدر الرسمي (source_url)" value={form.source_url} onChange={e => setForm(f=>({...f,source_url:e.target.value}))} style={inputStyle} />
+            <input placeholder="اسم الجهة المصدر (source_name)" value={form.source_name} onChange={e => setForm(f=>({...f,source_name:e.target.value}))} style={inputStyle} />
+            <select value={form.source_type} onChange={e => setForm(f=>({...f,source_type:e.target.value}))} style={inputStyle}>
+              {SOURCE_TYPES.map(t => <option key={t||"none"} value={t}>{SOURCE_AR[t]}</option>)}
+            </select>
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+              <select value={form.confidence_level} onChange={e => setForm(f=>({...f,confidence_level:e.target.value}))} style={inputStyle}>
+                {CONFIDENCE.map(t => <option key={t} value={t}>{CONFIDENCE_AR[t]}</option>)}
+              </select>
+              <select value={form.review_status} onChange={e => setForm(f=>({...f,review_status:e.target.value}))} style={inputStyle}>
+                {REVIEW_STATUSES.map(t => <option key={t} value={t}>{REVIEW_AR[t]}</option>)}
+              </select>
+            </div>
+            <div style={{ fontSize:".72rem", color: CRM_COLORS.danger, lineHeight:1.6 }}>
+              ⚠️ لا تضع «موثّقة» إلا بعد التحقّق من مصدر رسمي (حكومي/سفارة/بوابة eVisa) ووضع رابطه.
+            </div>
+          </div>
           <div style={{ display:"flex", gap:8 }}>
             <button type="submit" disabled={saving} style={{ ...buttonStyle, flex:1 }}>
               {saving ? "جار الحفظ…" : editing ? "حفظ" : "إضافة"}
