@@ -70,12 +70,14 @@ function mapVisaType(text) {
     const free = /free/.test(t);
     return { visa_type: "evisa", visa_required: true, fee: free ? 0 : null };
   }
-  if (/eta\b|electronic travel|travel authoriz|electronic authoriz|k-eta|esta|etias|nzeta/.test(t))
+  if (/eta\b|electronic travel|travel authoris|travel authoriz|electronic authoris|electronic authoriz|k-eta|esta|etias|nzeta/.test(t))
     return { visa_type: "eta", visa_required: true, fee: null };
   if (/visa required|visa is required/.test(t))
     return { visa_type: "visa_required", visa_required: true, fee: null };
-  // Unknown phrasing (tourist card, special permit, etc.) — leave for staff.
-  return { visa_type: null, visa_required: null, fee: null };
+  // Unknown phrasing (tourist card, special permit, etc.): the live table
+  // requires a type, so default to the conservative visa_required and let
+  // staff correct it (every row is REQUIRES_MANUAL_REVIEW anyway).
+  return { visa_type: "visa_required", visa_required: true, fee: null };
 }
 
 // Parse "Allowed stay" → integer days (best effort; null if open/unknown).
