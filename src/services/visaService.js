@@ -14,7 +14,11 @@ import { ragQuery } from "./ai/ragService";
 // from the Visa Admin page); only published rows (is_active=true) are returned.
 // Falls back to the legacy mock dataset for routes not yet in the DB.
 export async function checkVisaRequirements({ nationality, residence, destination }) {
-  // Step 1: Live database (verified + published rules)
+  // Curated route (rich bilingual documents + FAQs), if one exists.
+  const mock = lookupVisa({ nationality, residence, destination });
+
+  // Step 1: Live database for the verdict/fees/stay, but NEVER drop the curated
+  // documents + FAQs — those only live in the curated dataset, so prefer them.
   try {
     const db = await dbCheckVisa({
       nationalityCode: nationality,
@@ -22,16 +26,18 @@ export async function checkVisaRequirements({ nationality, residence, destinatio
       residenceCode: residence || null,
     });
     if (db?.found && db.visa_requirement) {
-      return { source: "supabase", data: mapDbResult(db, nationality, residence, destination) };
+      const data = mapDbResult(db, nationality, residence, destination);
+      if (mock?.documents?.length) data.documents = mock.documents;
+      if (mock?.faqs?.length) data.faqs = mock.faqs;
+      return { source: "supabase", data };
     }
   } catch (e) {
     // DB unreachable → fall through to mock so the page still works.
   }
 
-  // Step 2: Legacy mock dataset (fallback for routes not yet in the DB)
-  const localResult = lookupVisa({ nationality, residence, destination });
-  if (localResult) {
-    return { source: "mock_db", data: enrichResult(localResult, nationality, residence, destination) };
+  // Step 2: Legacy curated dataset (fallback for routes not yet in the DB)
+  if (mock) {
+    return { source: "mock_db", data: enrichResult(mock, nationality, residence, destination) };
   }
 
   return { source: "not_found", data: null };
