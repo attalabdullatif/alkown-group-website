@@ -96,8 +96,15 @@ visa-required nationalities).
 
 ```bash
 # from repo root, with REACT_APP_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY set
-node scripts/visa-engine/import-json.js scripts/visa-engine/data/<file>.json --dry-run   # validate only
-node scripts/visa-engine/import-json.js scripts/visa-engine/data/<file>.json             # upsert into vis_rules
+
+# One command — imports every dataset in the correct order
+# (generated/* → syria-batch1/2 → syria-inbound):
+node scripts/visa-engine/import-all.js --dry-run   # validate everything, no writes
+node scripts/visa-engine/import-all.js             # upsert everything
+
+# Or a single file:
+node scripts/visa-engine/import-json.js scripts/visa-engine/data/<file>.json --dry-run
+node scripts/visa-engine/import-json.js scripts/visa-engine/data/<file>.json
 ```
 
 Rows land as `REQUIRES_MANUAL_REVIEW`, so the public site is unaffected until
