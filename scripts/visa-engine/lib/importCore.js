@@ -98,6 +98,10 @@ async function runImport(rawRecords, opts = {}) {
       .maybeSingle();
 
     if (!existing) {
+      // Visibility on the public site is gated by is_active (NOT review_status).
+      // New drafts must import hidden; only VERIFIED rows are published. On
+      // update we leave is_active untouched so staff's publish state is kept.
+      row.is_active = record.review_status === "VERIFIED";
       const { error } = await sb.from("vis_rules").insert(row);
       if (error) log.failed.push({ line, key, errors: [error.message] });
       else log.created.push({ line, key, warnings });
