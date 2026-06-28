@@ -6,28 +6,61 @@
 import { lookupVisa, VISA_RULES } from "../data/visaRules";
 import { getCountryByCode, toSlug, COUNTRIES } from "../data/countries";
 import { supabase } from "../lib/supabase";
+import { checkVisa as dbCheckVisa } from "../lib/visaIntelligenceService";
 import { ragQuery } from "./ai/ragService";
 
 // ── VISA CHECKER ───────────────────────────────────────────────
+// Reads the live vis_rules database first (the single source of truth managed
+// from the Visa Admin page); only published rows (is_active=true) are returned.
+// Falls back to the legacy mock dataset for routes not yet in the DB.
 export async function checkVisaRequirements({ nationality, residence, destination }) {
-  // Step 1: Try local mock database first
-  const localResult = lookupVisa({ nationality, residence, destination });
-  if (localResult) {
-    return {
-      source: "mock_db",
-      data: enrichResult(localResult, nationality, residence, destination),
-    };
+  // Step 1: Live database (verified + published rules)
+  try {
+    const db = await dbCheckVisa({
+      nationalityCode: nationality,
+      destinationCode: destination,
+      residenceCode: residence || null,
+    });
+    if (db?.found && db.visa_requirement) {
+      return { source: "supabase", data: mapDbResult(db, nationality, residence, destination) };
+    }
+  } catch (e) {
+    // DB unreachable → fall through to mock so the page still works.
   }
 
-  // Step 2: Future → try Supabase database
-  // const dbResult = await fetchFromSupabase({ nationality, residence, destination });
-  // if (dbResult) return { source: "supabase", data: dbResult };
-
-  // Step 3: Future → AI fallback
-  // const aiResult = await queryAIAssistant({ nationality, residence, destination });
-  // if (aiResult) return { source: "ai", data: aiResult };
+  // Step 2: Legacy mock dataset (fallback for routes not yet in the DB)
+  const localResult = lookupVisa({ nationality, residence, destination });
+  if (localResult) {
+    return { source: "mock_db", data: enrichResult(localResult, nationality, residence, destination) };
+  }
 
   return { source: "not_found", data: null };
+}
+
+// Map a DB visa result → the shape VisaResultPage/VisaCenterPage expect.
+function mapDbResult(db, nationality, residence, destination) {
+  const fromCountry = getCountryByCode(nationality);
+  const toCountry = getCountryByCode(destination);
+  const resCountry = residence ? getCountryByCode(residence) : null;
+  const docs = (db.documents || []).map((d) => {
+    const label = d?.label_ar || d?.type || (typeof d === "string" ? d : "");
+    return { ar: label, en: d?.notes_en || d?.type || label };
+  });
+  return {
+    type: db.visa_requirement,
+    stay: db.stay_text || "—",
+    processing: db.processing_text || "—",
+    fee: { amount: db.fee_usd != null ? db.fee_usd : null, currency: "USD" },
+    notes: { ar: db.notes_ar || "", en: db.notes_en || db.notes_ar || "" },
+    documents: docs,
+    faqs: [],
+    matchType: db.residence_based && resCountry ? "specific" : "general",
+    updatedAt: db.last_verified || "—",
+    fromCountry,
+    toCountry,
+    resCountry,
+    seoSlug: generateRouteSlug(fromCountry, toCountry),
+  };
 }
 
 function enrichResult(rule, nationality, residence, destination) {

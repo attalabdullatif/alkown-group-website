@@ -166,7 +166,7 @@ export default function VisaResultPage({ params, lang, ff, setPage, setVisaParam
             {[
               { icon: "⏱", labelEn: "Processing", labelAr: "مدة المعالجة", val: data.processing },
               { icon: "📅", labelEn: "Max Stay", labelAr: "مدة الإقامة", val: data.stay },
-              { icon: "💰", labelEn: "Fee", labelAr: "الرسوم", val: data.fee.amount === 0 ? (ar ? "مجاناً" : "Free") : `${data.fee.amount} ${data.fee.currency}` },
+              { icon: "💰", labelEn: "Fee", labelAr: "الرسوم", val: data.fee.amount == null ? "—" : data.fee.amount === 0 ? (ar ? "مجاناً" : "Free") : `${data.fee.amount} ${data.fee.currency}` },
               { icon: "🔄", labelEn: "Last Updated", labelAr: "آخر تحديث", val: data.updatedAt },
             ].map((stat, i) => (
               <div key={i} style={{ background: "rgba(255,255,255,.04)", padding: "18px 20px", textAlign: "center" }}>
@@ -219,7 +219,7 @@ export default function VisaResultPage({ params, lang, ff, setPage, setVisaParam
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))", gap: 14, marginBottom: 28 }}>
                   <InfoCard icon="⏱" label={ar ? "مدة المعالجة" : "Processing Time"} value={data.processing} />
                   <InfoCard icon="📅" label={ar ? "مدة الإقامة" : "Stay Duration"} value={data.stay} />
-                  <InfoCard icon="💰" label={ar ? "الرسوم" : "Visa Fee"} value={data.fee.amount === 0 ? (ar ? "مجاناً" : "Free") : `${data.fee.amount} ${data.fee.currency}`} color="#27ae60" />
+                  <InfoCard icon="💰" label={ar ? "الرسوم" : "Visa Fee"} value={data.fee.amount == null ? "—" : data.fee.amount === 0 ? (ar ? "مجاناً" : "Free") : `${data.fee.amount} ${data.fee.currency}`} color="#27ae60" />
                 </div>
 
                 {data.matchType === "specific" && (
