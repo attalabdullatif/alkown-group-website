@@ -4,6 +4,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { COUNTRIES } from "../../data/countries";
 import { getPopularRoutes } from "../../services/visaService";
 import { VISA_TYPE_COLORS, VISA_TYPE_LABELS } from "../../data/visaRules";
@@ -103,13 +104,26 @@ function CountrySelect({ value, onChange, placeholder, placeholderAr, lang, ff }
 }
 
 // ── MAIN PAGE ──────────────────────────────────────────────────
-export default function VisaCenterPage({ lang, ff, setPage, setVisaParams }) {
+export default function VisaCenterPage({ lang = "ar", ff = "'Dubai','Cairo','Noto Naskh Arabic',sans-serif", setPage, setVisaParams }) {
   const [nationality, setNationality] = useState("");
   const [residence, setResidence] = useState("");
   const [destination, setDestination] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
   const ar = lang === "ar";
   const popularRoutes = getPopularRoutes();
+
+  // In the SPA the parent passes setVisaParams/setPage; when this page is opened
+  // directly via the /visa-center route those are absent, so fall back to the
+  // standalone checker route instead of crashing.
+  const goToResult = (params) => {
+    if (setVisaParams && setPage) {
+      setVisaParams(params);
+      setPage("visa-result");
+    } else {
+      navigate("/visa-checker");
+    }
+  };
 
   const handleCheck = () => {
     if (!nationality || !destination) {
@@ -117,13 +131,11 @@ export default function VisaCenterPage({ lang, ff, setPage, setVisaParams }) {
       return;
     }
     setError("");
-    setVisaParams({ nationality, residence, destination });
-    setPage("visa-result");
+    goToResult({ nationality, residence, destination });
   };
 
   const handlePopularRoute = (route) => {
-    setVisaParams({ nationality: route.from, residence: route.res?.code || "", destination: route.to });
-    setPage("visa-result");
+    goToResult({ nationality: route.from, residence: route.res?.code || "", destination: route.to });
   };
 
   return (
@@ -253,7 +265,7 @@ export default function VisaCenterPage({ lang, ff, setPage, setVisaParams }) {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 20 }}>
             {popularRoutes.map((route, i) => {
               const typeColor = VISA_TYPE_COLORS[route.rule.type] || C.gold;
-              const typeLabel = VISA_TYPE_LABELS[lang][route.rule.type];
+              const typeLabel = VISA_TYPE_LABELS[lang]?.[route.rule.type] || route.rule.type;
               return (
                 <button
                   key={i}
@@ -340,7 +352,7 @@ export default function VisaCenterPage({ lang, ff, setPage, setVisaParams }) {
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
             <button
-              onClick={() => setPage("visa-apply")}
+              onClick={() => setPage ? setPage("visa-apply") : navigate("/")}
               style={{
                 padding: "14px 36px", background: C.dark, color: C.gold,
                 border: "none", borderRadius: 6, cursor: "pointer",
@@ -353,7 +365,7 @@ export default function VisaCenterPage({ lang, ff, setPage, setVisaParams }) {
               {ar ? "قدّم طلبك الآن" : "Start Your Application"}
             </button>
             <button
-              onClick={() => setPage("visa-track")}
+              onClick={() => setPage ? setPage("visa-track") : navigate("/track-request")}
               style={{
                 padding: "14px 28px", background: "transparent", color: C.dark,
                 border: `2px solid ${C.dark}`, borderRadius: 6, cursor: "pointer",
