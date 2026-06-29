@@ -114,6 +114,41 @@ export default function VisaResultPage({ params, lang, ff, setPage }) {
   const langs = (meta?.languages || []).join(ar ? "، " : ", ");
   const neighbors = (meta?.neighbors || []).map(getMeta).filter(Boolean);
 
+  // Electronic vs embassy route → tailors steps + tips.
+  const isElectronic = ["evisa", "eta", "electronic_authorization", "visa_on_arrival"].includes(data.type);
+
+  // Tips derived from the actual rule (never fabricated).
+  const tips = [];
+  if (data.passportValidityMonths) tips.push({ ar: `تأكد أن جواز سفرك صالح ${data.passportValidityMonths} أشهر على الأقل من تاريخ الدخول.`, en: `Ensure your passport is valid for at least ${data.passportValidityMonths} months from the date of entry.` });
+  if (data.processing && data.processing !== "—") tips.push({ ar: `قدّم قبل وقت كافٍ — المعالجة تستغرق ${data.processing}.`, en: `Apply early — processing takes ${data.processing}.` });
+  if (isElectronic && data.officialWebsite) tips.push({ ar: "قدّم فقط عبر البوابة الرسمية، وتجنّب المواقع الوسيطة التي تفرض رسوماً إضافية.", en: "Apply only through the official portal — avoid third-party sites that charge extra fees." });
+  if (data.type === "embassy_visa" || data.type === "visa_required") tips.push({ ar: "احجز موعد السفارة أو مركز التأشيرات مبكراً، فالمواعيد قد تكون محدودة.", en: "Book your embassy or visa-centre appointment early — slots can be limited." });
+  tips.push({ ar: "قد تُطلب مستندات إضافية حسب حالتك؛ راجع مختصينا قبل التقديم.", en: "Additional documents may be requested depending on your case; consult our specialists before applying." });
+
+  // Application steps tailored to the route type.
+  const steps = isElectronic
+    ? [
+        { icon: "🛂", ar: "تحقّق من صلاحية جواز السفر (6 أشهر فأكثر عادةً).", en: "Check passport validity (usually 6+ months)." },
+        { icon: "🖼", ar: "جهّز صورة شخصية ونسخة واضحة من صفحة الجواز.", en: "Prepare a passport photo and a clear scan of your passport page." },
+        { icon: "💳", ar: "املأ الطلب وادفع الرسوم عبر البوابة الرسمية.", en: "Complete the application and pay the fee on the official portal." },
+        { icon: "📧", ar: "استلم التأشيرة إلكترونياً واطبعها قبل السفر.", en: "Receive the visa by email and print it before travel." },
+      ]
+    : [
+        { icon: "📋", ar: "جهّز جميع المستندات المطلوبة المذكورة أعلاه.", en: "Prepare all the required documents listed above." },
+        { icon: "📝", ar: "املأ استمارة طلب التأشيرة بدقة.", en: "Complete the visa application form accurately." },
+        { icon: "🏛", ar: "احجز موعداً في السفارة أو مركز VFS.", en: "Book an appointment at the embassy or VFS centre." },
+        { icon: "💳", ar: "ادفع الرسوم وقدّم البصمة إن لزم.", en: "Pay the fee and give biometrics if required." },
+        { icon: "⏳", ar: "انتظر المعالجة وتتبّع حالة طلبك.", en: "Wait for processing and track your application status." },
+        { icon: "✈️", ar: "استلم التأشيرة واستعد للسفر.", en: "Receive your visa and prepare to travel." },
+      ];
+
+  const photoSpecs = [
+    { icon: "📐", ar: "المقاس", arV: "35 × 45 مم", en: "Size", enV: "35 × 45 mm" },
+    { icon: "🎨", ar: "الخلفية", arV: "بيضاء/فاتحة", en: "Background", enV: "White / light" },
+    { icon: "🖼", ar: "الصيغة", arV: "JPEG، حديثة (آخر 6 أشهر)", en: "Format", enV: "JPEG, recent (last 6 months)" },
+    { icon: "🙂", ar: "الوجه", arV: "70–80% من الصورة، تعبير محايد", en: "Face", enV: "70–80% of frame, neutral expression" },
+  ];
+
   return (
     <div style={{ fontFamily: ff, direction: ar ? "rtl" : "ltr", background: C.warmWhite, minHeight: "100vh" }}>
 
@@ -197,6 +232,20 @@ export default function VisaResultPage({ params, lang, ff, setPage }) {
               </Card>
             )}
 
+            {/* Application steps */}
+            <Card title={ar ? "🧭 خطوات التقديم" : "🧭 Application Steps"} ff={ff}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {steps.map((s, i) => (
+                  <div key={i} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+                    <div style={{ width: 38, height: 38, borderRadius: "50%", background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1rem", flexShrink: 0, color: C.dark, fontWeight: 700 }}>{i + 1}</div>
+                    <div style={{ paddingTop: 7, color: C.g600, fontSize: ".9rem", lineHeight: 1.6 }}>
+                      <span style={{ marginInlineEnd: 6 }}>{s.icon}</span>{ar ? s.ar : s.en}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
             {/* Destination country info */}
             {meta && (
               <Card title={ar ? `🌍 معلومات عن ${toC?.nameAr}` : `🌍 About ${toC?.name}`} ff={ff}>
@@ -219,6 +268,32 @@ export default function VisaResultPage({ params, lang, ff, setPage }) {
                     <span key={n.code} style={{ display: "inline-flex", alignItems: "center", gap: 7, background: C.cream, border: `1px solid ${C.g100}`, borderRadius: 30, padding: "7px 14px", fontSize: ".85rem", color: C.g600 }}>
                       <span style={{ fontSize: "1.1rem" }}>{n.flag}</span>{ar ? n.name_ar || n.name_en : n.name_en}
                     </span>
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {/* Photo specifications (common guidance) */}
+            <Card title={ar ? "📸 مواصفات الصورة" : "📸 Photo Specifications"} ff={ff}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))", gap: "2px 28px" }}>
+                {photoSpecs.map((p, i) => (
+                  <DetailRow key={i} icon={p.icon} label={ar ? p.ar : p.en} value={ar ? p.arV : p.enV} />
+                ))}
+              </div>
+              <p style={{ color: C.g400, fontSize: ".78rem", lineHeight: 1.7, marginTop: 12 }}>
+                {ar ? "⚠️ مواصفات إرشادية شائعة — قد تختلف حسب الدولة، تحقّق من البوابة الرسمية." : "⚠️ Common guidance — exact specs vary by country; verify on the official portal."}
+              </p>
+            </Card>
+
+            {/* Tips & warnings */}
+            {tips.length > 0 && (
+              <Card title={ar ? "💡 نصائح وتحذيرات" : "💡 Tips & Warnings"} ff={ff}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {tips.map((t, i) => (
+                    <div key={i} style={{ display: "flex", gap: 11, alignItems: "flex-start" }}>
+                      <span style={{ color: C.gold, flexShrink: 0 }}>⚡</span>
+                      <span style={{ color: C.g600, fontSize: ".88rem", lineHeight: 1.6 }}>{ar ? t.ar : t.en}</span>
+                    </div>
                   ))}
                 </div>
               </Card>
