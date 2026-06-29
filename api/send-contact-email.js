@@ -26,8 +26,11 @@ module.exports = async (req, res) => {
   const WA_TOKEN    = process.env.TWILIO_AUTH_TOKEN;
   // Owner/admin WhatsApp number for new-request alerts (defaults to the business line).
   const OWNER_WA    = process.env.OWNER_WHATSAPP || process.env.CONTACT_NOTIFY_WHATSAPP || "+971544909522";
+  // Free owner-alert fallback (CallMeBot) — used when Twilio isn't configured.
+  const CB_PHONE    = process.env.CALLMEBOT_PHONE;
+  const CB_KEY      = process.env.CALLMEBOT_APIKEY;
 
-  if (!RESEND_KEY && !WA_SID) {
+  if (!RESEND_KEY && !WA_SID && !CB_KEY) {
     console.log("[Notifications] No email or WhatsApp provider configured — skipped");
     return res.status(200).json({ skipped: true });
   }
@@ -37,7 +40,7 @@ module.exports = async (req, res) => {
     const payload = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
     const { type = "new_request" } = payload;
 
-    const ctx = { RESEND_KEY, FROM_EMAIL, ADMIN_EMAIL, WA_FROM, WA_SID, WA_TOKEN, OWNER_WA };
+    const ctx = { RESEND_KEY, FROM_EMAIL, ADMIN_EMAIL, WA_FROM, WA_SID, WA_TOKEN, OWNER_WA, CB_PHONE, CB_KEY };
 
     switch (type) {
       case "status_update":    await handleStatusUpdate(ctx, payload);    break;
@@ -75,21 +78,16 @@ async function handleNewRequest(ctx, payload) {
     html: adminNewRequestHtml({ requestNumber, clientName, clientEmail, clientPhone, clientWA, serviceName, servicePrice, notes }),
   });
 
-  // Owner/admin WhatsApp alert for every new request.
-  if (ctx.WA_SID && ctx.OWNER_WA) {
-    const ownerNum = ctx.OWNER_WA.replace(/\D/g, "").replace(/^00/, "+").replace(/^(?!\+)/, "+");
-    await sendWhatsApp(ctx, {
-      to: `whatsapp:${ownerNum}`,
-      body: `📋 *طلب جديد* ${requestNumber}\n`
-        + `العميل: ${clientName}\n`
-        + (clientPhone ? `الهاتف: ${clientPhone}\n` : "")
-        + (clientEmail ? `البريد: ${clientEmail}\n` : "")
-        + `الخدمة: ${serviceName}\n`
-        + (servicePrice ? `السعر: $${servicePrice}\n` : "")
-        + (notes ? `\nملاحظات: ${notes}\n` : "")
-        + `\nلوحة التحكم: https://alkownglobal.com/dashboard`,
-    });
-  }
+  // Owner/admin WhatsApp alert for every new request (Twilio → CallMeBot fallback).
+  await notifyOwnerWhatsApp(ctx,
+    `📋 *طلب جديد* ${requestNumber}\n`
+    + `العميل: ${clientName}\n`
+    + (clientPhone ? `الهاتف: ${clientPhone}\n` : "")
+    + (clientEmail ? `البريد: ${clientEmail}\n` : "")
+    + `الخدمة: ${serviceName}\n`
+    + (servicePrice ? `السعر: $${servicePrice}\n` : "")
+    + (notes ? `\nملاحظات: ${notes}\n` : "")
+    + `\nلوحة التحكم: https://alkownglobal.com/dashboard`);
 
   if (clientEmail) {
     await sendEmail(ctx, {
@@ -275,6 +273,30 @@ async function sendEmail(ctx, { to, subject, html }) {
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(`Resend: ${JSON.stringify(err)}`);
+  }
+}
+
+// Send an alert to the OWNER: prefer Twilio (if configured), else free CallMeBot.
+async function notifyOwnerWhatsApp(ctx, body) {
+  if (ctx.WA_SID && ctx.WA_TOKEN && ctx.WA_FROM && ctx.OWNER_WA) {
+    const ownerNum = ctx.OWNER_WA.replace(/\D/g, "").replace(/^00/, "+").replace(/^(?!\+)/, "+");
+    await sendWhatsApp(ctx, { to: `whatsapp:${ownerNum}`, body });
+    return;
+  }
+  if (ctx.CB_PHONE && ctx.CB_KEY) {
+    await sendCallMeBot(ctx, body);
+  }
+}
+
+// Free WhatsApp alert to a single pre-registered number (owner) via CallMeBot.
+async function sendCallMeBot(ctx, body) {
+  try {
+    const phone = ctx.CB_PHONE.replace(/\D/g, "");
+    const url = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(phone)}`
+      + `&text=${encodeURIComponent(body)}&apikey=${encodeURIComponent(ctx.CB_KEY)}`;
+    await fetch(url);
+  } catch (e) {
+    console.warn("[CallMeBot] Error:", e.message);
   }
 }
 
