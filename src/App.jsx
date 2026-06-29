@@ -32,8 +32,6 @@ const VisaPipeline         = lazy(() => import("./pages/pipeline/VisaPipeline"))
 const TaskDashboard        = lazy(() => import("./pages/tasks/TaskDashboard"));
 const DocumentCenter       = lazy(() => import("./pages/documents/DocumentCenter"));
 const NotificationCenter   = lazy(() => import("./pages/notifications/NotificationCenter"));
-const ManagementDashboard  = lazy(() => import("./pages/dashboards/ManagementDashboard"));
-const SalesDashboard       = lazy(() => import("./pages/dashboards/SalesDashboard"));
 
 // ── AI Knowledge Engine — lazy chunks ─────────────────────────
 const AICommandCenter = lazy(() => import("./pages/ai/AICommandCenter"));
@@ -63,8 +61,6 @@ const NAV_LINKS = [
   { to: "/documents",    label: "📁 الوثائق",             roles: ["admin","manager","staff"] },
   { to: "/notifications",label: "🔔 الإشعارات",           roles: ["admin","manager"] },
   { to: "/accounting",   label: "💼 الفواتير والمحاسبة",  roles: ["admin","manager"] },
-  { to: "/dash/management", label: "📊 الإدارة",          roles: ["admin"] },
-  { to: "/dash/sales",      label: "📈 المبيعات",         roles: ["admin","manager"] },
   { to: "/visa-admin",       label: "🛂 إدارة التأشيرات",   roles: ["admin","manager"] },
   { to: "/ai",             label: "🤖 الذكاء الاصطناعي",  roles: ["admin","manager"] },
   { to: "/track-request",label: "🔍 تتبع الطلب",        roles: null },
@@ -351,19 +347,6 @@ export default function App() {
             <PageLayout><NotificationCenter /></PageLayout>
           </ProtectedRoute>
         } />
-
-        <Route path="/dash/management" element={
-          <ProtectedRoute allowed={["admin"]}>
-            <PageLayout><ManagementDashboard /></PageLayout>
-          </ProtectedRoute>
-        } />
-
-        <Route path="/dash/sales" element={
-          <ProtectedRoute allowed={["admin", "manager"]}>
-            <PageLayout><SalesDashboard /></PageLayout>
-          </ProtectedRoute>
-        } />
-
 
         <Route path="/invoices" element={
           <ProtectedRoute allowed={["admin", "manager"]}>

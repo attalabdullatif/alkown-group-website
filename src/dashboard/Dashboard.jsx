@@ -98,6 +98,13 @@ export default function Dashboard() {
 
   const recentRequests = useMemo(() => requests.slice(0, 10), [requests]);
 
+  // Most-requested services (merged in from the old Sales dashboard).
+  const topServices = useMemo(() => {
+    const m = {};
+    requests.forEach(r => { const n = r.services?.name || "غير محدد"; m[n] = (m[n] || 0) + 1; });
+    return Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  }, [requests]);
+
   const greeting = () => {
     const h = new Date().getHours();
     if (h < 12) return "صباح الخير";
@@ -225,6 +232,29 @@ export default function Dashboard() {
               )}
             </section>
           </div>
+
+          {/* Top Services */}
+          {topServices.length > 0 && (
+            <section style={{ ...cardStyle, padding: 22, marginBottom: 24 }}>
+              <h2 style={{ marginTop: 0, fontSize: 17 }}>أكثر الخدمات طلباً</h2>
+              <div style={{ display: "grid", gap: 12 }}>
+                {topServices.map(([name, count]) => {
+                  const max = Math.max(...topServices.map(([, c]) => c), 1);
+                  return (
+                    <div key={name}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5, fontSize: 14 }}>
+                        <span>{name}</span>
+                        <strong style={{ color: CRM_COLORS.goldDark }}>{count}</strong>
+                      </div>
+                      <div style={{ height: 8, background: CRM_COLORS.beige, borderRadius: 999, overflow: "hidden" }}>
+                        <div style={{ width: `${(count / max) * 100}%`, height: "100%", background: `linear-gradient(90deg, ${CRM_COLORS.gold}, ${CRM_COLORS.goldDark})`, borderRadius: 999, transition: "width .4s" }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
           {/* AI Command Center Strip */}
           <section style={{ ...cardStyle, padding: 20, marginBottom: 24, background: "linear-gradient(135deg,#1a1510,#2a2018)", border: "1px solid rgba(201,168,76,.2)" }}>
