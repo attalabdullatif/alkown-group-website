@@ -24,9 +24,11 @@ module.exports = async (req, res) => {
   const WA_FROM     = process.env.TWILIO_WHATSAPP_FROM;
   const WA_SID      = process.env.TWILIO_ACCOUNT_SID;
   const WA_TOKEN    = process.env.TWILIO_AUTH_TOKEN;
+  // Owner/admin WhatsApp number for new-request alerts (defaults to the business line).
+  const OWNER_WA    = process.env.OWNER_WHATSAPP || process.env.CONTACT_NOTIFY_WHATSAPP || "+971544909522";
 
-  if (!RESEND_KEY) {
-    console.log("[Notifications] RESEND_API_KEY not set — skipped");
+  if (!RESEND_KEY && !WA_SID) {
+    console.log("[Notifications] No email or WhatsApp provider configured — skipped");
     return res.status(200).json({ skipped: true });
   }
 
@@ -35,7 +37,7 @@ module.exports = async (req, res) => {
     const payload = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
     const { type = "new_request" } = payload;
 
-    const ctx = { RESEND_KEY, FROM_EMAIL, ADMIN_EMAIL, WA_FROM, WA_SID, WA_TOKEN };
+    const ctx = { RESEND_KEY, FROM_EMAIL, ADMIN_EMAIL, WA_FROM, WA_SID, WA_TOKEN, OWNER_WA };
 
     switch (type) {
       case "status_update":    await handleStatusUpdate(ctx, payload);    break;
@@ -72,6 +74,22 @@ async function handleNewRequest(ctx, payload) {
     subject: `📋 طلب جديد ${requestNumber} — ${clientName}`,
     html: adminNewRequestHtml({ requestNumber, clientName, clientEmail, clientPhone, clientWA, serviceName, servicePrice, notes }),
   });
+
+  // Owner/admin WhatsApp alert for every new request.
+  if (ctx.WA_SID && ctx.OWNER_WA) {
+    const ownerNum = ctx.OWNER_WA.replace(/\D/g, "").replace(/^00/, "+").replace(/^(?!\+)/, "+");
+    await sendWhatsApp(ctx, {
+      to: `whatsapp:${ownerNum}`,
+      body: `📋 *طلب جديد* ${requestNumber}\n`
+        + `العميل: ${clientName}\n`
+        + (clientPhone ? `الهاتف: ${clientPhone}\n` : "")
+        + (clientEmail ? `البريد: ${clientEmail}\n` : "")
+        + `الخدمة: ${serviceName}\n`
+        + (servicePrice ? `السعر: $${servicePrice}\n` : "")
+        + (notes ? `\nملاحظات: ${notes}\n` : "")
+        + `\nلوحة التحكم: https://alkownglobal.com/dashboard`,
+    });
+  }
 
   if (clientEmail) {
     await sendEmail(ctx, {
@@ -248,6 +266,7 @@ async function handleDocumentRequest(ctx, payload) {
 // ══════════════════════════════════════════════════════════════
 
 async function sendEmail(ctx, { to, subject, html }) {
+  if (!ctx.RESEND_KEY) return; // email provider not configured — skip (WhatsApp still fires)
   const res = await fetch("https://api.resend.com/emails", {
     method:  "POST",
     headers: { Authorization: `Bearer ${ctx.RESEND_KEY}`, "Content-Type": "application/json" },
