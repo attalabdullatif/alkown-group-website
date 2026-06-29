@@ -1255,7 +1255,7 @@ export default function AlkownGroup() {
     document.body.style.background = dark ? "#0d0b08" : "";
     document.body.style.margin = "0";
   }, [dark]);
-  const { get: cGet, getSection } = useContent();
+  const { get: cGet, getSection, loading: contentLoading } = useContent();
   const g = (sec, key) => cGet(sec, key, lang);
 
   // ── ألوان وخطوط ديناميكية من قاعدة البيانات ──────────────────
@@ -1268,6 +1268,14 @@ export default function AlkownGroup() {
   const dynFontAr    = cGet("typography","font_arabic","ar") || "Dubai";
   const dynFontEn    = cGet("typography","font_english","ar") || "Dubai";
   const dynFf        = `'Dubai','${dynFontAr}','Cairo','Noto Naskh Arabic',sans-serif`;
+  // Only fetch a Google font for genuinely custom families — Dubai is a local
+  // @font-face and Cairo/Noto are already loaded in index.html. Importing them
+  // here fired a broken request (family=Dubai) and caused a font flash.
+  const LOCAL_FONTS  = new Set(["Dubai", "Cairo", "Noto Naskh Arabic", "Georgia", ""]);
+  const customFonts  = [...new Set([dynFontAr, dynFontEn])].filter(f => f && !LOCAL_FONTS.has(f));
+  const fontImportUrl = customFonts.length
+    ? `https://fonts.googleapis.com/css2?${customFonts.map(f => `family=${encodeURIComponent(f).replace(/%20/g, "+")}`).join("&")}&display=swap`
+    : null;
   const dynSizeHero  = cGet("typography","size_hero","ar")    || "clamp(2.8rem,6vw,5.5rem)";
   const dynSizeSec   = cGet("typography","size_section","ar") || "clamp(1.8rem,4vw,3rem)";
 
@@ -1516,10 +1524,16 @@ export default function AlkownGroup() {
     { k: "about",            l: t.nav.about },
   ];
 
+  // Hold the first paint until editable content has loaded, so visitors never
+  // see the default text/colors flash and then swap to the database values.
+  if (contentLoading) {
+    return <div style={{ minHeight: "100vh", background: dark ? "#0d0b08" : C.warmWhite }} />;
+  }
+
   return (
     <div style={{ fontFamily: ff, direction: t.dir, background: dark ? "#0d0b08" : C.warmWhite, minHeight: "100vh", overflowX: "hidden", color: C.g800 }}>
-      {/* Dynamic Google Fonts import */}
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=${encodeURIComponent(dynFontAr).replace(/%20/g,"+")}:wght@400;600;700;800;900&family=${encodeURIComponent(dynFontEn).replace(/%20/g,"+")}&display=swap');`}</style>
+      {/* Dynamic Google Fonts import — only for custom (non-local) families */}
+      {fontImportUrl && <style>{`@import url('${fontImportUrl}');`}</style>}
       <style>{dynamicCSS}</style>
       <style>{`:root{
         --gold:${DC.gold};--goldL:${DC.goldLight};--goldD:${DC.goldDark};
