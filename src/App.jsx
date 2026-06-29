@@ -34,7 +34,6 @@ const DocumentCenter       = lazy(() => import("./pages/documents/DocumentCenter
 const NotificationCenter   = lazy(() => import("./pages/notifications/NotificationCenter"));
 const ManagementDashboard  = lazy(() => import("./pages/dashboards/ManagementDashboard"));
 const SalesDashboard       = lazy(() => import("./pages/dashboards/SalesDashboard"));
-const FinanceDashboard     = lazy(() => import("./pages/dashboards/FinanceDashboard"));
 
 // ── AI Knowledge Engine — lazy chunks ─────────────────────────
 const AICommandCenter = lazy(() => import("./pages/ai/AICommandCenter"));
@@ -66,7 +65,6 @@ const NAV_LINKS = [
   { to: "/accounting",   label: "💼 الفواتير والمحاسبة",  roles: ["admin","manager"] },
   { to: "/dash/management", label: "📊 الإدارة",          roles: ["admin"] },
   { to: "/dash/sales",      label: "📈 المبيعات",         roles: ["admin","manager"] },
-  { to: "/dash/finance",    label: "💹 المالية",          roles: ["admin","manager"] },
   { to: "/visa-admin",       label: "🛂 إدارة التأشيرات",   roles: ["admin","manager"] },
   { to: "/ai",             label: "🤖 الذكاء الاصطناعي",  roles: ["admin","manager"] },
   { to: "/track-request",label: "🔍 تتبع الطلب",        roles: null },
@@ -366,11 +364,6 @@ export default function App() {
           </ProtectedRoute>
         } />
 
-        <Route path="/dash/finance" element={
-          <ProtectedRoute allowed={["admin", "manager"]}>
-            <PageLayout><FinanceDashboard /></PageLayout>
-          </ProtectedRoute>
-        } />
 
         <Route path="/invoices" element={
           <ProtectedRoute allowed={["admin", "manager"]}>
