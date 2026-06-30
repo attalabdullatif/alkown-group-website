@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { C } from "../utils/theme";
 import { supabase } from "../lib/supabase";
-import { createRequestForClient, findOrCreateClient } from "../lib/crm";
 import PageHero from "./PageHero";
 
 export default function BookingPage({ t, lang, ff }) {
@@ -63,8 +62,6 @@ export default function BookingPage({ t, lang, ff }) {
   async function handleSubmit() {
     setSubmitting(true);
     try {
-      const clientData = await findOrCreateClient({ full_name: form.name, phone: form.phone, email: form.email });
-
       const notes = [
         ar ? "المصدر: نموذج الحجز على الموقع" : "Source: Website Booking Form",
         `${ar ? "الخدمة" : "Service"}: ${selectedService?.name || ""}`,
@@ -74,47 +71,56 @@ export default function BookingPage({ t, lang, ff }) {
         form.msg ? `\n${form.msg}` : ""
       ].filter(Boolean).join("\n");
 
-      const requestData = await createRequestForClient({
-        clientId: clientData.id,
-        serviceId: selectedService?.id || null,
-        status: "New",
-        notes
-      });
-
-      // رفع الملفات
-      if (uploadedFiles.length) {
-        setUploading(true);
-        for (const { file, type } of uploadedFiles) {
-          const safeName = file.name.replace(/[^\w.-]+/g, "-");
-          const path = `${requestData.id}/${Date.now()}-${safeName}`;
-          const { error: upErr } = await supabase.storage.from("request-documents").upload(path, file);
-          if (!upErr) {
-            await supabase.from("request_files").insert([{
-              request_id: requestData.id,
-              file_type: type,
-              file_name: file.name,
-              storage_path: path
-            }]);
-          }
-        }
-        setUploading(false);
-      }
-
-      // إرسال الإيميلات
-      await fetch("/api/send-contact-email", {
+      // Create the client + request server-side (RLS blocks anon writes).
+      const resp = await fetch("/api/submit-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          type: "new_request",
-          requestNumber: requestData.request_number,
-          client: clientData,
-          form: { ...form, service: selectedService?.name },
-          service: { name: selectedService?.name, price: selectedService?.price || selectedService?.price_min }
-        })
+          name: form.name, phone: form.phone, email: form.email,
+          serviceId: selectedService?.id || null, notes,
+        }),
       });
+      if (!resp.ok) {
+        const e = await resp.json().catch(() => ({}));
+        throw new Error(e.error || (ar ? "تعذّر إرسال الطلب" : "Could not submit request"));
+      }
+      const { requestId, requestNumber, client: clientData } = await resp.json();
+
+      // رفع الملفات (اختياري — أي فشل لا يُسقط الطلب)
+      if (uploadedFiles.length) {
+        setUploading(true);
+        try {
+          for (const { file, type } of uploadedFiles) {
+            const safeName = file.name.replace(/[^\w.-]+/g, "-");
+            const path = `${requestId}/${Date.now()}-${safeName}`;
+            const { error: upErr } = await supabase.storage.from("request-documents").upload(path, file);
+            if (!upErr) {
+              await supabase.from("request_files").insert([{
+                request_id: requestId, file_type: type, file_name: file.name, storage_path: path,
+              }]);
+            }
+          }
+        } catch (e) { /* uploads are best-effort */ }
+        setUploading(false);
+      }
+
+      // إرسال الإشعارات (إيميل + واتساب) — أي فشل لا يُسقط الطلب
+      try {
+        await fetch("/api/send-contact-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "new_request",
+            requestNumber,
+            client: clientData,
+            form: { ...form, service: selectedService?.name },
+            service: { name: selectedService?.name, price: selectedService?.price || selectedService?.price_min }
+          })
+        });
+      } catch (e) { /* notification is best-effort */ }
 
       setSubmitted({
-        requestNumber: requestData.request_number,
+        requestNumber,
         serviceName: selectedService?.name,
         servicePrice: priceLabel(selectedService),
         clientName: form.name,
