@@ -265,14 +265,19 @@ async function handleDocumentRequest(ctx, payload) {
 
 async function sendEmail(ctx, { to, subject, html }) {
   if (!ctx.RESEND_KEY) return; // email provider not configured — skip (WhatsApp still fires)
-  const res = await fetch("https://api.resend.com/emails", {
-    method:  "POST",
-    headers: { Authorization: `Bearer ${ctx.RESEND_KEY}`, "Content-Type": "application/json" },
-    body:    JSON.stringify({ from: ctx.FROM_EMAIL, to, subject, html }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(`Resend: ${JSON.stringify(err)}`);
+  // Best-effort: an email failure must never block the WhatsApp notification.
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method:  "POST",
+      headers: { Authorization: `Bearer ${ctx.RESEND_KEY}`, "Content-Type": "application/json" },
+      body:    JSON.stringify({ from: ctx.FROM_EMAIL, to, subject, html }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.warn("[Resend] send failed:", JSON.stringify(err));
+    }
+  } catch (e) {
+    console.warn("[Resend] error:", e.message);
   }
 }
 
