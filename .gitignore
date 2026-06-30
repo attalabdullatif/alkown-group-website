@@ -1,6 +1,7 @@
 node_modules
 .env
 .env.local
+.mcp.json
 build
 
 # Local analysis / scratch artifacts (not part of the app)
@@ -10,3 +11,5 @@ supabase_structure.txt
 website_data.md
 generate-pdfs.js
 replace_articles.js
+
+testsprite_tests\tmp\config.json
