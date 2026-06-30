@@ -114,7 +114,7 @@ export default function BookingPage({ t, lang, ff }) {
             requestNumber,
             client: clientData,
             form: { ...form, service: selectedService?.name },
-            service: { name: selectedService?.name, price: selectedService?.price || selectedService?.price_min }
+            service: { name: selectedService?.name, price: selectedService?.price || selectedService?.price_min, priceText: priceLabel(selectedService) }
           })
         });
       } catch (e) { /* notification is best-effort */ }

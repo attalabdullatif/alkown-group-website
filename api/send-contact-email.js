@@ -70,12 +70,15 @@ async function handleNewRequest(ctx, payload) {
   const clientWA     = form.whatsapp || clientPhone;
   const serviceName  = service.name  || form.service     || "—";
   const servicePrice = service.price || "";
+  // Prefer the pre-formatted price label from the form (matches the success
+  // page, e.g. "$2,500 – $3,000 USD"); fall back to a single numeric price.
+  const servicePriceText = service.priceText || (servicePrice ? `$${servicePrice}` : "");
   const notes        = form.msg      || "";
 
   await sendEmail(ctx, {
     to: ctx.ADMIN_EMAIL,
     subject: `📋 طلب جديد ${requestNumber} — ${clientName}`,
-    html: adminNewRequestHtml({ requestNumber, clientName, clientEmail, clientPhone, clientWA, serviceName, servicePrice, notes }),
+    html: adminNewRequestHtml({ requestNumber, clientName, clientEmail, clientPhone, clientWA, serviceName, servicePriceText, notes }),
   });
 
   // Owner/admin WhatsApp alert for every new request (Twilio → CallMeBot fallback).
@@ -93,7 +96,7 @@ async function handleNewRequest(ctx, payload) {
     + ltr("📞 الهاتف", clientPhone)
     + ltr("✉️ البريد", clientEmail)
     + rtl("🛂 الخدمة", serviceName)
-    + ltr("💰 السعر", servicePrice ? `$${servicePrice}` : "")
+    + ltr("💰 السعر", servicePriceText)
     + ltr("🔢 رقم الطلب", requestNumber)
     + (notes ? `${RLM}📝 ملاحظات: ${notes}\n` : "")
     + `${BAR}\n`
@@ -104,7 +107,7 @@ async function handleNewRequest(ctx, payload) {
     await sendEmail(ctx, {
       to: clientEmail,
       subject: `✅ تأكيد طلبك ${requestNumber} | Alkown Global`,
-      html: clientConfirmHtml({ requestNumber, clientName, clientEmail, clientPhone, serviceName, servicePrice, notes }),
+      html: clientConfirmHtml({ requestNumber, clientName, clientEmail, clientPhone, serviceName, servicePriceText, notes }),
     });
   }
 
@@ -368,9 +371,9 @@ function baseLayout(content) {
   </div></body></html>`;
 }
 
-function clientConfirmHtml({ requestNumber, clientName, clientEmail, clientPhone, serviceName, servicePrice, notes }) {
+function clientConfirmHtml({ requestNumber, clientName, clientEmail, clientPhone, serviceName, servicePriceText, notes }) {
   const now   = new Date().toLocaleDateString("ar-SA", { year: "numeric", month: "long", day: "numeric" });
-  const price = servicePrice ? `$${Number(servicePrice).toLocaleString()} USD` : "سيتم التحديد قريباً";
+  const price = servicePriceText || "سيتم التحديد قريباً";
   return baseLayout(`
     <div class="card" style="border-color:rgba(201,168,76,.3)">
       <h1>شكراً ${esc(clientName)} 🎉</h1>
@@ -401,7 +404,7 @@ function clientConfirmHtml({ requestNumber, clientName, clientEmail, clientPhone
   `);
 }
 
-function adminNewRequestHtml({ requestNumber, clientName, clientEmail, clientPhone, clientWA, serviceName, servicePrice, notes }) {
+function adminNewRequestHtml({ requestNumber, clientName, clientEmail, clientPhone, clientWA, serviceName, servicePriceText, notes }) {
   return baseLayout(`
     <div class="card" style="border-color:rgba(201,168,76,.3)">
       <h1>📋 طلب جديد</h1>
@@ -413,7 +416,7 @@ function adminNewRequestHtml({ requestNumber, clientName, clientEmail, clientPho
       <div class="row"><span class="muted">البريد</span><span>${esc(clientEmail) || "—"}</span></div>
       <div class="row"><span class="muted">الهاتف</span><span>${esc(clientPhone) || "—"}</span></div>
       <div class="row"><span class="muted">الخدمة</span><strong>${esc(serviceName)}</strong></div>
-      ${servicePrice ? `<div class="row"><span class="muted">السعر</span><strong class="gold">$${Number(servicePrice).toLocaleString()}</strong></div>` : ""}
+      ${servicePriceText ? `<div class="row"><span class="muted">السعر</span><strong class="gold">${esc(servicePriceText)}</strong></div>` : ""}
       ${notes ? `<div class="row"><span class="muted">ملاحظات</span><span style="max-width:55%;text-align:end">${esc(notes)}</span></div>` : ""}
     </div>
     <div class="card" style="text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
