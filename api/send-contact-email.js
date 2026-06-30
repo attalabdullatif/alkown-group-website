@@ -79,15 +79,26 @@ async function handleNewRequest(ctx, payload) {
   });
 
   // Owner/admin WhatsApp alert for every new request (Twilio → CallMeBot fallback).
+  // Bidi-safe: RLM (‏) keeps each line right-to-left; LTR values (phone,
+  // email, fee, request no., URL) are wrapped in LRM (‎) so they don't
+  // scramble the Arabic. Framed in a box for readability.
+  const RLM = "‏", LRM = "‎", BAR = "━━━━━━━━━━━━━━";
+  const rtl = (label, val) => val ? `${RLM}${label}: ${val}\n` : "";          // Arabic-ish values
+  const ltr = (label, val) => val ? `${RLM}${label}: ${LRM}${val}${LRM}\n` : ""; // Latin values
   await notifyOwnerWhatsApp(ctx,
-    `📋 *طلب جديد* ${requestNumber}\n`
-    + `العميل: ${clientName}\n`
-    + (clientPhone ? `الهاتف: ${clientPhone}\n` : "")
-    + (clientEmail ? `البريد: ${clientEmail}\n` : "")
-    + `الخدمة: ${serviceName}\n`
-    + (servicePrice ? `السعر: $${servicePrice}\n` : "")
-    + (notes ? `\nملاحظات: ${notes}\n` : "")
-    + `\nلوحة التحكم: https://alkownglobal.com/dashboard`);
+    `${BAR}\n`
+    + `${RLM}📋 *طلب جديد*\n`
+    + `${BAR}\n`
+    + rtl("👤 الاسم", clientName)
+    + ltr("📞 الهاتف", clientPhone)
+    + ltr("✉️ البريد", clientEmail)
+    + rtl("🛂 الخدمة", serviceName)
+    + ltr("💰 السعر", servicePrice ? `$${servicePrice}` : "")
+    + ltr("🔢 رقم الطلب", requestNumber)
+    + (notes ? `${RLM}📝 ملاحظات: ${notes}\n` : "")
+    + `${BAR}\n`
+    + `${RLM}🔗 لوحة التحكم:\n`
+    + `${LRM}https://alkownglobal.com/dashboard${LRM}`);
 
   if (clientEmail) {
     await sendEmail(ctx, {
