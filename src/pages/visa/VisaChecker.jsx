@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   fetchCountries, checkVisa, codeToFlag,
 } from "../../lib/visaIntelligenceService";
+import { setSEOMeta } from "../../services/seoService";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const GOLD   = "#c9a84c";
@@ -296,6 +297,13 @@ export default function VisaChecker() {
   const [loadingInit,  setLoadingInit]  = useState(true);
 
   useEffect(() => {
+    // Key ad landing page — give it its own title/description for search & shares.
+    setSEOMeta({
+      title: "هل تحتاج تأشيرة؟ فاحص متطلبات التأشيرة المجاني",
+      description: "اعرف فورًا إن كنت تحتاج تأشيرة لوجهتك: نوع التأشيرة، مدة الإقامة، الرسوم، والمستندات المطلوبة — ثم قدّم طلبك مع خبراء الكون العالمية.",
+      keywords: "فاحص التأشيرة، هل أحتاج تأشيرة، متطلبات التأشيرة، تأشيرة عند الوصول، تأشيرة إلكترونية، الكون العالمية",
+      canonical: "/visa-checker",
+    });
     fetchCountries()
       .then(setCountries)
       .catch(console.warn)

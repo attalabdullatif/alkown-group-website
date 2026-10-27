@@ -1,26 +1,28 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from "react";
 import { useContent } from "./context/ContentContext";
 import { useAuth } from "./context/AuthContext";
 import { supabase } from "./lib/supabase";
-import VisaCenterPage from "./pages/visa/VisaCenterPage";
-import VisaResultPage from "./pages/visa/VisaResultPage";
-import VisaApplicationPage from "./pages/visa/VisaApplicationPage";
-import VisaAdminIntelligencePage from "./pages/visa/VisaAdminIntelligence";
-import VisaTrackPage from "./pages/visa/VisaTrackPage";
 import { setSEOMeta, setStructuredData, ORGANIZATION_SCHEMA, PAGE_SEO } from "./services/seoService";
-import ResidencyPage from "./pages/Residency";
-import TravelFullPage from "./pages/Travel";
 import { C, buildCSS } from "./utils/theme";
 import Logo from "./components/Logo";
 import { Divider, Label, Particles, HeroBG } from "./components/SiteAtoms";
 import PageHero from "./sections/PageHero";
-import AdvertisingPage from "./sections/AdvertisingSection";
-import AcademyPage from "./sections/AcademySection";
-import AboutPage from "./sections/AboutSection";
-import StudentPage from "./sections/StudentSection";
-import DashboardPage from "./sections/DashboardSection";
-import BookingPage from "./sections/BookingSection";
 import Footer from "./sections/Footer";
+
+// Secondary pages load on demand — keeps them out of the main bundle so the
+// home page (the landing page for ads) loads fast.
+const VisaCenterPage      = lazy(() => import("./pages/visa/VisaCenterPage"));
+const VisaResultPage      = lazy(() => import("./pages/visa/VisaResultPage"));
+const VisaApplicationPage = lazy(() => import("./pages/visa/VisaApplicationPage"));
+const VisaTrackPage       = lazy(() => import("./pages/visa/VisaTrackPage"));
+const ResidencyPage       = lazy(() => import("./pages/Residency"));
+const TravelFullPage      = lazy(() => import("./pages/Travel"));
+const AdvertisingPage     = lazy(() => import("./sections/AdvertisingSection"));
+const AcademyPage         = lazy(() => import("./sections/AcademySection"));
+const AboutPage           = lazy(() => import("./sections/AboutSection"));
+const StudentPage         = lazy(() => import("./sections/StudentSection"));
+const DashboardPage       = lazy(() => import("./sections/DashboardSection"));
+const BookingPage         = lazy(() => import("./sections/BookingSection"));
 
 // ── Company Formation Data ────────────────────────────────────
 const CF_JURISDICTIONS = [
@@ -1682,6 +1684,7 @@ export default function AlkownGroup() {
         filter: "invert(0.88) hue-rotate(180deg) brightness(0.96)",
         minHeight: "100vh",
       } : { paddingTop: 80 }}>
+        <Suspense fallback={<div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", color: C.gold, fontFamily: ff }}>الكون ···</div>}>
         {page === "home" && <HomePage t={t} lang={lang} ff={ff} setPage={setPage} />}
         {page === "travel" && <TravelFullPage lang={lang} ff={ff} setPage={setPage} />}
         {page === "advertising" && <AdvertisingPage t={t} lang={lang} ff={ff} setPage={setPage} />}
@@ -1693,11 +1696,11 @@ export default function AlkownGroup() {
         {page === "visa-center" && <VisaCenterPage lang={lang} ff={ff} setPage={setPage} setVisaParams={setVisaParams} />}
         {page === "visa-result" && <VisaResultPage params={visaParams} lang={lang} ff={ff} setPage={setPage} setVisaParams={setVisaParams} />}
         {page === "visa-apply" && <VisaApplicationPage lang={lang} ff={ff} setPage={setPage} initialParams={visaParams} />}
-        {page === "visa-admin" && <VisaAdminIntelligencePage />}
         {page === "visa-track" && <VisaTrackPage lang={lang} ff={ff} setPage={setPage} />}
         {page === "knowledge" && <KnowledgeCenterPage lang={lang} ff={ff} setPage={setPage} />}
         {page === "company-formation" && <CompanyFormationPage lang={lang} ff={ff} setPage={setPage} />}
         {page === "residency" && <ResidencyPage lang={lang} ff={ff} setPage={setPage} />}
+        </Suspense>
       </div>
 
       <Footer t={t} lang={lang} ff={ff} setPage={setPage} />

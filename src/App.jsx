@@ -47,6 +47,34 @@ function PageLoader() {
   return <div className="lazy-fallback">الكون ···</div>;
 }
 
+// ── 404 — unknown URLs used to render a blank page ─────────────
+function NotFound() {
+  useEffect(() => { document.title = "الصفحة غير موجودة | الكون العالمية"; }, []);
+  return (
+    <div style={{
+      minHeight: "100vh", background: "#0f0d09", color: "#fff", direction: "rtl",
+      fontFamily: "'Cairo','Noto Naskh Arabic',sans-serif",
+      display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 24,
+    }}>
+      <div style={{ maxWidth: 480 }}>
+        <div style={{ color: "#c9a84c", fontSize: "4rem", fontWeight: 900, lineHeight: 1 }}>404</div>
+        <h1 style={{ fontSize: "1.4rem", fontWeight: 800, margin: "16px 0 10px" }}>الصفحة غير موجودة</h1>
+        <p style={{ color: "rgba(255,255,255,.55)", lineHeight: 1.8, marginBottom: 28 }}>
+          ربما تغيّر الرابط أو حُذفت الصفحة. يمكنك العودة للرئيسية أو فحص متطلبات تأشيرتك.
+        </p>
+        <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+          <Link to="/" style={{ background: "#c9a84c", color: "#1a1510", padding: "12px 24px", borderRadius: 10, fontWeight: 800, textDecoration: "none" }}>
+            الصفحة الرئيسية
+          </Link>
+          <Link to="/visa-checker" style={{ border: "1px solid rgba(201,168,76,.4)", color: "#c9a84c", padding: "12px 24px", borderRadius: 10, fontWeight: 700, textDecoration: "none" }}>
+            فحص التأشيرة
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Dark Mode Context ──────────────────────────────────────────
 const DarkCtx = createContext({ dark: false, toggle: () => {} });
 export const useDark = () => useContext(DarkCtx);
@@ -420,6 +448,9 @@ export default function App() {
             <PageLayout><BrandMemory /></PageLayout>
           </ProtectedRoute>
         } />
+
+        {/* Catch-all: unknown URLs get a real 404 instead of a blank page */}
+        <Route path="*" element={<NotFound />} />
 
       </Routes>
       </Suspense>
