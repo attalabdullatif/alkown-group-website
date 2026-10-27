@@ -12,13 +12,13 @@ export default function VerifyInvoice() {
 
   useEffect(() => {
     if (!invNumber) { setLoading(false); return; }
-    supabase.from("invoices")
-      .select("*, requests(request_number, clients(full_name, phone), services(name))")
-      .eq("invoice_number", invNumber)
-      .maybeSingle()
+    // Public verification goes through a SECURITY DEFINER RPC that returns
+    // only what's needed for one exact invoice number (no table read, no phone).
+    supabase.rpc("verify_invoice", { p_number: invNumber })
       .then(({ data }) => {
-        setInvoice(data);
-        setValid(!!data);
+        const row = data?.[0] || null;
+        setInvoice(row);
+        setValid(!!row);
         setLoading(false);
       });
   }, [invNumber]);
@@ -57,9 +57,8 @@ export default function VerifyInvoice() {
               </div>
 
               {[
-                ["العميل", invoice.requests?.clients?.full_name],
-                ["الهاتف", invoice.requests?.clients?.phone],
-                ["الخدمة", invoice.requests?.services?.name],
+                ["العميل", invoice.client_name],
+                ["الخدمة", invoice.service_name],
                 ["المبلغ", `$${Number(invoice.amount).toLocaleString()} USD`],
                 ["الحالة", invoice.status === "Paid" ? "✅ مدفوعة" : "⏳ معلّقة"],
                 ["التاريخ", new Date(invoice.created_at).toLocaleDateString("ar")],
@@ -74,7 +73,7 @@ export default function VerifyInvoice() {
         </div>
 
         <p style={{ textAlign: "center", color: "#333", fontSize: 12, marginTop: 20 }}>
-          info@alkowngroup.com | +90 534 764 1249
+          info@alkownglobal.com | +90 534 764 1249
         </p>
       </div>
     </div>

@@ -352,18 +352,22 @@ function PortalView({ user, client, ar, onSignOut }) {
 
   async function loadData() {
     setLoading(true);
-    const [reqRes, invRes, msgRes, notifRes, apptRes] = await Promise.all([
-      supabase.from("requests").select("*, services(name, price, price_min, price_max)").eq("client_id", client.id).order("created_at", { ascending: false }),
-      supabase.from("invoices").select("*, requests(request_number, services(name))").order("created_at", { ascending: false }),
+    // Requests first: invoices are filtered server-side to this client's
+    // request ids, so other clients' invoices never reach the browser.
+    const reqRes  = await supabase.from("requests").select("*, services(name, price, price_min, price_max)").eq("client_id", client.id).order("created_at", { ascending: false });
+    const allReqs = reqRes.data || [];
+    const reqIds  = allReqs.map(r => r.id);
+
+    const [invRes, msgRes, notifRes, apptRes] = await Promise.all([
+      reqIds.length
+        ? supabase.from("invoices").select("*, requests(request_number, services(name))").in("request_id", reqIds).order("created_at", { ascending: false })
+        : Promise.resolve({ data: [] }),
       supabase.from("client_messages").select("*").eq("client_id", client.id).order("created_at", { ascending: false }).limit(100),
       supabase.from("client_notifications").select("*").eq("client_id", client.id).order("created_at", { ascending: false }).limit(50),
       supabase.from("appointments").select("*").eq("client_id", client.id).order("appointment_date", { ascending: false }).limit(20).catch(() => ({ data: [] })),
     ]);
-    const allReqs = reqRes.data || [];
-    const allInvs = invRes.data || [];
-    const reqIds  = allReqs.map(r => r.id);
     setRequests(allReqs);
-    setInvoices(allInvs.filter(i => reqIds.includes(i.request_id)));
+    setInvoices(invRes.data || []);
     setMessages(msgRes.data || []);
     setNotifs(notifRes.data || []);
     setAppointments(apptRes.data || []);

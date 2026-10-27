@@ -115,15 +115,16 @@ export default function VisaRoutePage() {
     <div style={{ fontFamily: ff, background: C.warmWhite, minHeight: "100vh" }}>
       {seo.title && <SEOHead {...seo} />}
 
-      {/* Structured data for SEO */}
+      {/* Structured data for SEO. `slug` comes from the URL, so escape "<" —
+          JSON.stringify alone would let "</script>" break out of the tag. */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "WebPage",
         "name": seo.title,
         "description": seo.description,
-        "url": `https://alkownglobal.com/visa/${slug}`,
+        "url": `https://alkownglobal.com/visa/${encodeURIComponent(slug || "")}`,
         "publisher": { "@type": "Organization", "name": "ALKOWN Global", "url": "https://alkownglobal.com" }
-      }) }} />
+      }).replace(/</g, "\\u003c") }} />
 
       {/* Header */}
       <div style={{ background: `linear-gradient(135deg, ${C.dark} 0%, ${C.darkMid} 100%)`, padding: "60px clamp(20px,6vw,80px) 0" }}>
