@@ -10,6 +10,8 @@ const CARD   = "#1a1510";
 const BORDER = "rgba(201,168,76,.18)";
 const MUTED  = "rgba(255,255,255,.45)";
 const FF     = "'Cairo','Noto Naskh Arabic',sans-serif";
+const WHATSAPP = "971544909522";   // Alkown Global WhatsApp
+const WA_GREEN = "#25D366";
 
 const VISA_ICON = {
   visa_free:       "✅",
@@ -99,7 +101,7 @@ function CountrySelect({ label, value, onChange, countries, placeholder }) {
 }
 
 // ─── Result Card ──────────────────────────────────────────────────────────────
-function ResultCard({ result, onReset }) {
+function ResultCard({ result, onReset, makeWa }) {
   if (!result.found) return (
     <div style={{
       ...cardSt, borderTop:`3px solid #888`, textAlign:"center", padding:"40px 32px",
@@ -107,11 +109,16 @@ function ResultCard({ result, onReset }) {
       <div style={{ fontSize:"2rem", marginBottom:12 }}>🔍</div>
       <div style={{ color:"#fff", fontWeight:800, fontSize:"1.1rem", marginBottom:8 }}>لا توجد بيانات لهذه الرحلة</div>
       <div style={{ color: MUTED, fontSize:".88rem", marginBottom:24, lineHeight:1.7 }}>
-        {result.message_ar || "لم يتم العثور على معلومات تأشيرة. يرجى التواصل معنا مباشرة."}
+        {result.message_ar || "لم نعثر على معلومات لهذا المسار — دعنا نساعدك مباشرةً عبر واتساب."}
       </div>
-      <a href="/booking" style={{ ...ctaBtnSt, textDecoration:"none" }}>
-        📞 احجز استشارة مجانية
-      </a>
+      <div style={{ display:"flex", gap:10, justifyContent:"center", flexWrap:"wrap" }}>
+        <a href={makeWa("لم أجد معلومات لهذا المسار في الموقع.")} target="_blank" rel="noreferrer" style={waBtnSt}>
+          💬 اسأل خبيرنا عبر واتساب
+        </a>
+        <a href="/booking" style={{ ...ctaBtnSt, textDecoration:"none" }}>
+          📞 احجز استشارة
+        </a>
+      </div>
     </div>
   );
 
@@ -192,15 +199,11 @@ function ResultCard({ result, onReset }) {
 
       {/* CTA */}
       <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
+        <a href={makeWa(`النتيجة: ${result.label_ar}.`)} target="_blank" rel="noreferrer" style={waBtnSt}>
+          💬 اطلب هذه التأشيرة عبر واتساب
+        </a>
         <a href="/booking" style={{ ...ctaBtnSt, textDecoration:"none" }}>
           ✈️ قدّم طلبك الآن
-        </a>
-        <a href="/portal" style={{
-          ...ctaBtnSt, background:"transparent",
-          border:`1px solid ${BORDER}`, color:"rgba(255,255,255,.7)",
-          textDecoration:"none",
-        }}>
-          📞 تواصل مع خبير
         </a>
       </div>
 
@@ -275,6 +278,12 @@ const ctaBtnSt = {
   cursor:"pointer", fontFamily: FF, fontWeight:800, fontSize:".9rem",
   display:"inline-block",
 };
+const waBtnSt = {
+  background: WA_GREEN, color:"#fff", border:"none", borderRadius:10,
+  padding:"12px 24px", cursor:"pointer", fontFamily: FF, fontWeight:800,
+  fontSize:".9rem", display:"inline-flex", alignItems:"center", gap:8,
+  textDecoration:"none", boxShadow:"0 4px 16px rgba(37,211,102,.25)",
+};
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function VisaChecker() {
@@ -314,6 +323,19 @@ export default function VisaChecker() {
   }
 
   function handleReset() { setResult(null); setNationality(""); setDestination(""); setResidence(""); }
+
+  function handleSwap() { setNationality(destination); setDestination(nationality); setResult(null); }
+
+  // Builds a pre-filled WhatsApp link with the selected route — turns the
+  // checker into a direct sales channel (one tap to chat with Alkown).
+  const cmap = Object.fromEntries(countries.map(c => [c.code, c]));
+  function makeWa(extra) {
+    const nat  = cmap[nationality]?.name_ar || nationality || "—";
+    const dest = cmap[destination]?.name_ar || destination || "—";
+    const res  = residence ? `\nمقيم في: ${cmap[residence]?.name_ar || residence}` : "";
+    const msg  = `مرحباً الكون العالمية 👋\nأريد الاستفسار عن التأشيرة:\nمن: ${nat}${res}\nإلى: ${dest}\n${extra || ""}\nأرجو مساعدتي في التقديم. 🙏`;
+    return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`;
+  }
 
   return (
     <div style={{
@@ -355,6 +377,17 @@ export default function VisaChecker() {
                   countries={countries}
                   placeholder="اختر جنسيتك"
                 />
+                <button
+                  type="button" onClick={handleSwap} title="تبديل الجنسية والوجهة"
+                  style={{
+                    alignSelf:"flex-end", marginBottom:1, flexShrink:0,
+                    width:44, height:46, borderRadius:10, cursor:"pointer",
+                    background:"rgba(255,255,255,.04)", border:`1px solid ${BORDER}`,
+                    color: GOLD, fontSize:"1.05rem", transition:"all .2s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = GOLD; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; }}
+                >⇄</button>
                 <CountrySelect
                   label="الوجهة *"
                   value={destination}
@@ -388,7 +421,7 @@ export default function VisaChecker() {
 
       {/* Results */}
       <div id="visa-result" style={{ maxWidth:800, margin:"0 auto", padding:"40px 24px 80px" }}>
-        {result && <ResultCard result={result} onReset={handleReset} />}
+        {result && <ResultCard result={result} onReset={handleReset} makeWa={makeWa} />}
 
         {!result && !loadingInit && (
           <PopularRoutes countries={countries} onSelect={handlePopularSelect} />
