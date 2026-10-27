@@ -279,7 +279,8 @@ export default function BookingPage({ t, lang, ff }) {
                 </div>
               )}
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 18 }}>
+              {/* Side by side on wide screens, stacked on phones */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16, marginBottom: 18 }}>
                 <div>
                   <label style={lbl}>{t.booking.date}</label>
                   <input type="date" value={form.date} onChange={upd("date")} style={inp} min={new Date().toISOString().split("T")[0]} />

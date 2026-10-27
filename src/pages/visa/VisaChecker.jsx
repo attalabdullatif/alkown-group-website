@@ -169,7 +169,7 @@ function ResultCard({ result, onReset, makeWa }) {
       {result.documents?.length > 0 && (
         <div style={{ marginBottom:24 }}>
           <div style={{ color: GOLD, fontWeight:700, fontSize:".88rem", marginBottom:12 }}>📋 المستندات المطلوبة</div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(180px, 1fr))", gap:8 }}>
             {result.documents.map((doc, i) => (
               <div key={i} style={{
                 background:"rgba(255,255,255,.03)", border:`1px solid ${BORDER}`,
