@@ -1,4 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { PAGE_PATHS, PATH_PAGES } from "./lib/publicRoutes";
 import { useContent } from "./context/ContentContext";
 import { useAuth } from "./context/AuthContext";
 import { supabase } from "./lib/supabase";
@@ -1243,9 +1245,25 @@ const hexRgb = (hex="") => {
 // ═══════════════════════════════════════════════════════════════
 // MAIN APP
 // ═══════════════════════════════════════════════════════════════
+
 export default function AlkownGroup() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [lang, setLang] = useState("ar");
-  const [page, setPage] = useState("home");
+  const [page, setPageState] = useState(() => PATH_PAGES[location.pathname] || "home");
+
+  // Switching section also updates the URL.
+  const setPage = useCallback((k) => {
+    setPageState(k);
+    const path = PAGE_PATHS[k];
+    if (path && path !== window.location.pathname) navigate(path);
+  }, [navigate]);
+
+  // Back/forward buttons and direct links show the matching section.
+  useEffect(() => {
+    const k = PATH_PAGES[location.pathname];
+    if (k) setPageState(k);
+  }, [location.pathname]);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [visaParams, setVisaParams] = useState(null);
@@ -1512,7 +1530,7 @@ export default function AlkownGroup() {
     const seoKey = page === "home" ? "home" : PAGE_SEO[page] ? page : null;
     if (seoKey) {
       const cfg = PAGE_SEO[seoKey]?.[lang] || {};
-      setSEOMeta({ ...cfg, lang, canonical: page === "home" ? "/" : `/${page}` });
+      setSEOMeta({ ...cfg, lang, canonical: PAGE_PATHS[page] || `/${page}` });
     }
     if (page === "home") setStructuredData(ORGANIZATION_SCHEMA);
   }, [page, lang]);

@@ -14,13 +14,17 @@ const OUT_PATH  = path.join(__dirname, "..", "public", "sitemap.xml");
 const STATIC_PAGES = [
   { url: "/",                  priority: "1.0",  changefreq: "daily" },
   { url: "/visa-center",       priority: "0.9",  changefreq: "weekly" },
+  { url: "/visa-checker",      priority: "0.9",  changefreq: "weekly" },
+  { url: "/residency",         priority: "0.85", changefreq: "weekly" },
   { url: "/company-formation", priority: "0.85", changefreq: "weekly" },
   { url: "/knowledge-center",  priority: "0.85", changefreq: "weekly" },
-  { url: "/track-application", priority: "0.7",  changefreq: "monthly" },
-  { url: "/track-request",     priority: "0.6",  changefreq: "monthly" },
-  { url: "/portal",            priority: "0.6",  changefreq: "monthly" },
-  { url: "/verify-invoice",    priority: "0.5",  changefreq: "monthly" },
-  { url: "/login",             priority: "0.4",  changefreq: "yearly" },
+  { url: "/travel",            priority: "0.8",  changefreq: "weekly" },
+  { url: "/booking",           priority: "0.8",  changefreq: "monthly" },
+  { url: "/about",             priority: "0.7",  changefreq: "monthly" },
+  { url: "/track-application", priority: "0.6",  changefreq: "monthly" },
+  { url: "/track-request",     priority: "0.5",  changefreq: "monthly" },
+  // /portal and /login are excluded on purpose: robots.txt disallows them,
+  // and listing blocked URLs triggers Search Console errors.
 ];
 
 // ── Country codes (top 50 countries) ─────────────────────────

@@ -3,7 +3,7 @@
 // Enterprise-grade dynamic SEO management
 // ═══════════════════════════════════════════════════════════════
 
-const SITE_URL    = "https://alkownglobal.com";
+const SITE_URL    = "https://www.alkownglobal.com";
 const SITE_NAME   = "الكون العالمية | ALKOWN Global";
 const DEFAULT_OG  = `${SITE_URL}/og-image.png`;
 
@@ -101,8 +101,8 @@ export const ORGANIZATION_SCHEMA = {
   "@type": "Organization",
   "name": "ALKOWN Global",
   "alternateName": "الكون العالمية",
-  "url": "https://alkownglobal.com",
-  "logo": "https://alkownglobal.com/logo.png",
+  "url": "https://www.alkownglobal.com",
+  "logo": "https://www.alkownglobal.com/logo.png",
   "contactPoint": [
     { "@type": "ContactPoint", "telephone": "+90-534-764-1249", "contactType": "customer service", "areaServed": "TR" },
     { "@type": "ContactPoint", "telephone": "+971-54-490-9522", "contactType": "customer service", "areaServed": "AE" },
@@ -138,7 +138,7 @@ export function buildBreadcrumbSchema(items) {
       "@type": "ListItem",
       "position": i + 1,
       "name": item.name,
-      "item": `https://alkownglobal.com${item.url}`
+      "item": `https://www.alkownglobal.com${item.url}`
     }))
   };
 }
@@ -172,5 +172,25 @@ export const PAGE_SEO = {
   contact: {
     ar: { title: "تواصل معنا", description: "تواصل مع فريق الكون العالمية — دبي، اسطنبول، حلب. متاحون 24/7.", keywords: "تواصل، اتصال، دبي، اسطنبول" },
     en: { title: "Contact Us", description: "Contact ALKOWN Global — Dubai, Istanbul, Aleppo. Available 24/7.", keywords: "contact, ALKOWN, Dubai, Istanbul" }
+  },
+  booking: {
+    ar: { title: "احجز استشارة", description: "احجز استشارتك مع خبراء الكون العالمية في التأشيرات والإقامة وتأسيس الشركات.", keywords: "حجز استشارة، استشارة تأشيرة، استشارة إقامة" },
+    en: { title: "Book a Consultation", description: "Book a consultation with ALKOWN Global's visa, residency and company formation experts.", keywords: "book consultation, visa consultation, residency consultation" }
+  },
+  about: {
+    ar: { title: "من نحن", description: "تعرّف على الكون العالمية وفريقها — خدمات التأشيرة والإقامة وتأسيس الشركات والسفر.", keywords: "من نحن، الكون العالمية، عن الشركة" },
+    en: { title: "About Us", description: "Meet ALKOWN Global and our team — visa, residency, company formation and travel services.", keywords: "about us, ALKOWN Global" }
+  },
+  academy: {
+    ar: { title: "أكاديمية المهارات", description: "أكاديمية المهارات من الكون العالمية.", keywords: "أكاديمية، دورات، الكون العالمية" },
+    en: { title: "Academy", description: "The ALKOWN Global skills academy.", keywords: "academy, courses, ALKOWN Global" }
+  },
+  advertising: {
+    ar: { title: "وكالة الإعلان", description: "وكالة الإعلان من الكون العالمية.", keywords: "وكالة إعلان، تسويق، الكون العالمية" },
+    en: { title: "Advertising Agency", description: "The ALKOWN Global advertising agency.", keywords: "advertising agency, marketing, ALKOWN Global" }
+  },
+  student: {
+    ar: { title: "بوابة الطالب", description: "بوابة الطالب من الكون العالمية.", keywords: "بوابة الطالب، دراسة، الكون العالمية" },
+    en: { title: "Student Portal", description: "The ALKOWN Global student portal.", keywords: "student portal, study abroad, ALKOWN Global" }
   }
 };

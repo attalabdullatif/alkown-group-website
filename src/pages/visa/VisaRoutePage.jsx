@@ -122,8 +122,8 @@ export default function VisaRoutePage() {
         "@type": "WebPage",
         "name": seo.title,
         "description": seo.description,
-        "url": `https://alkownglobal.com/visa/${encodeURIComponent(slug || "")}`,
-        "publisher": { "@type": "Organization", "name": "ALKOWN Global", "url": "https://alkownglobal.com" }
+        "url": `https://www.alkownglobal.com/visa/${encodeURIComponent(slug || "")}`,
+        "publisher": { "@type": "Organization", "name": "ALKOWN Global", "url": "https://www.alkownglobal.com" }
       }).replace(/</g, "\\u003c") }} />
 
       {/* Header */}

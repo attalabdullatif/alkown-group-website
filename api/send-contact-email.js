@@ -101,7 +101,7 @@ async function handleNewRequest(ctx, payload) {
     + (notes ? `${RLM}📝 ملاحظات: ${notes}\n` : "")
     + `${BAR}\n`
     + `${RLM}🔗 لوحة التحكم:\n`
-    + `${LRM}https://alkownglobal.com/dashboard${LRM}`);
+    + `${LRM}https://www.alkownglobal.com/dashboard${LRM}`);
 
   if (clientEmail) {
     await sendEmail(ctx, {
@@ -115,7 +115,7 @@ async function handleNewRequest(ctx, payload) {
     const waNum = clientWA.replace(/\D/g, "").replace(/^00/, "+").replace(/^(?!\+)/, "+");
     await sendWhatsApp(ctx, {
       to: `whatsapp:${waNum}`,
-      body: `مرحباً ${clientName} 👋\nتم استلام طلبك *${requestNumber}* بنجاح.\nسيتواصل معك فريقنا قريباً.\n\nتتبع طلبك: https://alkownglobal.com/track-request`,
+      body: `مرحباً ${clientName} 👋\nتم استلام طلبك *${requestNumber}* بنجاح.\nسيتواصل معك فريقنا قريباً.\n\nتتبع طلبك: https://www.alkownglobal.com/track-request`,
     });
   }
 }
@@ -143,7 +143,7 @@ async function handleStatusUpdate(ctx, payload) {
         ${note ? `<div class="row"><span class="muted">ملاحظة</span><span>${esc(note)}</span></div>` : ""}
       </div>
       <div class="card" style="text-align:center">
-        <a href="https://alkownglobal.com/dashboard" class="btn">فتح لوحة التحكم</a>
+        <a href="https://www.alkownglobal.com/dashboard" class="btn">فتح لوحة التحكم</a>
       </div>
     `),
   });
@@ -160,7 +160,7 @@ async function handleStatusUpdate(ctx, payload) {
     const waNum = clientPhone.replace(/\D/g, "").replace(/^00/, "+").replace(/^(?!\+)/, "+");
     await sendWhatsApp(ctx, {
       to: `whatsapp:${waNum}`,
-      body: `مرحباً ${clientName} 👋\nتم تحديث طلبك *${requestNumber}*\nالحالة: *${STATUS_AR[status] || status}*\n${note ? `\nملاحظة: ${note}\n` : ""}\nتتبع طلبك: https://alkownglobal.com/track-request`,
+      body: `مرحباً ${clientName} 👋\nتم تحديث طلبك *${requestNumber}*\nالحالة: *${STATUS_AR[status] || status}*\n${note ? `\nملاحظة: ${note}\n` : ""}\nتتبع طلبك: https://www.alkownglobal.com/track-request`,
     });
   }
 }
@@ -223,7 +223,7 @@ async function handleNewMessage(ctx, payload) {
         </div>
       </div>
       <div class="card" style="text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-        <a href="https://alkownglobal.com/dashboard" class="btn">فتح لوحة التحكم</a>
+        <a href="https://www.alkownglobal.com/dashboard" class="btn">فتح لوحة التحكم</a>
         ${clientPhone ? `<a href="https://wa.me/${clientPhone.replace(/\D/g,"")}" class="btn-ghost">💬 رد واتساب</a>` : ""}
       </div>
     `),
@@ -258,7 +258,7 @@ async function handleDocumentRequest(ctx, payload) {
         ${message ? `<div style="margin-top:14px;background:#0d0d0d;border-right:3px solid #c9a84c;padding:12px;border-radius:8px;font-size:13px;color:#aaa">${esc(message)}</div>` : ""}
       </div>
       <div class="card" style="text-align:center">
-        <a href="https://alkownglobal.com/portal" class="btn">رفع الوثائق الآن</a>
+        <a href="https://www.alkownglobal.com/portal" class="btn">رفع الوثائق الآن</a>
       </div>
     `),
   });
@@ -268,7 +268,7 @@ async function handleDocumentRequest(ctx, payload) {
     const docText = Array.isArray(documents) && documents.length ? documents.map(d => `• ${d}`).join("\n") : "يرجى التواصل لمعرفة الوثائق المطلوبة";
     await sendWhatsApp(ctx, {
       to: `whatsapp:${waNum}`,
-      body: `مرحباً ${clientName} 📄\nالوثائق المطلوبة للطلب *${requestNumber}*:\n\n${docText}\n\nارفعها: https://alkownglobal.com/portal`,
+      body: `مرحباً ${clientName} 📄\nالوثائق المطلوبة للطلب *${requestNumber}*:\n\n${docText}\n\nارفعها: https://www.alkownglobal.com/portal`,
     });
   }
 }
@@ -398,7 +398,7 @@ function clientConfirmHtml({ requestNumber, clientName, clientEmail, clientPhone
       </div>
     </div>
     <div class="card" style="text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-      <a href="https://alkownglobal.com/track-request" class="btn">تتبّع طلبي</a>
+      <a href="https://www.alkownglobal.com/track-request" class="btn">تتبّع طلبي</a>
       <a href="https://wa.me/971544909522?text=مرحباً، طلبي ${esc(requestNumber)}" class="btn-ghost">💬 واتساب</a>
     </div>
   `);
@@ -420,7 +420,7 @@ function adminNewRequestHtml({ requestNumber, clientName, clientEmail, clientPho
       ${notes ? `<div class="row"><span class="muted">ملاحظات</span><span style="max-width:55%;text-align:end">${esc(notes)}</span></div>` : ""}
     </div>
     <div class="card" style="text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-      <a href="https://alkownglobal.com/dashboard" class="btn">فتح لوحة التحكم</a>
+      <a href="https://www.alkownglobal.com/dashboard" class="btn">فتح لوحة التحكم</a>
       ${clientPhone ? `<a href="https://wa.me/${clientPhone.replace(/\D/g,"")}?text=مرحباً ${esc(clientName)}، بخصوص طلبك ${esc(requestNumber)}" class="btn-ghost">💬 رد واتساب</a>` : ""}
     </div>
   `);
@@ -448,7 +448,7 @@ function statusUpdateHtml({ requestNumber, clientName, serviceName, status, note
     ${isCompleted ? `<div class="card" style="background:rgba(47,143,91,.06);border-color:rgba(47,143,91,.2);text-align:center"><p style="color:#2f8f5b;font-weight:700">🎉 تهانينا! تم إتمام طلبك بنجاح</p></div>` : ""}
     ${isRejected  ? `<div class="card" style="background:rgba(185,74,72,.06);border-color:rgba(185,74,72,.2)"><p style="color:#e07070;font-size:14px">للاستفسار أو إعادة التقديم تواصل معنا.</p></div>` : ""}
     <div class="card" style="text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-      <a href="https://alkownglobal.com/track-request" class="btn">تتبّع طلبي</a>
+      <a href="https://www.alkownglobal.com/track-request" class="btn">تتبّع طلبي</a>
       <a href="https://wa.me/971544909522" class="btn-ghost">💬 تواصل معنا</a>
     </div>
   `);
@@ -477,7 +477,7 @@ function invoiceReadyHtml({ invoiceNumber, clientName, serviceName, amount, dueD
       </div>
     </div>
     <div class="card" style="text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-      <a href="https://alkownglobal.com/portal" class="btn">عرض الفاتورة</a>
+      <a href="https://www.alkownglobal.com/portal" class="btn">عرض الفاتورة</a>
       <a href="https://wa.me/971544909522" class="btn-ghost">💬 استفسار</a>
     </div>
   `);

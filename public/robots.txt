@@ -108,4 +108,4 @@ Allow: /knowledge-center
 Allow: /track-request
 Allow: /verify-invoice
 
-Sitemap: https://alkownglobal.com/sitemap.xml
+Sitemap: https://www.alkownglobal.com/sitemap.xml

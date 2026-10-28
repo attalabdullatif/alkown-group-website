@@ -7,6 +7,7 @@ import { ContentProvider } from "./context/ContentContext";
 
 // ── Eager: critical path (landing + auth) ──────────────────────
 import MainWebsite from "./MainWebsite";
+import { PUBLIC_PATHS } from "./lib/publicRoutes";
 import Login from "./pages/Login";
 
 // ── Lazy: all other routes — each becomes its own JS chunk ──────
@@ -15,14 +16,9 @@ const Clients              = lazy(() => import("./pages/Clients"));
 const Services             = lazy(() => import("./pages/Services"));
 const Requests             = lazy(() => import("./pages/Requests"));
 const Accounting           = lazy(() => import("./pages/Accounting"));
-const VisaCenterPage       = lazy(() => import("./pages/visa/VisaCenterPage"));
 const VisaChecker          = lazy(() => import("./pages/visa/VisaChecker"));
 const VisaRoutePage        = lazy(() => import("./pages/visa/VisaRoutePage"));
 const VisaAdminIntelligence= lazy(() => import("./pages/visa/VisaAdminIntelligence"));
-const CompanyFormation     = lazy(() => import("./pages/CompanyFormation"));
-const Residency            = lazy(() => import("./pages/Residency"));
-const Travel               = lazy(() => import("./pages/Travel"));
-const KnowledgeCenter      = lazy(() => import("./pages/KnowledgeCenter"));
 const TrackRequest         = lazy(() => import("./pages/TrackRequest"));
 const VerifyInvoice        = lazy(() => import("./pages/VerifyInvoice"));
 const ClientPortal         = lazy(() => import("./pages/ClientPortal"));
@@ -324,8 +320,12 @@ export default function App() {
       <Suspense fallback={<PageLoader />}>
       <Routes>
 
-        {/* MAIN WEBSITE — eager */}
-        <Route path="/" element={<MainWebsite />} />
+        {/* MAIN WEBSITE — eager. Each public section has its own URL; all of
+            them render the full site (nav + footer), which syncs the section
+            with the URL. */}
+        {PUBLIC_PATHS.map(path => (
+          <Route key={path} path={path} element={<MainWebsite />} />
+        ))}
 
         {/* CRM — محمي — lazy chunks */}
         <Route path="/dashboard" element={
@@ -391,12 +391,7 @@ export default function App() {
         {/* Visa */}
         <Route path="/visa-checker" element={<VisaChecker />} />
 
-        {/* Public pages — lazy */}
-        <Route path="/visa-center"        element={<VisaCenterPage />} />
-        <Route path="/company-formation"  element={<CompanyFormation />} />
-        <Route path="/residency"          element={<Residency />} />
-        <Route path="/travel"             element={<Travel />} />
-        <Route path="/knowledge-center"   element={<KnowledgeCenter />} />
+        {/* Standalone public tools — lazy */}
         <Route path="/track-request"      element={<TrackRequest />} />
         <Route path="/track-application"  element={<TrackRequest />} />
         <Route path="/verify-invoice"     element={<VerifyInvoice />} />
