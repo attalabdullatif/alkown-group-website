@@ -1015,8 +1015,6 @@ const T = {
       uploadLabel: "Upload Files", uploadSub: "Passport, ID, Photos, or any required documents",
       fileTypes: ["Passport", "National ID", "Photo", "Supporting Document"],
       reviewTitle: "Review Your Request",
-      bankTitle: "Bank Transfer Details",
-      bankNote: "After submitting, please transfer the amount and send the receipt via WhatsApp.",
       times: ["09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM"],
       success: "Request Submitted!", successSub: "We've sent a confirmation and invoice to your email. Our team will review your request within 24 hours."
     },
@@ -1196,8 +1194,6 @@ const T = {
       uploadLabel: "رفع الملفات", uploadSub: "جواز السفر، الهوية، الصور، أو أي وثائق مطلوبة",
       fileTypes: ["جواز السفر", "الهوية الوطنية", "صورة شخصية", "وثيقة داعمة"],
       reviewTitle: "مراجعة طلبك",
-      bankTitle: "بيانات التحويل البنكي",
-      bankNote: "بعد الإرسال، يرجى تحويل المبلغ وإرسال الإيصال على الواتساب.",
       times: ["09:00 ص", "10:00 ص", "11:00 ص", "12:00 م", "02:00 م", "03:00 م", "04:00 م", "05:00 م"],
       success: "تم إرسال طلبك!", successSub: "أرسلنا تأكيداً وفاتورة على بريدك الإلكتروني. سيراجع فريقنا طلبك خلال 24 ساعة."
     },

@@ -169,26 +169,9 @@ export default function BookingPage({ t, lang, ff }) {
               ))}
             </div>
 
-            {/* بيانات البنك */}
-            <div style={{ background: "#0a0a0a", borderRadius: 4, padding: "24px 28px", marginBottom: 20 }}>
-              <div style={{ color: C.gold, fontSize: ".7rem", letterSpacing: ".2em", textTransform: "uppercase", marginBottom: 16 }}>{t.booking.bankTitle}</div>
-              {[
-                [ar ? "اسم البنك" : "Bank", "مصرف رويا"],
-                [ar ? "اسم الحساب" : "Account Name", "Alkown Group LLC"],
-                ["IBAN", "AE27 1325 4490 9522 0000 001"],
-                [ar ? "المرجع" : "Reference", submitted.requestNumber],
-              ].map(([k, v]) => (
-                <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #1a1a1a", color: "#ccc", fontSize: ".85rem" }}>
-                  <span style={{ color: "#666" }}>{k}</span>
-                  <strong style={{ color: k === (ar ? "المرجع" : "Reference") ? C.gold : "#fff" }}>{v}</strong>
-                </div>
-              ))}
-              <p style={{ color: "#555", fontSize: ".75rem", marginTop: 12 }}>⚠️ {t.booking.bankNote}</p>
-            </div>
-
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
               <a href={waLink} target="_blank" rel="noopener noreferrer" className="gbtn" style={{ fontFamily: ff, textDecoration: "none", display: "inline-block" }}>
-                📲 {ar ? "إرسال الإيصال عبر واتساب" : "Send Receipt via WhatsApp"}
+                📲 {ar ? "تابع طلبك عبر واتساب" : "Follow Up on WhatsApp"}
               </a>
               <button className="obtn" style={{ fontFamily: ff }} onClick={() => { setSubmitted(null); setStep(1); setForm({ name: "", email: "", phone: "", whatsapp: "", date: "", time: "", msg: "" }); setSelectedService(null); setUploadedFiles([]); }}>
                 {ar ? "طلب جديد" : "New Request"}
@@ -378,22 +361,6 @@ export default function BookingPage({ t, lang, ff }) {
                     <span style={{ color: C.g800, fontWeight: 600, fontSize: ".85rem", textAlign: "end" }}>{v}</span>
                   </div>
                 ))}
-              </div>
-
-              {/* بيانات التحويل */}
-              <div style={{ background: "#0a0a0a", borderRadius: 4, padding: "20px 24px", marginBottom: 24 }}>
-                <div style={{ color: C.gold, fontSize: ".7rem", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 12 }}>{t.booking.bankTitle}</div>
-                {[
-                  [ar ? "اسم البنك" : "Bank", "مصرف رويا"],
-                  [ar ? "اسم الحساب" : "Account Name", "Alkown Group LLC"],
-                  ["IBAN", "AE27 1325 4490 9522 0000 001"],
-                ].map(([k, v]) => (
-                  <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: "1px solid #1a1a1a", color: "#aaa", fontSize: ".82rem" }}>
-                    <span style={{ color: "#555" }}>{k}</span>
-                    <span>{v}</span>
-                  </div>
-                ))}
-                <p style={{ color: "#555", fontSize: ".74rem", marginTop: 10 }}>⚠️ {t.booking.bankNote}</p>
               </div>
 
               <div style={{ display: "flex", justifyContent: "space-between" }}>

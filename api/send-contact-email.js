@@ -388,15 +388,6 @@ function clientConfirmHtml({ requestNumber, clientName, clientEmail, clientPhone
       <div class="row"><span class="muted">التاريخ</span><span>${now}</span></div>
       ${notes ? `<div class="row"><span class="muted">ملاحظاتك</span><span style="max-width:55%;text-align:end">${esc(notes)}</span></div>` : ""}
     </div>
-    <div class="card">
-      <h2>💳 بيانات التحويل البنكي</h2>
-      <div class="bank-box">
-        <div class="bank-row"><span class="muted">اسم البنك</span><strong>مصرف رويا</strong></div>
-        <div class="bank-row"><span class="muted">اسم الحساب</span><strong>Alkown Group LLC</strong></div>
-        <div class="bank-row"><span class="muted">IBAN</span><strong>AE27 1325 4490 9522 0000 001</strong></div>
-        <div class="bank-row"><span class="muted">المرجع</span><strong class="gold">${esc(requestNumber)}</strong></div>
-      </div>
-    </div>
     <div class="card" style="text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
       <a href="https://www.alkownglobal.com/track-request" class="btn">تتبّع طلبي</a>
       <a href="https://wa.me/971544909522?text=مرحباً، طلبي ${esc(requestNumber)}" class="btn-ghost">💬 واتساب</a>
