@@ -12,6 +12,7 @@ const { applyCors } = require("./_cors");
 const { checkRateLimit } = require("./_rateLimit");
 const { createClient } = require("@supabase/supabase-js");
 
+// Keep in sync with the limits in src/sections/BookingSection.jsx.
 const MAX_FILES = 6;
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const ALLOWED_FILE = /^(image\/[\w.+-]+|application\/pdf)$/;
@@ -91,25 +92,26 @@ module.exports = async (req, res) => {
     if (reqErr) throw reqErr;
 
     // ── Signed upload URLs for the attachments (best-effort) ──
-    const uploads = [];
-    for (const f of files) {
-      const safeName = f.name.replace(/[^\w.-]+/g, "-");
-      const path = `${request.id}/${Date.now()}-${f.index}-${safeName}`;
-      const { data: signed, error: signErr } = await sb.storage
-        .from("request-documents").createSignedUploadUrl(path);
-      if (signErr) { console.error("[submit-request] sign upload:", signErr.message); continue; }
-      const { error: rowErr } = await sb.from("request_files").insert([{
-        request_id: request.id, file_type: f.docType, file_name: f.name, storage_path: signed.path,
-      }]);
-      if (rowErr) { console.error("[submit-request] file row:", rowErr.message); continue; }
-      uploads.push({ index: f.index, path: signed.path, token: signed.token });
+    const stamp = Date.now();
+    const signed = await Promise.all(files.map(async f => {
+      const path = `${request.id}/${stamp}-${f.index}-${f.name.replace(/[^\w.-]+/g, "-")}`;
+      const { data, error } = await sb.storage.from("request-documents").createSignedUploadUrl(path);
+      if (error) console.error("[submit-request] sign upload:", error.message);
+      return data && { ...f, path: data.path, token: data.token };
+    }));
+    let uploads = signed.filter(Boolean);
+    if (uploads.length) {
+      const { error: rowErr } = await sb.from("request_files").insert(uploads.map(u => ({
+        request_id: request.id, file_type: u.docType, file_name: u.name, storage_path: u.path,
+      })));
+      if (rowErr) { console.error("[submit-request] file rows:", rowErr.message); uploads = []; }
     }
 
     return res.status(200).json({
       ok: true,
       requestId: request.id,
       requestNumber,
-      uploads,
+      uploads: uploads.map(({ index, path, token }) => ({ index, path, token })),
       client: { id: client.id, full_name: client.full_name, email: client.email, phone: client.phone },
     });
   } catch (err) {

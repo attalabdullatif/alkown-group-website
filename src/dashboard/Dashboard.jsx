@@ -75,6 +75,7 @@ export default function Dashboard() {
     requests.forEach(r => { const s = normalizeStatus(r.status); counts[s] = (counts[s] || 0) + 1; });
     return counts;
   }, [requests]);
+  const statusMax = Math.max(...Object.values(statusCounts), 1);
 
   const monthCounts = useMemo(() => {
     const counts = {};
@@ -177,7 +178,7 @@ export default function Dashboard() {
               <div style={{ display: "grid", gap: 14 }}>
                 {VISA_STATUSES.map(status => {
                   const count = statusCounts[status] || 0;
-                  const max = Math.max(...Object.values(statusCounts), 1);
+                  const max = statusMax;
                   return (
                     <div key={status}>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, fontSize: 14 }}>

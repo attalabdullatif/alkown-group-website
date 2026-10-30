@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Link, Navigate, useLocation, useNavigate 
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext";
 import { signOut } from "./lib/auth";
-import { getRoleLabel, normalizeRole } from "./lib/rbac";
+import { getRoleLabel, isRoleAllowed } from "./lib/rbac";
 import { ContentProvider } from "./context/ContentContext";
 
 // ── Eager: critical path (landing + auth) ──────────────────────
@@ -76,7 +76,8 @@ const DarkCtx = createContext({ dark: false, toggle: () => {} });
 export const useDark = () => useContext(DarkCtx);
 
 // ── Admin navigation — grouped side menu (right side, RTL) ────
-// Roles here must match each route's <ProtectedRoute allowed> below.
+// The routes below use the same STAFF / MANAGERS lists, so a menu link is
+// shown exactly when its page is reachable.
 const STAFF = ["admin", "manager", "staff"];
 const MANAGERS = ["admin", "manager"];
 
@@ -103,11 +104,6 @@ const NAV_GROUPS = [
   ]},
 ];
 
-// Same rule as ProtectedRoute: compare normalised roles ("Admin" === "admin")
-function canSee(item, role) {
-  return item.roles.map(r => normalizeRole(r)).includes(normalizeRole(role));
-}
-
 const SIDEBAR_WIDTH = 236;
 
 function Navigation() {
@@ -126,7 +122,7 @@ function Navigation() {
   }
 
   const groups = NAV_GROUPS
-    .map(g => ({ ...g, items: g.items.filter(item => canSee(item, role)) }))
+    .map(g => ({ ...g, items: g.items.filter(item => isRoleAllowed(item.roles, role)) }))
     .filter(g => g.items.length);
 
   const smallBtn = {
@@ -342,25 +338,25 @@ export default function App() {
 
         {/* CRM — محمي — lazy chunks */}
         <Route path="/dashboard" element={
-          <ProtectedRoute allowed={["admin", "manager", "staff"]}>
+          <ProtectedRoute allowed={STAFF}>
             <DashboardPage />
           </ProtectedRoute>
         } />
 
         <Route path="/clients" element={
-          <ProtectedRoute allowed={["admin", "manager"]}>
+          <ProtectedRoute allowed={MANAGERS}>
             <ClientsPage />
           </ProtectedRoute>
         } />
 
         <Route path="/services" element={
-          <ProtectedRoute allowed={["admin", "manager"]}>
+          <ProtectedRoute allowed={MANAGERS}>
             <ServicesPage />
           </ProtectedRoute>
         } />
 
         <Route path="/requests" element={
-          <ProtectedRoute allowed={["admin", "manager", "staff"]}>
+          <ProtectedRoute allowed={STAFF}>
             <RequestsPage />
           </ProtectedRoute>
         } />
@@ -369,19 +365,19 @@ export default function App() {
         <Route path="/pipeline" element={<Navigate to="/requests" replace />} />
 
         <Route path="/tasks" element={
-          <ProtectedRoute allowed={["admin", "manager", "staff"]}>
+          <ProtectedRoute allowed={STAFF}>
             <PageLayout><TaskDashboard /></PageLayout>
           </ProtectedRoute>
         } />
 
         <Route path="/documents" element={
-          <ProtectedRoute allowed={["admin", "manager", "staff"]}>
+          <ProtectedRoute allowed={STAFF}>
             <PageLayout><DocumentCenter /></PageLayout>
           </ProtectedRoute>
         } />
 
         <Route path="/notifications" element={
-          <ProtectedRoute allowed={["admin", "manager"]}>
+          <ProtectedRoute allowed={MANAGERS}>
             <PageLayout><NotificationCenter /></PageLayout>
           </ProtectedRoute>
         } />
@@ -389,7 +385,7 @@ export default function App() {
         <Route path="/invoices" element={<Navigate to="/accounting" replace />} />
 
         <Route path="/accounting" element={
-          <ProtectedRoute allowed={["admin", "manager"]}>
+          <ProtectedRoute allowed={MANAGERS}>
             <AccountingPage />
           </ProtectedRoute>
         } />
@@ -405,7 +401,7 @@ export default function App() {
         <Route path="/visa/:slug"         element={<VisaRoutePage />} />
 
         <Route path="/visa-admin" element={
-          <ProtectedRoute allowed={["admin", "manager"]}>
+          <ProtectedRoute allowed={MANAGERS}>
             <PageLayout><VisaAdminIntelligence /></PageLayout>
           </ProtectedRoute>
         } />
@@ -415,37 +411,37 @@ export default function App() {
 
         {/* ── AI Knowledge Engine ────────────────────────────── */}
         <Route path="/ai" element={
-          <ProtectedRoute allowed={["admin","manager"]}>
+          <ProtectedRoute allowed={MANAGERS}>
             <PageLayout><AICommandCenter /></PageLayout>
           </ProtectedRoute>
         } />
         <Route path="/ai/knowledge" element={
-          <ProtectedRoute allowed={["admin","manager"]}>
+          <ProtectedRoute allowed={MANAGERS}>
             <PageLayout><KnowledgeBase /></PageLayout>
           </ProtectedRoute>
         } />
         <Route path="/ai/search" element={
-          <ProtectedRoute allowed={["admin","manager"]}>
+          <ProtectedRoute allowed={MANAGERS}>
             <PageLayout><RAGSearch /></PageLayout>
           </ProtectedRoute>
         } />
         <Route path="/ai/agents" element={
-          <ProtectedRoute allowed={["admin","manager"]}>
+          <ProtectedRoute allowed={MANAGERS}>
             <PageLayout><AgentHub /></PageLayout>
           </ProtectedRoute>
         } />
         <Route path="/ai/content" element={
-          <ProtectedRoute allowed={["admin","manager"]}>
+          <ProtectedRoute allowed={MANAGERS}>
             <PageLayout><ContentEngine /></PageLayout>
           </ProtectedRoute>
         } />
         <Route path="/ai/calendar" element={
-          <ProtectedRoute allowed={["admin","manager"]}>
+          <ProtectedRoute allowed={MANAGERS}>
             <PageLayout><ContentCalendar /></PageLayout>
           </ProtectedRoute>
         } />
         <Route path="/ai/memory" element={
-          <ProtectedRoute allowed={["admin","manager"]}>
+          <ProtectedRoute allowed={MANAGERS}>
             <PageLayout><BrandMemory /></PageLayout>
           </ProtectedRoute>
         } />

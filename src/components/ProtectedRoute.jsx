@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { normalizeRole, meetsLevel } from "../lib/rbac";
+import { normalizeRole, meetsLevel, isRoleAllowed } from "../lib/rbac";
 
 export default function ProtectedRoute({ children, allowed, minLevel }) {
   const { user, role, loading } = useAuth();
@@ -35,8 +35,7 @@ export default function ProtectedRoute({ children, allowed, minLevel }) {
     );
   }
 
-  // allowed array check: normalize both sides before comparing
-  if (allowed && !allowed.map(r => normalizeRole(r)).includes(normalized)) {
+  if (allowed && !isRoleAllowed(allowed, role)) {
     return (
       <div style={{
         display: "flex", flexDirection: "column", alignItems: "center",

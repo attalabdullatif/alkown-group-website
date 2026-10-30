@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { sendStatusNotification } from "../lib/crm";
 import {
   CRM_COLORS,
+  TASK_PRIORITIES,
   VISA_STATUSES,
   buttonStyle,
   cardStyle,
@@ -26,27 +27,15 @@ const emptyRequest = {
   notes: "",
 };
 
-const PRIORITIES = [
-  { key: "high",   ar: "عالية",   color: "#c0392b" },
-  { key: "medium", ar: "متوسطة",  color: "#c8922a" },
-  { key: "low",    ar: "منخفضة",  color: "#2d9c5a" },
-];
-
 function PriorityBadge({ priority }) {
-  const p = PRIORITIES.find(x => x.key === priority);
+  const p = TASK_PRIORITIES.find(x => x.value === priority);
   if (!p) return null;
   return (
     <span style={{
       padding: "1px 8px", borderRadius: 99, fontSize: 10, fontWeight: 700,
       background: `${p.color}18`, color: p.color,
-    }}>{p.ar}</span>
+    }}>{p.label}</span>
   );
-}
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-function statusLabel(status) {
-  return statusLabelAr(status);
 }
 
 // ── Workflow Stepper ──────────────────────────────────────────────────────────
@@ -100,7 +89,7 @@ function WorkflowStepper({ currentStatus }) {
                   color: textColor, fontWeight: isActive ? 800 : 500,
                   whiteSpace: "nowrap", letterSpacing: ".02em",
                 }}>
-                  {statusLabel(status)}
+                  {statusLabelAr(status)}
                 </div>
               </div>
               {/* Connector line */}
@@ -153,7 +142,7 @@ function Timeline({ history, loading }) {
                     color: statusColor(entry.from_status),
                     padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 700,
                   }}>
-                    {statusLabel(entry.from_status)}
+                    {statusLabelAr(entry.from_status)}
                   </span>
                   <span style={{ color: CRM_COLORS.muted, fontSize: 12 }}>←</span>
                 </>
@@ -163,7 +152,7 @@ function Timeline({ history, loading }) {
                 color: statusColor(entry.to_status),
                 padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 800,
               }}>
-                {statusLabel(entry.to_status)}
+                {statusLabelAr(entry.to_status)}
               </span>
             </div>
             {/* Note */}
@@ -269,7 +258,7 @@ function KanbanBoard({ requests, onEdit, onMove }) {
                 borderRadius: "8px 8px 0 0", padding: "10px 14px",
                 display: "flex", justifyContent: "space-between", alignItems: "center",
               }}>
-                <span style={{ fontWeight: 700, fontSize: 13, color }}>{statusLabel(status)}</span>
+                <span style={{ fontWeight: 700, fontSize: 13, color }}>{statusLabelAr(status)}</span>
                 <span style={{ background: `${color}22`, color, borderRadius: 20, padding: "1px 9px", fontSize: 11, fontWeight: 800 }}>
                   {cards.length}
                 </span>
@@ -422,14 +411,14 @@ export default function Requests() {
       client_id: form.client_id,
       service_id: form.service_id || null,
       status: form.status,
-      priority: form.priority || "medium",
+      priority: form.priority,
       assigned_to_email: form.assigned_to_email.trim() || null,
       notes: form.notes,
     };
 
-    // .select() so a new request's id is available for its history row
+    // .select() on insert so the new request's id is available for its history row
     const result = selectedRequest
-      ? await supabase.from("requests").update(payload).eq("id", selectedRequest.id).select("id")
+      ? await supabase.from("requests").update(payload).eq("id", selectedRequest.id)
       : await supabase.from("requests").insert([{ ...payload, request_number: makeRequestNumber() }]).select("id");
 
     if (result.error) {
@@ -438,29 +427,16 @@ export default function Requests() {
       return;
     }
 
-    // Record history when status changes (or on creation)
-    const statusChanged = !selectedRequest || normalizeStatus(selectedRequest.status) !== form.status;
-    if (statusChanged) {
-      await supabase.from("request_history").insert([{
-        request_id: selectedRequest?.id || result.data?.[0]?.id,
-        from_status: selectedRequest?.status || null,
-        to_status: form.status,
-        note: statusNote.trim() || null,
-        changed_by: user?.id || null,
-        changed_by_email: user?.email || null,
-      }]);
-    }
-
-    // Send notification if status changed on existing request
-    if (selectedRequest && statusChanged) {
-      await sendStatusNotification({
-        requestNumber: selectedRequest.request_number,
-        client: selectedRequest.clients,
-        form: {
-          service: services.find((s) => s.id === form.service_id)?.name || "",
-          msg: statusNote || form.notes,
-        },
-        status: form.status,
+    // History on creation or status change; the client is emailed only for
+    // changes to an existing request.
+    if (!selectedRequest || normalizeStatus(selectedRequest.status) !== form.status) {
+      await recordStatusChange({
+        request: selectedRequest || { id: result.data?.[0]?.id },
+        toStatus: form.status,
+        note: statusNote.trim(),
+        notify: !!selectedRequest,
+        serviceName: services.find((s) => s.id === form.service_id)?.name,
+        message: statusNote || form.notes,
       });
     }
 
@@ -469,32 +445,43 @@ export default function Requests() {
     await loadData();
   }
 
+  // Side effects of any status change (form or board): a history row, then
+  // an email to the client. The email isn't awaited so the UI never waits on it.
+  async function recordStatusChange({ request, toStatus, note, notify, serviceName, message }) {
+    await supabase.from("request_history").insert([{
+      request_id: request.id,
+      from_status: request.status || null,
+      to_status: toStatus,
+      note: note || null,
+      changed_by: user?.id || null,
+      changed_by_email: user?.email || null,
+    }]);
+    if (notify) {
+      sendStatusNotification({
+        requestNumber: request.request_number,
+        client: request.clients,
+        form: { service: serviceName || request.services?.name || "", msg: message || "" },
+        status: toStatus,
+      });
+    }
+  }
+
   // Kanban drag & drop: move a request to another stage
   async function moveRequest(requestId, toStatus) {
     const request = requests.find(r => r.id === requestId);
     if (!request || normalizeStatus(request.status) === toStatus) return;
+    const setCardStatus = (status) =>
+      setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status } : r));
     setError("");
-    setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: toStatus } : r));
+    setCardStatus(toStatus);
 
     const { error: moveError } = await supabase.from("requests").update({ status: toStatus }).eq("id", requestId);
     if (moveError) {
       setError(moveError.message);
-      await loadData();
+      setCardStatus(request.status);
       return;
     }
-    await supabase.from("request_history").insert([{
-      request_id: requestId,
-      from_status: request.status || null,
-      to_status: toStatus,
-      changed_by: user?.id || null,
-      changed_by_email: user?.email || null,
-    }]);
-    await sendStatusNotification({
-      requestNumber: request.request_number,
-      client: request.clients,
-      form: { service: request.services?.name || "", msg: "" },
-      status: toStatus,
-    });
+    await recordStatusChange({ request, toStatus, notify: true });
     if (selectedRequest?.id === requestId) {
       setSelectedRequest({ ...request, status: toStatus });
       setForm(f => ({ ...f, status: toStatus }));
@@ -590,12 +577,12 @@ export default function Requests() {
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={{ ...inputStyle, flex: "0 0 180px" }}>
               <option value="All">كل الحالات</option>
               {VISA_STATUSES.map((s) => (
-                <option key={s} value={s}>{statusLabel(s)}</option>
+                <option key={s} value={s}>{statusLabelAr(s)}</option>
               ))}
             </select>
             <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} style={{ ...inputStyle, flex: "0 0 140px" }}>
               <option value="All">كل الأولويات</option>
-              {PRIORITIES.map((p) => <option key={p.key} value={p.key}>{p.ar}</option>)}
+              {TASK_PRIORITIES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
             </select>
             <button style={outlineButtonStyle} onClick={loadData}>تحديث</button>
             {/* View toggle */}
@@ -664,7 +651,7 @@ export default function Requests() {
                           background: `${statusColor(request.status)}18`,
                           padding: "2px 10px", borderRadius: 20,
                         }}>
-                          {statusLabel(request.status)}
+                          {statusLabelAr(request.status)}
                         </span>
                       </td>
                       <td><PriorityBadge priority={request.priority} /></td>
@@ -706,11 +693,11 @@ export default function Requests() {
                 {services.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
               <select value={form.status} onChange={(e) => setForm(f => ({ ...f, status: e.target.value }))} style={inputStyle}>
-                {VISA_STATUSES.map((s) => <option key={s} value={s}>{statusLabel(s)}</option>)}
+                {VISA_STATUSES.map((s) => <option key={s} value={s}>{statusLabelAr(s)}</option>)}
               </select>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 10 }}>
                 <select value={form.priority} onChange={(e) => setForm(f => ({ ...f, priority: e.target.value }))} style={inputStyle} title="الأولوية">
-                  {PRIORITIES.map((p) => <option key={p.key} value={p.key}>أولوية {p.ar}</option>)}
+                  {TASK_PRIORITIES.map((p) => <option key={p.value} value={p.value}>الأولوية: {p.label}</option>)}
                 </select>
                 <input
                   type="email"
@@ -791,7 +778,7 @@ export default function Requests() {
                         color: statusColor(selectedRequest.status),
                         padding: "3px 10px", borderRadius: 20, fontWeight: 800, fontSize: 13,
                       }}>
-                        {statusLabel(selectedRequest.status)}
+                        {statusLabelAr(selectedRequest.status)}
                       </span>
                     </Detail>
                     <Detail label="تاريخ الإنشاء" value={formatDate(selectedRequest.created_at)} />

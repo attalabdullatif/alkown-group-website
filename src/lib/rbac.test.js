@@ -1,6 +1,7 @@
 // Smoke tests for the RBAC permission layer (security-critical).
 import {
   can,
+  isRoleAllowed,
   normalizeRole,
   meetsLevel,
   requirePermission,
@@ -80,5 +81,17 @@ describe("filterNavByRole", () => {
   it("hides admin items from lower roles and shows them to admins", () => {
     expect(filterNavByRole(nav, "staff").map((n) => n.to)).not.toContain("/admin-only");
     expect(filterNavByRole(nav, "company_admin").map((n) => n.to)).toContain("/admin-only");
+  });
+});
+
+describe("isRoleAllowed", () => {
+  test("matches legacy and canonical spellings", () => {
+    expect(isRoleAllowed(["admin", "manager"], "Admin")).toBe(true);
+    expect(isRoleAllowed(["admin", "manager"], "company_admin")).toBe(true);
+    expect(isRoleAllowed(["admin", "manager", "staff"], "Staff")).toBe(true);
+  });
+  test("rejects roles outside the list", () => {
+    expect(isRoleAllowed(["admin", "manager"], "staff")).toBe(false);
+    expect(isRoleAllowed(["admin", "manager"], null)).toBe(false);
   });
 });

@@ -243,7 +243,7 @@ function TrackView({ setView, ar }) {
     setRequest(row);
   }
 
-  const stepIdx = request ? clientStepIndex(request.status) : -1;
+  const stepIdx = clientStepIndex(request?.status);
 
   return (
     <div style={{ maxWidth: 560, margin: "0 auto", padding: "60px 24px" }}>
@@ -569,7 +569,7 @@ function PortalView({ user, client, ar, onSignOut }) {
                         )}
 
                         {/* ── Outstanding Requirements Checklist ── */}
-                        {req.status === "Pending Documents" && (
+                        {normalizeStatus(req.status) === "Documents Pending" && (
                           <div style={{ marginBottom: 20, background: "#0d0d0d", borderRadius: 10, padding: 16, border: `1px solid ${GOLD}33` }}>
                             <div style={{ fontSize: 13, fontWeight: 700, color: "#c28a25", marginBottom: 12 }}>⚠️ المستندات المطلوبة</div>
                             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -884,7 +884,7 @@ function AppointmentCard({ appt }) {
           {appt.notes && <div style={{ color: "#aaa", fontSize: 12, marginTop: 6, fontStyle: "italic" }}>{appt.notes}</div>}
         </div>
         <span style={{ background: `${color}22`, color, padding: "4px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" }}>
-          {(APPT_STATUS_AR[status] || status)}
+          {APPT_STATUS_AR[status] || status}
         </span>
       </div>
     </div>

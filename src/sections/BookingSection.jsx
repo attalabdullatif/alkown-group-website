@@ -3,13 +3,18 @@ import { C } from "../utils/theme";
 import { supabase } from "../lib/supabase";
 import PageHero from "./PageHero";
 
+// Attachment limits — keep in sync with api/submit-request.js, which issues
+// the signed upload URLs and re-checks them.
+const MAX_FILES = 6;
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
+const ALLOWED_FILE = /^(image\/[\w.+-]+|application\/pdf)$/;
+
 export default function BookingPage({ t, lang, ff }) {
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(null); // { requestNumber, serviceName, servicePrice }
   const [dbServices, setDbServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [uploadedFiles, setUploadedFiles] = useState([]); // [{ file, type, preview }]
-  const [uploading, setUploading] = useState(false); // eslint-disable-line no-unused-vars
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", whatsapp: "", date: "", time: "", msg: "" });
   const upd = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
@@ -44,15 +49,15 @@ export default function BookingPage({ t, lang, ff }) {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    if (!/^image\/|^application\/pdf$/.test(file.type)) {
+    if (!ALLOWED_FILE.test(file.type)) {
       alert(ar ? "يُقبل فقط صور أو ملفات PDF" : "Only images or PDF files are accepted");
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > MAX_FILE_BYTES) {
       alert(ar ? "حجم الملف أكبر من 10MB" : "File is larger than 10MB");
       return;
     }
-    if (uploadedFiles.length >= 6) {
+    if (uploadedFiles.length >= MAX_FILES) {
       alert(ar ? "الحد الأقصى 6 ملفات" : "Maximum 6 files");
       return;
     }
@@ -102,20 +107,11 @@ export default function BookingPage({ t, lang, ff }) {
       const { requestNumber, uploads = [], client: clientData } = await resp.json();
 
       // رفع الملفات عبر روابط موقّعة من الخادم (الزائر غير مسجّل دخول)
-      let filesFailed = uploadedFiles.length - uploads.length;
-      if (uploads.length) {
-        setUploading(true);
-        for (const up of uploads) {
-          const item = uploadedFiles[up.index];
-          try {
-            const { error: upErr } = item
-              ? await supabase.storage.from("request-documents").uploadToSignedUrl(up.path, up.token, item.file)
-              : { error: true };
-            if (upErr) filesFailed++;
-          } catch (e) { filesFailed++; }
-        }
-        setUploading(false);
-      }
+      const results = await Promise.allSettled(uploads.map(up =>
+        supabase.storage.from("request-documents")
+          .uploadToSignedUrl(up.path, up.token, uploadedFiles[up.index].file)));
+      const filesFailed = uploadedFiles.length
+        - results.filter(r => r.status === "fulfilled" && !r.value.error).length;
 
       // إرسال الإشعارات (إيميل + واتساب) — أي فشل لا يُسقط الطلب
       try {

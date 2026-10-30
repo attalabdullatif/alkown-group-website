@@ -80,7 +80,7 @@ export default function TrackRequest() {
     setError(visaId && !email.trim() ? T.needEmail : T.notFound);
   }
 
-  const stepIndex = request ? clientStepIndex(request.status) : -1;
+  const stepIndex = clientStepIndex(request?.status);
 
   return (
     <div style={{

@@ -214,6 +214,16 @@ export function requirePermission(role, resource, action) {
 }
 
 /**
+ * Is `role` one of the `allowed` roles? Both sides are normalised, so
+ * "Admin" / "admin" / "company_admin" all match. Used by ProtectedRoute and
+ * the admin menu so a link is shown exactly when its page is reachable.
+ */
+export function isRoleAllowed(allowed, role) {
+  const normalized = normalizeRole(role);
+  return allowed.some(r => normalizeRole(r) === normalized);
+}
+
+/**
  * Filter a list of nav items by role.
  * Each item may have { roles: string[] } — null/undefined means public.
  */

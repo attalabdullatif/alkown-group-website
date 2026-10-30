@@ -11,15 +11,6 @@ export const CRM_COLORS = {
   info: "#3d6f9f",
 };
 
-export const REQUEST_STATUSES = [
-  "New",
-  "In Progress",
-  "Pending Documents",
-  "Approved",
-  "Rejected",
-  "Completed",
-];
-
 // 9-stage visa workflow
 export const VISA_STATUSES = [
   "Lead",
@@ -45,14 +36,9 @@ export const VISA_STATUS_AR = {
   "Completed":            "مكتمل",
 };
 
-// All statuses merged for filter dropdowns (legacy + visa)
-export const ALL_STATUSES = [
-  ...new Set([...REQUEST_STATUSES, ...VISA_STATUSES]),
-];
-
 // ── One request-status vocabulary ─────────────────────────────────────────────
-// VISA_STATUSES (9 stages) is the canonical list staff pick from. Older rows may
-// still hold legacy values, so map them before labelling, colouring or placing
+// VISA_STATUSES (9 stages) is the canonical list staff pick from. Migration 025
+// converted requests rows, but request_history still holds legacy values, so map them before labelling, colouring or placing
 // them. "In Progress" maps conservatively to Consultation so a client is never
 // shown progress (e.g. "submitted") that hasn't happened.
 export const LEGACY_STATUS_MAP = {
@@ -90,13 +76,9 @@ export function clientStepIndex(status) {
 }
 
 export const statusColors = {
-  New: CRM_COLORS.goldDark,
-  "In Progress": CRM_COLORS.info,
-  "Pending Documents": "#c28a25",
   Approved: CRM_COLORS.success,
   Rejected: CRM_COLORS.danger,
   Completed: "#333",
-  // Visa workflow
   Lead: "#8b5cf6",
   Consultation: "#3d6f9f",
   "Documents Pending": "#c28a25",
