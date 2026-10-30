@@ -180,6 +180,25 @@
         letter-spacing: .2em;
       }
     </style>
+
+    <!-- Vercel Web Analytics (cookieless). Counts public pages only — admin
+         and login pages are dropped so the numbers reflect real visitors.
+         Loaded only on the deployed site (the script is served by Vercel). -->
+    <script>
+      (function () {
+        var host = location.hostname;
+        if (!/(^|\.)alkownglobal\.com$|\.vercel\.app$/.test(host)) return;
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+        var PRIVATE = /^\/(dashboard|clients|services|requests|pipeline|tasks|documents|notifications|accounting|invoices|visa-admin|ai|login)(\/|$)/;
+        window.va('beforeSend', function (event) {
+          return PRIVATE.test(new URL(event.url).pathname) ? null : event;
+        });
+        var s = document.createElement('script');
+        s.defer = true;
+        s.src = '/_vercel/insights/script.js';
+        document.head.appendChild(s);
+      })();
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
