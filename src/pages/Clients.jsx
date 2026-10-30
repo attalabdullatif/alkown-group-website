@@ -15,7 +15,8 @@ import {
   inputStyle,
   outlineButtonStyle,
   pageStyle,
-  statusColors,
+  statusColor,
+  statusLabelAr,
 } from "../components/crmUi";
 
 const emptyClient = { full_name: "", phone: "", email: "", pipeline_stage: "New Lead" };
@@ -719,11 +720,11 @@ export default function Clients() {
                   ) : (
                     <div style={{ display: "grid", gap: 10 }}>
                       {selectedRequests.map(r => (
-                        <div key={r.id} style={{ borderRight: `3px solid ${statusColors[r.status] || CRM_COLORS.gold}`, paddingRight: 12, paddingTop: 4, paddingBottom: 4 }}>
+                        <div key={r.id} style={{ borderRight: `3px solid ${statusColor(r.status)}`, paddingRight: 12, paddingTop: 4, paddingBottom: 4 }}>
                           <div style={{ fontWeight: 700, color: CRM_COLORS.goldDark, fontSize: 13 }}>{r.request_number}</div>
                           <div style={{ fontSize: 13, color: CRM_COLORS.text }}>{r.services?.name || "—"}</div>
                           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 2 }}>
-                            <span style={{ color: statusColors[r.status], fontSize: 12, fontWeight: 700 }}>{r.status}</span>
+                            <span style={{ color: statusColor(r.status), fontSize: 12, fontWeight: 700 }}>{statusLabelAr(r.status)}</span>
                             <span style={{ color: CRM_COLORS.muted, fontSize: 11 }}>{formatDate(r.created_at).split(",")[0]}</span>
                           </div>
                         </div>

@@ -1,8 +1,9 @@
 import { lazy, Suspense, createContext, useContext, useState as useDarkState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext";
 import { signOut } from "./lib/auth";
+import { getRoleLabel, normalizeRole } from "./lib/rbac";
 import { ContentProvider } from "./context/ContentContext";
 
 // ── Eager: critical path (landing + auth) ──────────────────────
@@ -24,7 +25,6 @@ const VerifyInvoice        = lazy(() => import("./pages/VerifyInvoice"));
 const ClientPortal         = lazy(() => import("./pages/ClientPortal"));
 
 // ── Phase 2 — New Features ────────────────────────────────────
-const VisaPipeline         = lazy(() => import("./pages/pipeline/VisaPipeline"));
 const TaskDashboard        = lazy(() => import("./pages/tasks/TaskDashboard"));
 const DocumentCenter       = lazy(() => import("./pages/documents/DocumentCenter"));
 const NotificationCenter   = lazy(() => import("./pages/notifications/NotificationCenter"));
@@ -75,152 +75,165 @@ function NotFound() {
 const DarkCtx = createContext({ dark: false, toggle: () => {} });
 export const useDark = () => useContext(DarkCtx);
 
-const NAV_LINKS = [
-  { to: "/dashboard",    label: "📊 لوحة التحكم",      roles: ["admin","manager","staff"] },
-  { to: "/clients",      label: "👥 العملاء",           roles: ["admin","manager"] },
-  { to: "/services",     label: "🛎️ الخدمات",           roles: ["admin","manager"] },
-  { to: "/requests",     label: "📋 الطلبات",           roles: ["admin","manager","staff"] },
-  { to: "/pipeline",     label: "🗂️ خط الطلبات",         roles: ["admin","manager","staff"] },
-  { to: "/tasks",        label: "✅ المهام",              roles: ["admin","manager","staff"] },
-  { to: "/documents",    label: "📁 الوثائق",             roles: ["admin","manager","staff"] },
-  { to: "/notifications",label: "🔔 الإشعارات",           roles: ["admin","manager"] },
-  { to: "/accounting",   label: "💼 الفواتير والمحاسبة",  roles: ["admin","manager"] },
-  { to: "/visa-admin",       label: "🛂 إدارة التأشيرات",   roles: ["admin","manager"] },
-  { to: "/ai",             label: "🤖 الذكاء الاصطناعي",  roles: ["admin","manager"] },
-  { to: "/track-request",label: "🔍 تتبع الطلب",        roles: null },
-  { to: "/portal",       label: "🚪 بوابة العملاء",     roles: null },
+// ── Admin navigation — grouped side menu (right side, RTL) ────
+// Roles here must match each route's <ProtectedRoute allowed> below.
+const STAFF = ["admin", "manager", "staff"];
+const MANAGERS = ["admin", "manager"];
+
+const NAV_GROUPS = [
+  { title: null, items: [
+    { to: "/dashboard",     icon: "📊", label: "لوحة التحكم",          roles: STAFF },
+  ]},
+  { title: "العمل اليومي", items: [
+    { to: "/requests",      icon: "📋", label: "الطلبات",              roles: STAFF },
+    { to: "/clients",       icon: "👥", label: "العملاء",              roles: MANAGERS },
+    { to: "/tasks",         icon: "✅", label: "المهام",               roles: STAFF },
+    { to: "/documents",     icon: "📁", label: "الوثائق",              roles: STAFF },
+  ]},
+  { title: "المالية", items: [
+    { to: "/accounting",    icon: "💼", label: "الفواتير والمحاسبة",   roles: MANAGERS },
+  ]},
+  { title: "الإعدادات", items: [
+    { to: "/services",      icon: "🛎️", label: "الخدمات",              roles: MANAGERS },
+    { to: "/visa-admin",    icon: "🛂", label: "إدارة التأشيرات",      roles: MANAGERS },
+    { to: "/notifications", icon: "🔔", label: "الإشعارات",            roles: MANAGERS },
+  ]},
+  { title: "الذكاء الاصطناعي", items: [
+    { to: "/ai",            icon: "🤖", label: "مركز الذكاء الاصطناعي", roles: MANAGERS },
+  ]},
 ];
 
+// Same rule as ProtectedRoute: compare normalised roles ("Admin" === "admin")
+function canSee(item, role) {
+  return item.roles.map(r => normalizeRole(r)).includes(normalizeRole(role));
+}
+
+const SIDEBAR_WIDTH = 236;
+
 function Navigation() {
-  const { user, role } = useAuth();
+  const { role } = useAuth();
   const { dark, toggle } = useDark();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [menuOpen, setMenuOpen] = useDarkState(false);
+
+  // Close the mobile drawer after navigating
+  useEffect(() => { setMenuOpen(false); }, [pathname, setMenuOpen]);
 
   async function handleSignOut() {
     await signOut();
     navigate("/login");
-    setMenuOpen(false);
   }
 
-  const visible = NAV_LINKS.filter(n => !n.roles || !user || n.roles.includes(role));
+  const groups = NAV_GROUPS
+    .map(g => ({ ...g, items: g.items.filter(item => canSee(item, role)) }))
+    .filter(g => g.items.length);
+
+  const smallBtn = {
+    background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)",
+    color: "rgba(255,255,255,.7)", borderRadius: 8, padding: "6px 10px",
+    cursor: "pointer", fontSize: ".95rem", lineHeight: 1, fontFamily: "inherit",
+  };
 
   return (
-    <div className="no-print" style={{
-      background: "linear-gradient(135deg,#1a1510,#2a2018)",
-      borderBottom: "1px solid rgba(201,168,76,.18)",
-      padding: "0 24px",
-      direction: "rtl",
-      fontFamily: "'Dubai','Cairo','Noto Naskh Arabic',sans-serif",
-    }}>
-      {/* Top bar */}
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", maxWidth:1400, margin:"0 auto", padding:"10px 0" }}>
-        <Link to="/" style={{ textDecoration:"none", display:"flex", alignItems:"center", gap:8 }}>
-          <span style={{ color:"#c9a84c", fontWeight:800, fontSize:"1.1rem", letterSpacing:".05em" }}>الكون</span>
-          <span style={{ color:"rgba(255,255,255,.35)", fontSize:".72rem", letterSpacing:".18em" }}>GLOBAL · CRM</span>
-        </Link>
-        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <button
-            onClick={toggle}
-            title={dark ? "الوضع الفاتح" : "الوضع الداكن"}
-            style={{
-              background: dark ? "rgba(201,168,76,.15)" : "rgba(255,255,255,.08)",
-              border: `1px solid ${dark ? "rgba(201,168,76,.4)" : "rgba(255,255,255,.15)"}`,
-              color: dark ? "#c9a84c" : "rgba(255,255,255,.6)",
-              borderRadius: 8, padding: "5px 10px", cursor: "pointer",
-              fontSize: "1rem", lineHeight: 1, transition: "all .2s",
-            }}
-          >
-            {dark ? "☀️" : "🌙"}
-          </button>
-          {user && (
-            <>
-              <span style={{ color:"rgba(255,255,255,.35)", fontSize:".78rem" }} className="hide-mobile">
-                {role === "admin" ? "👑" : role === "manager" ? "🏢" : "👤"} {role}
-              </span>
-              <button onClick={handleSignOut} className="hide-mobile" style={{
-                background:"rgba(255,80,80,.08)", color:"#ff6b6b",
-                border:"1px solid rgba(255,80,80,.25)", padding:"6px 14px",
-                borderRadius:8, cursor:"pointer", fontFamily:"inherit", fontSize:".78rem", fontWeight:700,
-              }}>
-                تسجيل الخروج
-              </button>
-            </>
-          )}
-          {/* Hamburger — mobile only */}
-          <button
-            onClick={() => setMenuOpen(o => !o)}
-            className="show-mobile"
-            style={{
-              background:"rgba(255,255,255,.06)", border:"1px solid rgba(255,255,255,.12)",
-              color:"rgba(255,255,255,.7)", borderRadius:8, padding:"6px 10px",
-              cursor:"pointer", fontSize:"1.1rem", lineHeight:1,
-              display:"none",
-            }}
-          >
-            {menuOpen ? "✕" : "☰"}
-          </button>
-        </div>
+    <div className="no-print" style={{ direction: "rtl", fontFamily: "'Dubai','Cairo','Noto Naskh Arabic',sans-serif" }}>
+      {/* Mobile top bar */}
+      <div className="crm-topbar" style={{
+        display: "none", position: "sticky", top: 0, zIndex: 40,
+        background: "linear-gradient(135deg,#1a1510,#2a2018)",
+        borderBottom: "1px solid rgba(201,168,76,.18)",
+        padding: "10px 16px", justifyContent: "space-between", alignItems: "center",
+      }}>
+        <Brand />
+        <button onClick={() => setMenuOpen(o => !o)} style={smallBtn} aria-label="القائمة">
+          {menuOpen ? "✕" : "☰"}
+        </button>
       </div>
 
-      {/* Nav links — desktop: wrap, mobile: dropdown */}
-      <div style={{ maxWidth:1400, margin:"0 auto" }}>
-        {/* Desktop */}
-        <div className="nav-desktop" style={{ display:"flex", flexWrap:"wrap", gap:0, paddingBottom:6 }}>
-          {visible.map(n => (
-            <NavLink key={n.to} to={n.to}>{n.label}</NavLink>
+      {menuOpen && <div className="crm-backdrop" onClick={() => setMenuOpen(false)} />}
+
+      <aside className={`crm-sidebar${menuOpen ? " open" : ""}`} style={{
+        position: "fixed", top: 0, right: 0, bottom: 0, width: SIDEBAR_WIDTH, zIndex: 50,
+        background: "linear-gradient(180deg,#1a1510,#231b13)",
+        borderLeft: "1px solid rgba(201,168,76,.18)",
+        display: "flex", flexDirection: "column",
+      }}>
+        <div style={{ padding: "18px 18px 12px" }}><Brand /></div>
+
+        <nav style={{ flex: 1, overflowY: "auto", padding: "4px 10px 12px" }}>
+          {groups.map((g, i) => (
+            <div key={g.title || i} style={{ marginTop: g.title ? 14 : 0 }}>
+              {g.title && (
+                <div style={{ color: "rgba(201,168,76,.55)", fontSize: ".68rem", fontWeight: 700, letterSpacing: ".08em", padding: "0 10px 6px" }}>
+                  {g.title}
+                </div>
+              )}
+              {g.items.map(item => (
+                <NavLink key={item.to} item={item} active={pathname === item.to || pathname.startsWith(item.to + "/")} />
+              ))}
+            </div>
           ))}
-        </div>
-        {/* Mobile dropdown */}
-        {menuOpen && (
-          <div className="nav-mobile" style={{
-            display:"flex", flexDirection:"column", paddingBottom:12,
-            borderTop:"1px solid rgba(201,168,76,.12)",
-          }}>
-            {visible.map(n => (
-              <NavLink key={n.to} to={n.to} onClick={() => setMenuOpen(false)}>{n.label}</NavLink>
-            ))}
-            {user && (
-              <button onClick={handleSignOut} style={{
-                background:"rgba(255,80,80,.08)", color:"#ff6b6b",
-                border:"1px solid rgba(255,80,80,.25)", padding:"10px 16px",
-                borderRadius:8, cursor:"pointer", fontFamily:"inherit", fontSize:".85rem", fontWeight:700,
-                margin:"8px 0 0", textAlign:"right",
-              }}>
-                تسجيل الخروج
-              </button>
-            )}
+        </nav>
+
+        <div style={{ borderTop: "1px solid rgba(201,168,76,.12)", padding: "12px 14px", display: "grid", gap: 10 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+            <span style={{ color: "rgba(255,255,255,.45)", fontSize: ".78rem" }}>
+              👤 {role ? getRoleLabel(role) : "—"}
+            </span>
+            <button onClick={toggle} title={dark ? "الوضع الفاتح" : "الوضع الداكن"} style={smallBtn}>
+              {dark ? "☀️" : "🌙"}
+            </button>
           </div>
-        )}
-      </div>
+          <a href="/" target="_blank" rel="noreferrer" style={{ color: "rgba(255,255,255,.55)", fontSize: ".8rem", textDecoration: "none" }}>
+            🌐 عرض الموقع ↗
+          </a>
+          <button onClick={handleSignOut} style={{
+            background: "rgba(255,80,80,.08)", color: "#ff6b6b",
+            border: "1px solid rgba(255,80,80,.25)", padding: "8px 14px",
+            borderRadius: 8, cursor: "pointer", fontFamily: "inherit", fontSize: ".8rem", fontWeight: 700,
+          }}>
+            تسجيل الخروج
+          </button>
+        </div>
+      </aside>
 
       <style>{`
-        @media (max-width: 768px) {
-          .nav-desktop { display: none !important; }
-          .show-mobile  { display: flex !important; }
-          .hide-mobile  { display: none !important; }
+        .crm-content { margin-right: ${SIDEBAR_WIDTH}px; }
+        .crm-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 45; }
+        @media (max-width: 900px) {
+          .crm-content  { margin-right: 0; }
+          .crm-topbar   { display: flex !important; }
+          .crm-sidebar  { transform: translateX(100%); transition: transform .2s ease; }
+          .crm-sidebar.open { transform: none; box-shadow: -8px 0 30px rgba(0,0,0,.4); }
         }
-        @media (min-width: 769px) {
-          .nav-mobile   { display: none !important; }
-          .show-mobile  { display: none !important; }
-        }
+        @media print { .crm-content { margin-right: 0; } }
       `}</style>
     </div>
   );
 }
 
-function NavLink({ to, children, onClick }) {
-  const active = window.location.pathname === to || window.location.pathname.startsWith(to + "/");
+function Brand() {
   return (
-    <Link to={to} onClick={onClick} style={{
-      textDecoration:"none", whiteSpace:"nowrap",
-      padding:"10px 16px", fontSize:".85rem", fontWeight: active ? 700 : 500,
-      color: active ? "#c9a84c" : "rgba(255,255,255,.6)",
-      borderBottom: active ? "2px solid #c9a84c" : "2px solid transparent",
-      fontFamily:"'Cairo','Noto Naskh Arabic',sans-serif",
-      transition:"all .2s",
+    <Link to="/dashboard" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
+      <span style={{ color: "#c9a84c", fontWeight: 800, fontSize: "1.1rem", letterSpacing: ".05em" }}>الكون</span>
+      <span style={{ color: "rgba(255,255,255,.35)", fontSize: ".68rem", letterSpacing: ".18em" }}>GLOBAL · CRM</span>
+    </Link>
+  );
+}
+
+function NavLink({ item, active }) {
+  return (
+    <Link to={item.to} style={{
+      display: "flex", alignItems: "center", gap: 10,
+      textDecoration: "none", padding: "9px 12px", marginBottom: 2, borderRadius: 8,
+      fontSize: ".86rem", fontWeight: active ? 700 : 500,
+      color: active ? "#c9a84c" : "rgba(255,255,255,.68)",
+      background: active ? "rgba(201,168,76,.12)" : "transparent",
+      borderRight: `3px solid ${active ? "#c9a84c" : "transparent"}`,
+      transition: "background .15s, color .15s",
     }}>
-      {children}
+      <span style={{ width: 20, textAlign: "center" }}>{item.icon}</span>
+      {item.label}
     </Link>
   );
 }
@@ -242,7 +255,7 @@ function PageLayout({ children }) {
       {/* Navigation — لا تتأثر بالـ invert */}
       <Navigation />
       {/* المحتوى — يتأثر بالوضع الليلي */}
-      <div className={dark ? "crm-dark" : ""} style={dark ? {
+      <div className={dark ? "crm-content crm-dark" : "crm-content"} style={dark ? {
         filter: "invert(1) hue-rotate(180deg)",
       } : {}}>
         <div style={{ padding: "20px" }}>
@@ -352,11 +365,8 @@ export default function App() {
           </ProtectedRoute>
         } />
 
-        <Route path="/pipeline" element={
-          <ProtectedRoute allowed={["admin", "manager", "staff"]}>
-            <PageLayout><VisaPipeline /></PageLayout>
-          </ProtectedRoute>
-        } />
+        {/* The pipeline board now lives in Requests (board view) */}
+        <Route path="/pipeline" element={<Navigate to="/requests" replace />} />
 
         <Route path="/tasks" element={
           <ProtectedRoute allowed={["admin", "manager", "staff"]}>
@@ -376,11 +386,7 @@ export default function App() {
           </ProtectedRoute>
         } />
 
-        <Route path="/invoices" element={
-          <ProtectedRoute allowed={["admin", "manager"]}>
-            <AccountingPage />
-          </ProtectedRoute>
-        } />
+        <Route path="/invoices" element={<Navigate to="/accounting" replace />} />
 
         <Route path="/accounting" element={
           <ProtectedRoute allowed={["admin", "manager"]}>

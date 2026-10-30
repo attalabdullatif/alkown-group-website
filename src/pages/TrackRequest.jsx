@@ -1,17 +1,8 @@
 import { useState } from "react";
 import { trackRequest, trackVisaApplication, parseVisaId } from "../services/trackingService";
-import { statusColors } from "../components/crmUi";
-
-const STATUS_AR = {
-  "New": "جديد",
-  "In Progress": "قيد التنفيذ",
-  "Pending Documents": "بانتظار وثائق",
-  "Approved": "موافق عليه",
-  "Rejected": "مرفوض",
-  "Completed": "مكتمل",
-};
-
-const STATUS_STEP = ["New", "In Progress", "Pending Documents", "Approved", "Completed"];
+import {
+  CLIENT_STEPS, clientStepIndex, normalizeStatus, statusColor, statusLabelAr,
+} from "../components/crmUi";
 
 export default function TrackRequest() {
   const [requestNumber, setRequestNumber] = useState("");
@@ -89,7 +80,7 @@ export default function TrackRequest() {
     setError(visaId && !email.trim() ? T.needEmail : T.notFound);
   }
 
-  const stepIndex = request ? STATUS_STEP.indexOf(request.status) : -1;
+  const stepIndex = request ? clientStepIndex(request.status) : -1;
 
   return (
     <div style={{
@@ -187,23 +178,23 @@ export default function TrackRequest() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, flexWrap: "wrap", gap: 10 }}>
               <span style={{ color: "#888", fontSize: 13 }}>{request.request_number}</span>
               <span style={{
-                background: `${statusColors[request.status] || "#c9a84c"}20`,
-                color: statusColors[request.status] || "#c9a84c",
+                background: `${statusColor(request.status)}20`,
+                color: statusColor(request.status),
                 padding: "6px 18px", borderRadius: 20, fontWeight: 700, fontSize: 14
               }}>
-                {lang === "ar" ? STATUS_AR[request.status] : request.status}
+                {lang === "ar" ? statusLabelAr(request.status) : normalizeStatus(request.status)}
               </span>
             </div>
 
-            {/* Progress Steps */}
-            {request.status !== "Rejected" && (
+            {/* Progress Steps — simplified client view of the 9 internal stages */}
+            {normalizeStatus(request.status) !== "Rejected" && (
               <div style={{ display: "flex", gap: 0, marginBottom: 28, position: "relative" }}>
-                {STATUS_STEP.map((step, i) => {
+                {CLIENT_STEPS.map((step, i) => {
                   const done = i <= stepIndex;
                   const active = i === stepIndex;
                   return (
-                    <div key={step} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}>
-                      {i < STATUS_STEP.length - 1 && (
+                    <div key={step.key} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}>
+                      {i < CLIENT_STEPS.length - 1 && (
                         <div style={{
                           position: "absolute", top: 12, left: "50%", width: "100%", height: 2,
                           background: done && i < stepIndex ? "#c9a84c" : "#2a2a2a", zIndex: 0
@@ -219,7 +210,7 @@ export default function TrackRequest() {
                         {done ? (active ? "●" : "✓") : i + 1}
                       </div>
                       <div style={{ marginTop: 6, fontSize: 10, color: done ? "#c9a84c" : "#555", textAlign: "center" }}>
-                        {lang === "ar" ? STATUS_AR[step] : step}
+                        {lang === "ar" ? step.ar : step.en}
                       </div>
                     </div>
                   );

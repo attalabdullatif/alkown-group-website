@@ -4,18 +4,9 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
   CRM_COLORS, LEAD_STAGE_AR, LEAD_STAGE_COLORS, LEAD_STAGES,
-  REQUEST_STATUSES, cardStyle, formatDate,
-  outlineButtonStyle, pageStyle, statusColors,
+  VISA_STATUSES, cardStyle, formatDate, normalizeStatus,
+  outlineButtonStyle, pageStyle, statusColor, statusLabelAr,
 } from "../components/crmUi";
-
-const STATUS_AR = {
-  "New": "جديد",
-  "In Progress": "قيد التنفيذ",
-  "Pending Documents": "بانتظار وثائق",
-  "Approved": "موافق عليه",
-  "Rejected": "مرفوض",
-  "Completed": "مكتمل",
-};
 
 export default function Dashboard() {
   const { user, role } = useAuth();
@@ -80,8 +71,8 @@ export default function Dashboard() {
   [requests]);
 
   const statusCounts = useMemo(() => {
-    const counts = Object.fromEntries(REQUEST_STATUSES.map(s => [s, 0]));
-    requests.forEach(r => { counts[r.status] = (counts[r.status] || 0) + 1; });
+    const counts = Object.fromEntries(VISA_STATUSES.map(s => [s, 0]));
+    requests.forEach(r => { const s = normalizeStatus(r.status); counts[s] = (counts[s] || 0) + 1; });
     return counts;
   }, [requests]);
 
@@ -184,19 +175,19 @@ export default function Dashboard() {
             <section style={{ ...cardStyle, padding: 22 }}>
               <h2 style={{ marginTop: 0, fontSize: 17 }}>الطلبات حسب الحالة</h2>
               <div style={{ display: "grid", gap: 14 }}>
-                {REQUEST_STATUSES.map(status => {
+                {VISA_STATUSES.map(status => {
                   const count = statusCounts[status] || 0;
                   const max = Math.max(...Object.values(statusCounts), 1);
                   return (
                     <div key={status}>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, fontSize: 14 }}>
-                        <span>{STATUS_AR[status]}</span>
-                        <strong style={{ color: statusColors[status] }}>{count}</strong>
+                        <span>{statusLabelAr(status)}</span>
+                        <strong style={{ color: statusColor(status) }}>{count}</strong>
                       </div>
                       <div style={{ height: 8, background: CRM_COLORS.beige, borderRadius: 999, overflow: "hidden" }}>
                         <div style={{
                           width: `${(count / max) * 100}%`, height: "100%",
-                          background: statusColors[status] || CRM_COLORS.gold,
+                          background: statusColor(status),
                           borderRadius: 999, transition: "width .4s"
                         }} />
                       </div>
@@ -328,11 +319,11 @@ export default function Dashboard() {
                         <td style={{ color: CRM_COLORS.muted, fontSize: 13 }}>{r.services?.name || "-"}</td>
                         <td>
                           <span style={{
-                            color: statusColors[r.status], fontWeight: 700, fontSize: 13,
-                            background: `${statusColors[r.status]}18`,
+                            color: statusColor(r.status), fontWeight: 700, fontSize: 13,
+                            background: `${statusColor(r.status)}18`,
                             padding: "2px 10px", borderRadius: 20
                           }}>
-                            {STATUS_AR[r.status] || r.status}
+                            {statusLabelAr(r.status)}
                           </span>
                         </td>
                         <td style={{ color: CRM_COLORS.muted, fontSize: 13 }}>{formatDate(r.created_at).split(",")[0]}</td>

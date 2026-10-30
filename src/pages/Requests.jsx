@@ -3,38 +3,58 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 import { sendStatusNotification } from "../lib/crm";
 import {
-  ALL_STATUSES,
   CRM_COLORS,
   VISA_STATUSES,
-  VISA_STATUS_AR,
   buttonStyle,
   cardStyle,
   formatDate,
   inputStyle,
   makeRequestNumber,
   outlineButtonStyle,
+  normalizeStatus,
   pageStyle,
-  statusColors,
+  statusColor,
+  statusLabelAr,
 } from "../components/crmUi";
 
 const emptyRequest = {
   client_id: "",
   service_id: "",
   status: "Lead",
+  priority: "medium",
+  assigned_to_email: "",
   notes: "",
 };
+
+const PRIORITIES = [
+  { key: "high",   ar: "عالية",   color: "#c0392b" },
+  { key: "medium", ar: "متوسطة",  color: "#c8922a" },
+  { key: "low",    ar: "منخفضة",  color: "#2d9c5a" },
+];
+
+function PriorityBadge({ priority }) {
+  const p = PRIORITIES.find(x => x.key === priority);
+  if (!p) return null;
+  return (
+    <span style={{
+      padding: "1px 8px", borderRadius: 99, fontSize: 10, fontWeight: 700,
+      background: `${p.color}18`, color: p.color,
+    }}>{p.ar}</span>
+  );
+}
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function statusLabel(status) {
-  return VISA_STATUS_AR[status] || status;
+  return statusLabelAr(status);
 }
 
 // ── Workflow Stepper ──────────────────────────────────────────────────────────
 
 function WorkflowStepper({ currentStatus }) {
-  const currentIndex = VISA_STATUSES.indexOf(currentStatus);
-  const isRejected = currentStatus === "Rejected";
+  const normalized = normalizeStatus(currentStatus);
+  const currentIndex = VISA_STATUSES.indexOf(normalized);
+  const isRejected = normalized === "Rejected";
 
   return (
     <div style={{ padding: "18px 22px", borderBottom: `1px solid ${CRM_COLORS.border}` }}>
@@ -44,7 +64,7 @@ function WorkflowStepper({ currentStatus }) {
       <div style={{ display: "flex", alignItems: "flex-start", overflowX: "auto", paddingBottom: 4 }}>
         {VISA_STATUSES.map((status, idx) => {
           const isDone = !isRejected && currentIndex > idx;
-          const isActive = currentStatus === status;
+          const isActive = normalized === status;
           const isLast = idx === VISA_STATUSES.length - 1;
 
           const circleColor = isActive
@@ -117,9 +137,9 @@ function Timeline({ history, loading }) {
           {/* Dot */}
           <div style={{
             width: 12, height: 12, borderRadius: "50%",
-            background: statusColors[entry.to_status] || CRM_COLORS.gold,
+            background: statusColor(entry.to_status),
             border: `2px solid #fff`,
-            boxShadow: `0 0 0 2px ${statusColors[entry.to_status] || CRM_COLORS.gold}44`,
+            boxShadow: `0 0 0 2px ${statusColor(entry.to_status)}44`,
             flexShrink: 0, marginTop: 3,
             position: "relative", zIndex: 1,
           }} />
@@ -129,8 +149,8 @@ function Timeline({ history, loading }) {
               {entry.from_status && (
                 <>
                   <span style={{
-                    background: `${statusColors[entry.from_status] || CRM_COLORS.muted}18`,
-                    color: statusColors[entry.from_status] || CRM_COLORS.muted,
+                    background: `${statusColor(entry.from_status)}18`,
+                    color: statusColor(entry.from_status),
                     padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 700,
                   }}>
                     {statusLabel(entry.from_status)}
@@ -139,8 +159,8 @@ function Timeline({ history, loading }) {
                 </>
               )}
               <span style={{
-                background: `${statusColors[entry.to_status] || CRM_COLORS.gold}18`,
-                color: statusColors[entry.to_status] || CRM_COLORS.goldDark,
+                background: `${statusColor(entry.to_status)}18`,
+                color: statusColor(entry.to_status),
                 padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 800,
               }}>
                 {statusLabel(entry.to_status)}
@@ -168,24 +188,81 @@ function Timeline({ history, loading }) {
 }
 
 // ── Kanban Board ──────────────────────────────────────────────────────────────
+// Drag a card onto another column to move the request to that stage.
 
-function KanbanBoard({ requests, onEdit, onDelete }) {
-  const cols = VISA_STATUSES.filter(s => s !== "Rejected");
+function KanbanCard({ req, onEdit }) {
+  const rejected = normalizeStatus(req.status) === "Rejected";
+  return (
+    <div
+      draggable
+      onDragStart={e => e.dataTransfer.setData("requestId", req.id)}
+      style={{
+        background: "#fff", border: `1px solid ${CRM_COLORS.border}`,
+        borderRadius: 8, padding: "10px 12px", cursor: "grab",
+        boxShadow: "0 1px 4px rgba(0,0,0,.06)",
+        transition: "box-shadow .15s",
+      }}
+      onMouseEnter={e => e.currentTarget.style.boxShadow = "0 3px 12px rgba(0,0,0,.12)"}
+      onMouseLeave={e => e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,.06)"}
+      onClick={() => onEdit(req)}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 6, marginBottom: 4 }}>
+        <span style={{ fontWeight: 800, color: rejected ? CRM_COLORS.danger : CRM_COLORS.goldDark, fontSize: 12 }}>
+          {req.request_number}
+        </span>
+        <PriorityBadge priority={req.priority} />
+      </div>
+      <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 3 }}>
+        {req.clients?.full_name || "—"}
+      </div>
+      <div style={{ fontSize: 11, color: CRM_COLORS.muted }}>{req.services?.name || "—"}</div>
+      {req.tags?.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
+          {req.tags.map(t => (
+            <span key={t} style={{ fontSize: 10, background: CRM_COLORS.beige, borderRadius: 4, padding: "1px 6px" }}>{t}</span>
+          ))}
+        </div>
+      )}
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: CRM_COLORS.muted, marginTop: 6, gap: 6 }}>
+        <span>{formatDate(req.created_at).split(",")[0]}</span>
+        {req.assigned_to_email && <span title="المسؤول">👤 {req.assigned_to_email.split("@")[0]}</span>}
+      </div>
+    </div>
+  );
+}
+
+function KanbanBoard({ requests, onEdit, onMove }) {
+  const [dragOver, setDragOver] = useState(null);
   const byStatus = useMemo(() => {
     const m = {};
     VISA_STATUSES.forEach(s => { m[s] = []; });
-    requests.forEach(r => { if (m[r.status]) m[r.status].push(r); else m["Lead"].push(r); });
+    requests.forEach(r => {
+      const s = normalizeStatus(r.status);
+      (m[s] || m["Lead"]).push(r);
+    });
     return m;
   }, [requests]);
 
   return (
     <div style={{ overflowX: "auto", paddingBottom: 8 }}>
       <div style={{ display: "flex", gap: 14, minWidth: "max-content", alignItems: "flex-start" }}>
-        {cols.map(status => {
+        {VISA_STATUSES.map(status => {
           const cards = byStatus[status] || [];
-          const color = statusColors[status] || CRM_COLORS.gold;
+          const color = statusColor(status);
+          const isOver = dragOver === status;
           return (
-            <div key={status} style={{ width: 220, flexShrink: 0 }}>
+            <div
+              key={status}
+              style={{ width: 220, flexShrink: 0, opacity: status === "Rejected" ? .85 : 1 }}
+              onDragOver={e => { e.preventDefault(); setDragOver(status); }}
+              onDragLeave={() => setDragOver(null)}
+              onDrop={e => {
+                e.preventDefault();
+                setDragOver(null);
+                const id = e.dataTransfer.getData("requestId");
+                if (id) onMove(id, status);
+              }}
+            >
               {/* Column header */}
               <div style={{
                 background: `${color}14`, border: `1px solid ${color}33`,
@@ -199,35 +276,13 @@ function KanbanBoard({ requests, onEdit, onDelete }) {
               </div>
               {/* Cards */}
               <div style={{
-                background: "#f9f6ef", border: `1px solid ${color}22`, borderTop: "none",
+                background: isOver ? `${color}12` : "#f9f6ef",
+                border: `1px ${isOver ? "dashed" : "solid"} ${isOver ? color : `${color}22`}`, borderTop: "none",
                 borderRadius: "0 0 8px 8px", minHeight: 80, padding: 8,
                 display: "flex", flexDirection: "column", gap: 8,
+                transition: "background .15s",
               }}>
-                {cards.map(req => (
-                  <div
-                    key={req.id}
-                    style={{
-                      background: "#fff", border: `1px solid ${CRM_COLORS.border}`,
-                      borderRadius: 8, padding: "10px 12px", cursor: "pointer",
-                      boxShadow: "0 1px 4px rgba(0,0,0,.06)",
-                      transition: "box-shadow .15s",
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.boxShadow = "0 3px 12px rgba(0,0,0,.12)"}
-                    onMouseLeave={e => e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,.06)"}
-                    onClick={() => onEdit(req)}
-                  >
-                    <div style={{ fontWeight: 800, color: CRM_COLORS.goldDark, fontSize: 12, marginBottom: 4 }}>
-                      {req.request_number}
-                    </div>
-                    <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 3 }}>
-                      {req.clients?.full_name || "—"}
-                    </div>
-                    <div style={{ fontSize: 11, color: CRM_COLORS.muted }}>{req.services?.name || "—"}</div>
-                    <div style={{ fontSize: 10, color: CRM_COLORS.muted, marginTop: 6 }}>
-                      {formatDate(req.created_at).split(",")[0]}
-                    </div>
-                  </div>
-                ))}
+                {cards.map(req => <KanbanCard key={req.id} req={req} onEdit={onEdit} />)}
                 {cards.length === 0 && (
                   <div style={{ textAlign: "center", color: CRM_COLORS.muted, fontSize: 12, padding: "12px 0" }}>—</div>
                 )}
@@ -235,28 +290,6 @@ function KanbanBoard({ requests, onEdit, onDelete }) {
             </div>
           );
         })}
-        {/* Rejected column */}
-        {(() => {
-          const rejected = byStatus["Rejected"] || [];
-          return (
-            <div style={{ width: 220, flexShrink: 0, opacity: .8 }}>
-              <div style={{ background: `${CRM_COLORS.danger}10`, border: `1px solid ${CRM_COLORS.danger}33`, borderRadius: "8px 8px 0 0", padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontWeight: 700, fontSize: 13, color: CRM_COLORS.danger }}>مرفوض</span>
-                <span style={{ background: `${CRM_COLORS.danger}22`, color: CRM_COLORS.danger, borderRadius: 20, padding: "1px 9px", fontSize: 11, fontWeight: 800 }}>{rejected.length}</span>
-              </div>
-              <div style={{ background: "#fdf6f6", border: `1px solid ${CRM_COLORS.danger}22`, borderTop: "none", borderRadius: "0 0 8px 8px", minHeight: 80, padding: 8, display: "flex", flexDirection: "column", gap: 8 }}>
-                {rejected.map(req => (
-                  <div key={req.id} style={{ background: "#fff", border: `1px solid ${CRM_COLORS.border}`, borderRadius: 8, padding: "10px 12px", cursor: "pointer" }} onClick={() => onEdit(req)}>
-                    <div style={{ fontWeight: 800, color: CRM_COLORS.danger, fontSize: 12, marginBottom: 4 }}>{req.request_number}</div>
-                    <div style={{ fontSize: 13, fontWeight: 600 }}>{req.clients?.full_name || "—"}</div>
-                    <div style={{ fontSize: 11, color: CRM_COLORS.muted }}>{req.services?.name || "—"}</div>
-                  </div>
-                ))}
-                {rejected.length === 0 && <div style={{ textAlign: "center", color: CRM_COLORS.muted, fontSize: 12, padding: "12px 0" }}>—</div>}
-              </div>
-            </div>
-          );
-        })()}
       </div>
     </div>
   );
@@ -279,6 +312,7 @@ export default function Requests() {
   const [statusNote, setStatusNote]       = useState("");
   const [search, setSearch]               = useState("");
   const [statusFilter, setStatusFilter]   = useState("All");
+  const [priorityFilter, setPriorityFilter] = useState("All");
   const [loading, setLoading]             = useState(true);
   const [saving, setSaving]               = useState(false);
   const [error, setError]                 = useState("");
@@ -310,13 +344,16 @@ export default function Requests() {
   const filteredRequests = useMemo(() => {
     const term = search.trim().toLowerCase();
     return requests.filter((request) => {
-      const matchesStatus = statusFilter === "All" || request.status === statusFilter;
+      const matchesStatus = statusFilter === "All" || normalizeStatus(request.status) === statusFilter;
+      const matchesPriority = priorityFilter === "All" || (request.priority || "medium") === priorityFilter;
       const matchesSearch =
         !term ||
         [
           request.request_number,
           request.status,
+          statusLabelAr(request.status),
           request.notes,
+          request.assigned_to_email,
           request.clients?.full_name,
           request.clients?.email,
           request.clients?.phone,
@@ -324,16 +361,18 @@ export default function Requests() {
         ]
           .filter(Boolean)
           .some((value) => String(value).toLowerCase().includes(term));
-      return matchesStatus && matchesSearch;
+      return matchesStatus && matchesPriority && matchesSearch;
     });
-  }, [requests, search, statusFilter]);
+  }, [requests, search, statusFilter, priorityFilter]);
 
   function editRequest(request) {
     setSelectedRequest(request);
     setForm({
       client_id: request.client_id || "",
       service_id: request.service_id || "",
-      status: request.status || "Lead",
+      status: normalizeStatus(request.status) || "Lead",
+      priority: request.priority || "medium",
+      assigned_to_email: request.assigned_to_email || "",
       notes: request.notes || "",
     });
     setStatusNote("");
@@ -383,12 +422,15 @@ export default function Requests() {
       client_id: form.client_id,
       service_id: form.service_id || null,
       status: form.status,
+      priority: form.priority || "medium",
+      assigned_to_email: form.assigned_to_email.trim() || null,
       notes: form.notes,
     };
 
+    // .select() so a new request's id is available for its history row
     const result = selectedRequest
-      ? await supabase.from("requests").update(payload).eq("id", selectedRequest.id)
-      : await supabase.from("requests").insert([{ ...payload, request_number: makeRequestNumber() }]);
+      ? await supabase.from("requests").update(payload).eq("id", selectedRequest.id).select("id")
+      : await supabase.from("requests").insert([{ ...payload, request_number: makeRequestNumber() }]).select("id");
 
     if (result.error) {
       setError(result.error.message);
@@ -397,7 +439,7 @@ export default function Requests() {
     }
 
     // Record history when status changes (or on creation)
-    const statusChanged = !selectedRequest || selectedRequest.status !== form.status;
+    const statusChanged = !selectedRequest || normalizeStatus(selectedRequest.status) !== form.status;
     if (statusChanged) {
       await supabase.from("request_history").insert([{
         request_id: selectedRequest?.id || result.data?.[0]?.id,
@@ -425,6 +467,39 @@ export default function Requests() {
     setSaving(false);
     resetForm();
     await loadData();
+  }
+
+  // Kanban drag & drop: move a request to another stage
+  async function moveRequest(requestId, toStatus) {
+    const request = requests.find(r => r.id === requestId);
+    if (!request || normalizeStatus(request.status) === toStatus) return;
+    setError("");
+    setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: toStatus } : r));
+
+    const { error: moveError } = await supabase.from("requests").update({ status: toStatus }).eq("id", requestId);
+    if (moveError) {
+      setError(moveError.message);
+      await loadData();
+      return;
+    }
+    await supabase.from("request_history").insert([{
+      request_id: requestId,
+      from_status: request.status || null,
+      to_status: toStatus,
+      changed_by: user?.id || null,
+      changed_by_email: user?.email || null,
+    }]);
+    await sendStatusNotification({
+      requestNumber: request.request_number,
+      client: request.clients,
+      form: { service: request.services?.name || "", msg: "" },
+      status: toStatus,
+    });
+    if (selectedRequest?.id === requestId) {
+      setSelectedRequest({ ...request, status: toStatus });
+      setForm(f => ({ ...f, status: toStatus }));
+      loadRequestHistory(requestId);
+    }
   }
 
   async function uploadRequestFile(event) {
@@ -514,14 +589,18 @@ export default function Requests() {
             />
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={{ ...inputStyle, flex: "0 0 180px" }}>
               <option value="All">كل الحالات</option>
-              {ALL_STATUSES.map((s) => (
+              {VISA_STATUSES.map((s) => (
                 <option key={s} value={s}>{statusLabel(s)}</option>
               ))}
+            </select>
+            <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} style={{ ...inputStyle, flex: "0 0 140px" }}>
+              <option value="All">كل الأولويات</option>
+              {PRIORITIES.map((p) => <option key={p.key} value={p.key}>{p.ar}</option>)}
             </select>
             <button style={outlineButtonStyle} onClick={loadData}>تحديث</button>
             {/* View toggle */}
             <div style={{ display: "flex", border: `1px solid ${CRM_COLORS.border}`, borderRadius: 6, overflow: "hidden" }}>
-              {[["table","📋 جدول"],["kanban","🗂️ Kanban"]].map(([mode, label]) => (
+              {[["table","📋 جدول"],["kanban","🗂️ لوحة المراحل"]].map(([mode, label]) => (
                 <button
                   key={mode}
                   onClick={() => setViewMode(mode)}
@@ -542,7 +621,12 @@ export default function Requests() {
           {loading ? (
             <p style={{ color: CRM_COLORS.muted }}>جارٍ تحميل الطلبات...</p>
           ) : viewMode === "kanban" ? (
-            <KanbanBoard requests={filteredRequests} onEdit={editRequest} onDelete={deleteRequest} />
+            <>
+              <p style={{ margin: "0 0 10px", fontSize: 12, color: CRM_COLORS.muted }}>
+                اسحب البطاقة إلى عمود آخر لتغيير مرحلة الطلب (يُسجَّل في السجل الزمني ويُبلَّغ العميل).
+              </p>
+              <KanbanBoard requests={filteredRequests} onEdit={editRequest} onMove={moveRequest} />
+            </>
           ) : (
             <div style={{ overflowX: "auto" }}>
               <table width="100%" cellPadding="13" style={{ borderCollapse: "collapse" }}>
@@ -552,6 +636,7 @@ export default function Requests() {
                     <th>العميل</th>
                     <th>الخدمة</th>
                     <th>الحالة</th>
+                    <th>الأولوية</th>
                     <th>التاريخ</th>
                     <th>إجراءات</th>
                   </tr>
@@ -574,14 +659,15 @@ export default function Requests() {
                       <td style={{ color: CRM_COLORS.muted, fontSize: 13 }}>{request.services?.name || "-"}</td>
                       <td>
                         <span style={{
-                          color: statusColors[request.status] || CRM_COLORS.text,
+                          color: statusColor(request.status),
                           fontWeight: 800, fontSize: 12,
-                          background: `${statusColors[request.status] || CRM_COLORS.gold}18`,
+                          background: `${statusColor(request.status)}18`,
                           padding: "2px 10px", borderRadius: 20,
                         }}>
                           {statusLabel(request.status)}
                         </span>
                       </td>
+                      <td><PriorityBadge priority={request.priority} /></td>
                       <td style={{ color: CRM_COLORS.muted, fontSize: 13 }}>{formatDate(request.created_at).split(",")[0]}</td>
                       <td>
                         <div style={{ display: "flex", gap: 8 }}>
@@ -593,7 +679,7 @@ export default function Requests() {
                   ))}
                   {!filteredRequests.length && (
                     <tr>
-                      <td colSpan="6" style={{ color: CRM_COLORS.muted, textAlign: "center", padding: 28 }}>
+                      <td colSpan="7" style={{ color: CRM_COLORS.muted, textAlign: "center", padding: 28 }}>
                         لا توجد طلبات.
                       </td>
                     </tr>
@@ -620,8 +706,20 @@ export default function Requests() {
                 {services.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
               <select value={form.status} onChange={(e) => setForm(f => ({ ...f, status: e.target.value }))} style={inputStyle}>
-                {ALL_STATUSES.map((s) => <option key={s} value={s}>{statusLabel(s)}</option>)}
+                {VISA_STATUSES.map((s) => <option key={s} value={s}>{statusLabel(s)}</option>)}
               </select>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 10 }}>
+                <select value={form.priority} onChange={(e) => setForm(f => ({ ...f, priority: e.target.value }))} style={inputStyle} title="الأولوية">
+                  {PRIORITIES.map((p) => <option key={p.key} value={p.key}>أولوية {p.ar}</option>)}
+                </select>
+                <input
+                  type="email"
+                  placeholder="بريد الموظف المسؤول"
+                  value={form.assigned_to_email}
+                  onChange={(e) => setForm(f => ({ ...f, assigned_to_email: e.target.value }))}
+                  style={inputStyle}
+                />
+              </div>
 
               {/* Status change note — shown when editing and status might change */}
               {selectedRequest && (
@@ -689,8 +787,8 @@ export default function Requests() {
                     <Detail label="الخدمة" value={selectedRequest.services?.name} />
                     <Detail label="الحالة">
                       <span style={{
-                        background: `${statusColors[selectedRequest.status] || CRM_COLORS.gold}18`,
-                        color: statusColors[selectedRequest.status] || CRM_COLORS.goldDark,
+                        background: `${statusColor(selectedRequest.status)}18`,
+                        color: statusColor(selectedRequest.status),
                         padding: "3px 10px", borderRadius: 20, fontWeight: 800, fontSize: 13,
                       }}>
                         {statusLabel(selectedRequest.status)}

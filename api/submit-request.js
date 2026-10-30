@@ -65,7 +65,7 @@ module.exports = async (req, res) => {
     // ── Create the request ──
     const requestNumber = `REQ-${Date.now()}`;
     const { data: request, error: reqErr } = await sb.from("requests")
-      .insert([{ request_number: requestNumber, client_id: client.id, service_id: serviceId, status: "New", notes }])
+      .insert([{ request_number: requestNumber, client_id: client.id, service_id: serviceId, status: "Lead", notes }])
       .select().single();
     if (reqErr) throw reqErr;
 

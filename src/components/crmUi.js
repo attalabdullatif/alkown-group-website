@@ -50,6 +50,45 @@ export const ALL_STATUSES = [
   ...new Set([...REQUEST_STATUSES, ...VISA_STATUSES]),
 ];
 
+// ── One request-status vocabulary ─────────────────────────────────────────────
+// VISA_STATUSES (9 stages) is the canonical list staff pick from. Older rows may
+// still hold legacy values, so map them before labelling, colouring or placing
+// them. "In Progress" maps conservatively to Consultation so a client is never
+// shown progress (e.g. "submitted") that hasn't happened.
+export const LEGACY_STATUS_MAP = {
+  "New": "Lead",
+  "In Progress": "Consultation",
+  "Pending Documents": "Documents Pending",
+};
+
+export function normalizeStatus(status) {
+  return LEGACY_STATUS_MAP[status] || status;
+}
+
+export function statusLabelAr(status) {
+  const s = normalizeStatus(status);
+  return VISA_STATUS_AR[s] || s || "—";
+}
+
+export function statusColor(status) {
+  return statusColors[normalizeStatus(status)] || CRM_COLORS.gold;
+}
+
+// Simplified 5-step progress shown to clients (tracking page, portal),
+// derived from the 9 internal stages.
+export const CLIENT_STEPS = [
+  { key: "received",  ar: "استلام الطلب",  en: "Received",  stages: ["Lead", "Consultation"] },
+  { key: "documents", ar: "تجهيز الوثائق", en: "Documents", stages: ["Documents Pending", "Ready For Submission"] },
+  { key: "submitted", ar: "تم التقديم",    en: "Submitted", stages: ["Submitted", "Processing"] },
+  { key: "decision",  ar: "صدور القرار",   en: "Decision",  stages: ["Approved", "Rejected"] },
+  { key: "done",      ar: "مكتمل",         en: "Completed", stages: ["Completed"] },
+];
+
+export function clientStepIndex(status) {
+  const s = normalizeStatus(status);
+  return CLIENT_STEPS.findIndex(step => step.stages.includes(s));
+}
+
 export const statusColors = {
   New: CRM_COLORS.goldDark,
   "In Progress": CRM_COLORS.info,

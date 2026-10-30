@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState, useCallback } from "react"; // eslint-disable-line no-unused-vars
 import { supabase } from "../lib/supabase";
 import { trackRequest } from "../services/trackingService";
+import {
+  CLIENT_STEPS, clientStepIndex, normalizeStatus, statusColor, statusLabelAr,
+} from "../components/crmUi";
 
 /* ═══════════════════════════════════════════════════════════════
    ALKOWN GLOBAL — Client Portal
@@ -13,17 +16,6 @@ const CARD = "#111";
 const BORDER = "#1e1e1e";
 const MUTED = "#666";
 
-const STATUS_AR = {
-  "New": "جديد", "In Progress": "قيد التنفيذ",
-  "Pending Documents": "بانتظار وثائق", "Approved": "موافق عليه",
-  "Rejected": "مرفوض", "Completed": "مكتمل",
-};
-const STATUS_COLOR = {
-  "New": "#c9a84c", "In Progress": "#3d6f9f",
-  "Pending Documents": "#c28a25", "Approved": "#2f8f5b",
-  "Rejected": "#e05252", "Completed": "#555",
-};
-const STATUS_STEPS = ["New", "In Progress", "Pending Documents", "Approved", "Completed"];
 
 // ── Styles ────────────────────────────────────────────────────
 const S = {
@@ -251,7 +243,7 @@ function TrackView({ setView, ar }) {
     setRequest(row);
   }
 
-  const stepIdx = request ? STATUS_STEPS.indexOf(request.status) : -1;
+  const stepIdx = request ? clientStepIndex(request.status) : -1;
 
   return (
     <div style={{ maxWidth: 560, margin: "0 auto", padding: "60px 24px" }}>
@@ -270,23 +262,23 @@ function TrackView({ setView, ar }) {
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
               <span style={{ color: GOLD, fontWeight: 900, fontSize: 16 }}>{request.request_number}</span>
-              <span style={{ background: `${STATUS_COLOR[request.status]}22`, color: STATUS_COLOR[request.status], padding: "4px 14px", borderRadius: 20, fontSize: 13, fontWeight: 700 }}>
-                {STATUS_AR[request.status] || request.status}
+              <span style={{ background: `${statusColor(request.status)}22`, color: statusColor(request.status), padding: "4px 14px", borderRadius: 20, fontSize: 13, fontWeight: 700 }}>
+                {statusLabelAr(request.status)}
               </span>
             </div>
             {request.status !== "Rejected" && (
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24 }}>
-                {STATUS_STEPS.map((step, i) => {
+                {CLIENT_STEPS.map((step, i) => {
                   const done = i <= stepIdx;
                   return (
-                    <div key={step} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}>
-                      {i < STATUS_STEPS.length - 1 && (
+                    <div key={step.key} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}>
+                      {i < CLIENT_STEPS.length - 1 && (
                         <div style={{ position: "absolute", top: 13, left: "50%", width: "100%", height: 2, background: done && i < stepIdx ? GOLD : BORDER, zIndex: 0 }} />
                       )}
                       <div style={{ width: 28, height: 28, borderRadius: "50%", background: done ? GOLD : "#1a1a1a", border: `2px solid ${done ? GOLD : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1, fontSize: 12, fontWeight: 700, color: done ? "#000" : MUTED }}>
                         {done && i < stepIdx ? "✓" : i + 1}
                       </div>
-                      <div style={{ fontSize: 10, color: done ? GOLD : MUTED, marginTop: 5, textAlign: "center", maxWidth: 60 }}>{STATUS_AR[step]}</div>
+                      <div style={{ fontSize: 10, color: done ? GOLD : MUTED, marginTop: 5, textAlign: "center", maxWidth: 60 }}>{step.ar}</div>
                     </div>
                   );
                 })}
@@ -376,11 +368,9 @@ function PortalView({ user, client, ar, onSignOut }) {
 
   async function loadHistory(requestId) {
     if (reqHistory[requestId]) return; // already loaded
-    const { data } = await supabase
-      .from("request_history")
-      .select("*")
-      .eq("request_id", requestId)
-      .order("created_at", { ascending: true });
+    // Own-request timeline via RPC: status + date only (request_history
+    // itself is staff-only and holds internal notes).
+    const { data } = await supabase.rpc("client_request_history", { p_request_id: requestId });
     setReqHistory(prev => ({ ...prev, [requestId]: data || [] }));
   }
 
@@ -497,7 +487,7 @@ function PortalView({ user, client, ar, onSignOut }) {
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {requests.map(req => {
-                const stepIdx = STATUS_STEPS.indexOf(req.status);
+                const stepIdx = clientStepIndex(req.status);
                 const open = selectedReq === req.id;
                 return (
                   <div key={req.id} style={{ ...S.card, overflow: "hidden" }}>
@@ -511,8 +501,8 @@ function PortalView({ user, client, ar, onSignOut }) {
                         {priceLabel(req.services) && <div style={{ color: MUTED, fontSize: 13, marginTop: 2 }}>{priceLabel(req.services)}</div>}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <span style={{ background: `${STATUS_COLOR[req.status]}22`, color: STATUS_COLOR[req.status], padding: "4px 14px", borderRadius: 20, fontSize: 13, fontWeight: 700 }}>
-                          {STATUS_AR[req.status] || req.status}
+                        <span style={{ background: `${statusColor(req.status)}22`, color: statusColor(req.status), padding: "4px 14px", borderRadius: 20, fontSize: 13, fontWeight: 700 }}>
+                          {statusLabelAr(req.status)}
                         </span>
                         <span style={{ color: MUTED, fontSize: 18 }}>{open ? "▲" : "▼"}</span>
                       </div>
@@ -527,13 +517,13 @@ function PortalView({ user, client, ar, onSignOut }) {
                             {/* Horizontal step indicators */}
                             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, position: "relative" }}>
                               <div style={{ position: "absolute", top: 14, right: 0, left: 0, height: 2, background: BORDER, zIndex: 0 }} />
-                              {STATUS_STEPS.map((step, i) => {
+                              {CLIENT_STEPS.map((step, i) => {
                                 const done = i <= stepIdx;
                                 const current = i === stepIdx;
-                                const histRow = (reqHistory[req.id] || []).find(h => h.to_stage === step || h.new_status === step);
+                                const histRow = (reqHistory[req.id] || []).find(h => step.stages.includes(normalizeStatus(h.to_status)));
                                 return (
-                                  <div key={step} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", position: "relative", zIndex: 1 }}>
-                                    {i < STATUS_STEPS.length - 1 && done && i < stepIdx && (
+                                  <div key={step.key} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", position: "relative", zIndex: 1 }}>
+                                    {i < CLIENT_STEPS.length - 1 && done && i < stepIdx && (
                                       <div style={{ position: "absolute", top: 14, left: "-50%", right: "50%", height: 2, background: GOLD, zIndex: 0 }} />
                                     )}
                                     <div style={{
@@ -548,7 +538,7 @@ function PortalView({ user, client, ar, onSignOut }) {
                                     }}>
                                       {i < stepIdx ? "✓" : i + 1}
                                     </div>
-                                    <div style={{ fontSize: 10, color: done ? GOLD : MUTED, marginTop: 6, textAlign: "center", lineHeight: 1.4 }}>{STATUS_AR[step]}</div>
+                                    <div style={{ fontSize: 10, color: done ? GOLD : MUTED, marginTop: 6, textAlign: "center", lineHeight: 1.4 }}>{step.ar}</div>
                                     {histRow && (
                                       <div style={{ fontSize: 9, color: MUTED, marginTop: 3, textAlign: "center" }}>
                                         {new Date(histRow.created_at).toLocaleDateString("ar", { month: "short", day: "numeric" })}
@@ -566,11 +556,10 @@ function PortalView({ user, client, ar, onSignOut }) {
                                   <div key={h.id || i} style={{ position: "relative" }}>
                                     <div style={{ position: "absolute", top: 6, right: -19, width: 8, height: 8, borderRadius: "50%", background: GOLD, border: `2px solid #0a0a0a` }} />
                                     <div style={{ fontSize: 12, color: "#ddd" }}>
-                                      {h.to_stage || h.new_status ? `انتقل إلى: ${STATUS_AR[h.to_stage || h.new_status] || h.to_stage || h.new_status}` : h.note || h.notes || "تحديث"}
+                                      {h.to_status ? `انتقل إلى: ${statusLabelAr(h.to_status)}` : "تحديث"}
                                     </div>
                                     <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>
                                       {new Date(h.created_at).toLocaleString("ar", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                                      {h.changed_by || h.created_by ? ` — ${h.changed_by || h.created_by}` : ""}
                                     </div>
                                   </div>
                                 ))}
@@ -895,7 +884,7 @@ function AppointmentCard({ appt }) {
           {appt.notes && <div style={{ color: "#aaa", fontSize: 12, marginTop: 6, fontStyle: "italic" }}>{appt.notes}</div>}
         </div>
         <span style={{ background: `${color}22`, color, padding: "4px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" }}>
-          {APPT_STATUS_AR[status] || status}
+          {(APPT_STATUS_AR[status] || status)}
         </span>
       </div>
     </div>
