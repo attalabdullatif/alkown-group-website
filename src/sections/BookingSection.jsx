@@ -44,6 +44,18 @@ export default function BookingPage({ t, lang, ff }) {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
+    if (!/^image\/|^application\/pdf$/.test(file.type)) {
+      alert(ar ? "يُقبل فقط صور أو ملفات PDF" : "Only images or PDF files are accepted");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      alert(ar ? "حجم الملف أكبر من 10MB" : "File is larger than 10MB");
+      return;
+    }
+    if (uploadedFiles.length >= 6) {
+      alert(ar ? "الحد الأقصى 6 ملفات" : "Maximum 6 files");
+      return;
+    }
     setUploadedFiles(prev => [...prev, { file, type: fileType, id: Date.now() }]);
   }
 
@@ -78,29 +90,30 @@ export default function BookingPage({ t, lang, ff }) {
         body: JSON.stringify({
           name: form.name, phone: form.phone, email: form.email,
           serviceId: selectedService?.id || null, notes,
+          files: uploadedFiles.map(({ file, type }, index) => ({
+            index, name: file.name, type: file.type, size: file.size, docType: type,
+          })),
         }),
       });
       if (!resp.ok) {
         const e = await resp.json().catch(() => ({}));
         throw new Error(e.error || (ar ? "تعذّر إرسال الطلب" : "Could not submit request"));
       }
-      const { requestId, requestNumber, client: clientData } = await resp.json();
+      const { requestNumber, uploads = [], client: clientData } = await resp.json();
 
-      // رفع الملفات (اختياري — أي فشل لا يُسقط الطلب)
-      if (uploadedFiles.length) {
+      // رفع الملفات عبر روابط موقّعة من الخادم (الزائر غير مسجّل دخول)
+      let filesFailed = uploadedFiles.length - uploads.length;
+      if (uploads.length) {
         setUploading(true);
-        try {
-          for (const { file, type } of uploadedFiles) {
-            const safeName = file.name.replace(/[^\w.-]+/g, "-");
-            const path = `${requestId}/${Date.now()}-${safeName}`;
-            const { error: upErr } = await supabase.storage.from("request-documents").upload(path, file);
-            if (!upErr) {
-              await supabase.from("request_files").insert([{
-                request_id: requestId, file_type: type, file_name: file.name, storage_path: path,
-              }]);
-            }
-          }
-        } catch (e) { /* uploads are best-effort */ }
+        for (const up of uploads) {
+          const item = uploadedFiles[up.index];
+          try {
+            const { error: upErr } = item
+              ? await supabase.storage.from("request-documents").uploadToSignedUrl(up.path, up.token, item.file)
+              : { error: true };
+            if (upErr) filesFailed++;
+          } catch (e) { filesFailed++; }
+        }
         setUploading(false);
       }
 
@@ -125,7 +138,8 @@ export default function BookingPage({ t, lang, ff }) {
         servicePrice: priceLabel(selectedService),
         clientName: form.name,
         clientEmail: form.email,
-        whatsapp: form.whatsapp || form.phone
+        whatsapp: form.whatsapp || form.phone,
+        filesFailed,
       });
     } catch (err) {
       alert(ar ? `حدث خطأ: ${err.message}` : `Error: ${err.message}`);
@@ -168,6 +182,14 @@ export default function BookingPage({ t, lang, ff }) {
                 </div>
               ))}
             </div>
+
+            {submitted.filesFailed > 0 && (
+              <div style={{ background: "#fff7e6", border: "1px solid #f0c36d", color: "#8a5a00", borderRadius: 4, padding: "12px 16px", marginBottom: 20, fontSize: ".85rem", lineHeight: 1.7 }}>
+                {ar
+                  ? `تعذّر رفع ${submitted.filesFailed} من الملفات. طلبك وصلنا — أرسل الملفات عبر واتساب من الزر أدناه.`
+                  : `${submitted.filesFailed} file(s) could not be uploaded. Your request was received — please send them via WhatsApp below.`}
+              </div>
+            )}
 
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
               <a href={waLink} target="_blank" rel="noopener noreferrer" className="gbtn" style={{ fontFamily: ff, textDecoration: "none", display: "inline-block" }}>
